@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="logging" default="screen" />
+  <arg name="dest" default="./dataset" />
+  <arg name="joy_node_dev" default="/dev/input/js0">
+
+
+  <node pkg="datacoll" type="dataset_writer.py" name="ROSbot_dataset_writer_node" output="$(arg logging)">
+    <param name="dest" type="string" value="$(arg dest)" />
+  </node>
+
+  <!-- keyboard controller node -->
+  <!-- <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="$(arg logging)">
+  </node> -->
+
+ <!-- joy node -->
+  <node respawn="true" pkg="joy" type="joy_node" name="turtle_joy" >
+    <param name="dev" type="string" value="$(arg joy_node_dev)" />
+    <!-- <param name="deadzone" value="0.12" /> -->
+  </node>
+
+  <include file="$(find husarion_ros)/launch/rosbot_drivers.launch">
+  </include>
+
+</launch>
