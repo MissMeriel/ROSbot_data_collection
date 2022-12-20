@@ -105,25 +105,22 @@ def main_loop():
         f.write("IMAGE,CMD_VEL_LAT,CMD_VEL_LONG,")
         while not rospy.is_shutdown():
             if image is not None:
-                bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')
+                bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')[...,::-1]
                 if img_count % 100 == 0:
                     rospy.loginfo("Dataset size="+str(img_count))
 
                 if not collection_paused:
-                    cv2.imshow("/camera/rgb/image_raw", bridge_img[...,::-1])
+                    cv2.imshow("/camera/rgb/image_raw", bridge_img)
                     img_filename = "astra-{:05d}.jpg".format(img_count)
                     f.write("{},{},{}\n".format(img_filename, speed_cmd, turn_cmd))
                     cv2.imwrite("{}/{}".format(dataset_subdir, img_filename), bridge_img)
                     img_count += 1
-                else:
-                    cv2.imshow("collection paused", np.zeros((480,640,3)))
+                # else:
+                #     cv2.imshow("collection paused", np.zeros((480,640,3)))
                 cv2.waitKey(1)
                 cmd_msg = Twist()
                 cmd_msg.linear.x = speed_cmd
                 cmd_msg.angular.z = turn_cmd
-                # if turn_cmd != 0:
-                #     cmd_msg.linear.x = 0.2 * np.sign(speed_cmd)
-                #     cmd_msg.angular.z = turn_cmd
                 cmd_vel_pub.publish(cmd_msg)
                 # speed_cmd = turn_cmd = 0 
         rate.sleep()
