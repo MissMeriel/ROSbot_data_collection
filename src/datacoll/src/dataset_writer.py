@@ -57,18 +57,18 @@ def cmd_vel_callback(data):
 def joy_callback(data):
     global MAX_SPEED_LONG, MAX_SPEED_LAT, speed_cmd, turn_cmd, collection_paused
     # adjust max longitudinal speed
-    if data.axes[] > 0:
+    if data.axes[7] > 0:
         MAX_SPEED_LONG = max(MAX_SPEED_LONG + 0.2, 1.0)
-    elif data.axes[] < 0:
-        MAX_SPEED_LONG = max(MAX_SPEED_LONG - 0.2, 1.0)
+    elif data.axes[7] < 0:
+        MAX_SPEED_LONG = max(MAX_SPEED_LONG - 0.2, 0.01)
     # adjust max lateral/turning speed
-    if data.axes[] > 0:
+    if data.axes[6] < 0:
         MAX_SPEED_LAT = max(MAX_SPEED_LAT + 0.2, 1.0)
-    elif data.axes[] < 0:
-        MAX_SPEED_LAT = max(MAX_SPEED_LAT - 0.2, 1.0)
+    elif data.axes[6] > 0:
+        MAX_SPEED_LAT = max(MAX_SPEED_LAT - 0.2, 0.01)
     # attenuate speed and turn commands
-    speed_cmd = data.axes[] * MAX_SPEED_LONG
-    turn_cmd = data.axes[] * MAX_SPEED_LAT
+    speed_cmd = data.axes[1] * MAX_SPEED_LONG
+    turn_cmd = data.axes[0] * MAX_SPEED_LAT
     # check if user wants to pause data collection
     if data.buttons[0] > 0 and collection_paused:
         collection_paused = False
@@ -76,13 +76,12 @@ def joy_callback(data):
         collection_paused = True
 
 def main_loop():
-    global image, speed_cmd, turn_cmd, collection_paused
+    global image, speed_cmd, turn_cmd, collection_paused, MAX_SPEED_LAT, MAX_SPEED_LONG
     rospy.init_node('ROSbot_dataset_writer_node', anonymous=False)
     print("In main_loop")
     dataset_dir = rospy.get_param(rospy.get_name()+"/dest", ".")
     randstr = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
     localtime = time.localtime()
-    # timestr = str(localtime.tm_mon) + "_" + str(localtime.tm_mday) + "-" + str(localtime.tm_hour) + "_" + str(localtime.tm_min)
     timestr = "{}_{}-{}_{}".format(localtime.tm_mon, localtime.tm_mday, localtime.tm_hour, localtime.tm_min)
     dataset_subdir = dataset_dir+"/rosbot-"+timestr+"-"+randstr
     if not os.path.exists(dataset_subdir):
@@ -93,8 +92,8 @@ def main_loop():
 
     rospy.Subscriber("/camera/rgb/image_rect_color", Image, img_callback)
     # rospy.Subscriber("/camera/rgb/image_rect_color/compressed", CompressedImage, img_callback)
-    rospy.Subscriber("/cmd_vel", Twist, cmd_vel_callback)
-    rospy.Subscriber("/joy", Twist, joy_callback)
+    # rospy.Subscriber("/cmd_vel", Twist, cmd_vel_callback)
+    rospy.Subscriber("/joy", Joy, joy_callback)
 
     cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
     
@@ -109,14 +108,25 @@ def main_loop():
                 bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')
                 if img_count % 100 == 0:
                     rospy.loginfo("Dataset size="+str(img_count))
-                # cv2.imshow("/camera/rgb/image_raw",cv_img[...,::-1])
-                # cv2.imshow("/camera/rgb/image_raw", bridge_img[...,::-1])
-                # cv2.waitKey(1)
+
                 if not collection_paused:
-                    f.write("\n".format())
-                    cv2.imwrite("{}/astra-{:05d}.jpg".format(dataset_subdir, img_count), bridge_img)
+                    cv2.imshow("/camera/rgb/image_raw", bridge_img[...,::-1])
+                    img_filename = "astra-{:05d}.jpg".format(img_count)
+                    f.write("{},{},{}\n".format(img_filename, speed_cmd, turn_cmd))
+                    cv2.imwrite("{}/{}".format(dataset_subdir, img_filename), bridge_img)
                     img_count += 1
-            rate.sleep()
+                else:
+                    cv2.imshow("collection paused", np.zeros((480,640,3)))
+                cv2.waitKey(1)
+                cmd_msg = Twist()
+                cmd_msg.linear.x = speed_cmd
+                cmd_msg.angular.z = turn_cmd
+                # if turn_cmd != 0:
+                #     cmd_msg.linear.x = 0.2 * np.sign(speed_cmd)
+                #     cmd_msg.angular.z = turn_cmd
+                cmd_vel_pub.publish(cmd_msg)
+                # speed_cmd = turn_cmd = 0 
+        rate.sleep()
     # rospy.spin()
     
 
