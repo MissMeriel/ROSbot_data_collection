@@ -8,16 +8,18 @@ It contains
 To charge your ROSbot: [link](https://husarion.com/manuals/rosbot/#charging-rosbot)
 
 When you are ready to drive the ROSbot around, follow these steps. 
-These steps assume you are starting with your ROSbot turned off, charged, and nothing plugged in:
-1. First, find the two USB ports on the back of the ROSbot. Plug the Bluetooth dongle into the right USB port (labelled XBOX) and the external data storage device into the left USB port (labelled EXT). DO NOT USE the dongle that came with the XBox controller; it only works for Windows systems.
-2. Turn your XBox controller into pairing mode. This is accomplished by pressing and holding together the XBox button and the button on the back of the controller with the ")))" symbol next to it. When it is in pairing mode, the XBox button will show a fast steady blink. If you don't hold them down long enough, it will show a heartbeat blink.
+These directions assume that you are starting with your ROSbot turned off, charged, and nothing plugged in:
+1. First, find the two USB ports on the rear panel of the ROSbot. Plug the Bluetooth dongle into the right USB port (labelled XBOX) and the external data storage device into the left USB port (labelled EXT). DO NOT USE the dongle that came with the XBox controller; it only works for Windows systems.
+2. Turn your XBox controller into pairing mode. This is accomplished by pressing and holding together the XBox button and the button on the back of the controller with the ")))" symbol next to it. See figure below showing which buttons to hold. When it is in pairing mode, the XBox button will show a fast steady blink. If you don't hold them down long enough, it will show a heartbeat blink.
 3. Turn on your ROSbot. It will take ~10 seconds to wake up. The lidar turret will begin to spin and the fast, steady blinking XBox button on the controller will turn to constantly lit to indicate it is paired.
 4. You're ready to drive :)
-5. When you're ready to stop, simply toggle the on/off switch on the ROSbot.
+5. When you're ready to stop, simply toggle the on/off switch on the ROSbot. See figure below to locate the on/off switch.
 
-TODO on/off ROSbot switch
+![rosbot rear panel](figures/rosbot-rear-panel.png)
+ROSbot rear panel guide.
 
-TODO bluetooth pairing buttons on XBox controller
+![xbox pairing buttons](figures/xbox-pairing-buttons.jpeg)
+XBox controller pairing buttons.
 
 ## Driving your ROSbot
 ![controller-mapping](figures/xbox-controller-mapping.png)
@@ -29,8 +31,12 @@ The maximum longitudinal (forward/back) speed can be adjusted up or down by pres
 Each adjustment changes the max speed by ±0.2 on a scale of (-1, 1).
 
 # ROSbot data
+Husarion puts out an annotated list of ROSbot topics via the [ROSbot API](https://husarion.com/manuals/rosbot/#ros-api).
+For a full list of available ROSbot data, see [list of published topics](ROSbot-pub-topics.txt).
 
 # ROSbot Troubleshooting
+
+Guide to the LED output on the back: [LEDs and buttons](https://husarion.com/manuals/core2/#leds-and-buttons)
 
 ## Husarion References
 
