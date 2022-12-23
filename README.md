@@ -5,7 +5,7 @@ It contains
 
 ## ROSbot Setup
 
-To charge your ROSbot: [link](https://husarion.com/manuals/rosbot/#charging-rosbot)
+To charge your ROSbot, follow the Husarion [charging instructions](https://husarion.com/manuals/rosbot/#charging-rosbot).
 
 When you are ready to drive the ROSbot around, follow these steps. 
 These directions assume that you are starting with your ROSbot turned off, charged, and nothing plugged in:
@@ -16,10 +16,12 @@ These directions assume that you are starting with your ROSbot turned off, charg
 5. When you're ready to stop, simply toggle the on/off switch on the ROSbot. See figure below to locate the on/off switch.
 
 ![rosbot rear panel](figures/rosbot-rear-panel.png)
+
 ROSbot rear panel guide.
 
 ![xbox pairing buttons](figures/xbox-pairing-buttons.jpeg)
-XBox controller pairing buttons.
+
+XBox controller pairing buttons (press and hold down simultaneously).
 
 ## Driving your ROSbot
 ![controller-mapping](figures/xbox-controller-mapping.png)
