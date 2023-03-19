@@ -1,7 +1,7 @@
 # ROSbot Dataset Collection
 
 This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot 2.0.
-It contains 
+It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
 
 ## ROSbot Setup
 
