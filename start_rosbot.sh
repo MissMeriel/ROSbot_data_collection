@@ -4,7 +4,7 @@
 export ROSBOT_VER=ROSBOT_2.0
 #export ROS_MASTER_URI=http://master:11311
 export ROS_MASTER_URI=http://localhost:11311 
-export ROS_IP=192.168.0.6
+export ROS_IP=127.0.0.1
 export ROS_IPV6=off
 #sudo mount /dev/sda1 /media/usb
 sudo service bluetooth start

@@ -15,9 +15,10 @@ Hardware required:
 2. Connect to your ROSbot (ssh, plug in a monitor and mouse/keyboard, etc.).
 3. Copy `start_rosbot.sh` to `~` (aka `/home/husarion`). 
 4. Give `start_rosbot.sh` executable permissions by running `chmod +x start_rosbot.sh`.
-5. Copy the `datacoll` directory inside `src` to `~/husarion_ws/src`.
-6. Navigate to `~/husarion_ws/src/datacoll/src` and add executable permissions to all `.py` scripts.
-7. `cd ~/husarion_ws/src; source devel/setup.bash`
+5. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
+6. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
+7. `cd ~/husarion_ws; source devel/setup.bash`
+8. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to troubleshooting for determining your distro and updating your ros repo.
 8. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
 9. If step #8 runs smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed screenshots, see section below on adding scripts to your startup routine.
     1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
@@ -39,6 +40,12 @@ Hardware required:
 
 ## Troubleshooting
 
-If you are using a wireless network, test your ROSbot startup routine when not connected to that network. You may need to disable the WiFi on your ROSbot to successfully complete the startup routine.
+If you are using a wireless network and intend to operate the ROSbot outside that network, test your ROSbot startup routine when not connected to that network. 
+You may need to disable the WiFi on your ROSbot to successfully complete the startup routine. 
+You may also want to change the `ROS_IP` set in `start_rosbot.sh`.
 
 Here's a [reference](https://net2.com/how-to-run-applications-at-startup-on-ubuntu-18-04/) for adding scripts to an Ubuntu 18 LSB system.
+
+The apt repository preinstalled on the ROSbot may be stale and may require an update. 
+Check your ros distro by running `rosverion -d` or `ls /opt/ros`.
+If you cannot install new ros packages using `apt`, [update your apt repository](http://wiki.ros.org/melodic/Installation/Ubuntu) if necessary.

@@ -6,7 +6,7 @@
   <arg name="joy_node_dev" default="/dev/input/js0"/>
   <arg name="collecting" default=true/>
 
-  <node pkg="datacoll" type="dataset_writer_bugfixes.py" name="ROSbot_dataset_writer_node" output="$(arg logging)">
+  <node pkg="datacoll" type="dataset_writer.py" name="ROSbot_dataset_writer_node" output="$(arg logging)">
     <param name="dest" type="string" value="$(arg dest)" />
   </node>
 
