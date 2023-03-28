@@ -31,6 +31,11 @@ class ImWriteThread(threading.Thread):
         self.batt_state = None
         self.vel_lin_x = None
         self.vel_ang_z = None
+        self.lidar_angle_min = None
+        self.lidar_angle_max = None
+        self.lidar_angle_increment = None
+        self.lidar_range_min = None
+        self.lidar_range_max = None
         self.lidar_ranges = None
         self.lidar_intensities = None
         self.range_fl = None
@@ -53,7 +58,7 @@ class ImWriteThread(threading.Thread):
                 cv2.imwrite("{}/{}".format(self.dataset_subdir, self.img_filename), self.im)
 
                 with open(self.dataset_subdir + "/data.csv", 'a') as f:
-                    f.write("{},{},{},{},{},{},{},{},{},{},{},{}\n".format(self.img_filename, self.speed_cmd, self.turn_cmd, self.batt_state, self.vel_lin_x, self.vel_ang_z, self.lidar_ranges, self.lidar_intensities, self.range_fl, self.range_fr, self.range_rl, self.range_rr))
+                    f.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(self.img_filename, self.speed_cmd, self.turn_cmd, self.batt_state, self.vel_lin_x, self.vel_ang_z, self.lidar_angle_min, self.lidar_angle_max, self.lidar_angle_increment, self.lidar_range_min, self.lidar_range_max, self.lidar_ranges, self.lidar_intensities, self.range_fl, self.range_fr, self.range_rl, self.range_rr))
                 self.img_count += 1
                 # with open("{}/{}".format(dataset_subdir, self.img_filename), 'wb') as imfile:
                     # np.save(imfile, bridge_img)
@@ -175,24 +180,30 @@ def main_loop():
         with open(dataset_subdir+"/data.csv", "w") as f:
             
             # write dataframe file header
-            f.write("IMAGE,CMD_VEL_LAT,CMD_VEL_LONG,VELOCITY_LIN_X,VELOCITY_ANG_Z,BATT_VOLTAGE,LIDAR_RANGE,LIDAR_INTENSITY,RANGE_FL,RANGE_FR,RANGE_RL,RANGE_RR\n")
-            # wait for subscribed topics
-            rospy.sleep(5)
+            # self.lidar_angle_min, self.lidar_angle_max, self.lidar_angle_increment, self.lidar_range_min, self.lidar_range_max, 
+            f.write("IMAGE,CMD_VEL_LAT,CMD_VEL_LONG,VELOCITY_LIN_X,VELOCITY_ANG_Z,BATT_VOLTAGE,LIDAR_ANGLE_MIN,LIDAR_ANGLE_MAX,LIDAR_ANGLE_INCREMENT,LIDAR_RANGE_MIN,LIDAR_RANGE_MAX,LIDAR_RANGE,LIDAR_INTENSITY,RANGE_FL,RANGE_FR,RANGE_RL,RANGE_RR\n")
+    except Exception as e:
+        print(e)
+        exit(0)
 
-            while not rospy.is_shutdown():
-                collecting = rospy.get_param("collecting", True)
-                print("img_count", imwrite_thread.img_count)
-                if image is not None and collecting:
-                    bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')[...,::-1]
-                    imwrite_thread.update(bridge_img, speed_cmd, turn_cmd, batt_state, 
-                                            vel_state.linear.x, vel_state.angular.z, 
-                                            str(lidar_state.ranges).replace(",", " "), 
-                                            str(lidar_state.intensities).replace(",", " "), 
-                                            range_fl, range_fr, range_rl, range_rr)
+    try:
+        # wait for subscribed topics
+        rospy.sleep(5)
 
-                    if imwrite_thread.img_count % 100 == 0:
-                        rospy.loginfo("Dataset size="+str(imwrite_thread.img_count))
-                rate.sleep()
+        while not rospy.is_shutdown():
+            collecting = rospy.get_param("collecting", True)
+            # print("img_count", imwrite_thread.img_count)
+            if image is not None and collecting:
+                bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')[...,::-1]
+                imwrite_thread.update(bridge_img, speed_cmd, turn_cmd, batt_state, 
+                                        vel_state.linear.x, vel_state.angular.z, 
+                                        str(lidar_state.ranges).replace(",", " "), 
+                                        str(lidar_state.intensities).replace(",", " "), 
+                                        range_fl, range_fr, range_rl, range_rr)
+
+                if imwrite_thread.img_count % 100 == 0:
+                    rospy.loginfo("Dataset size="+str(imwrite_thread.img_count))
+            rate.sleep()
     except Exception as e:
         print(e)
 
