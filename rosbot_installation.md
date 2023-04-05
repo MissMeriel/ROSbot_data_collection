@@ -24,9 +24,9 @@ This will make setup a lot faster as you can make sure you have everything you n
 8. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet.
 9. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to troubleshooting for determining your distro and updating your ros repo and authentication.
 10. Install `bluez` and `bluetoothctl`: ` sudo apt install bluez`
-8. Do X to make sure the bluetooth stays connected
-9. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
-10. If steps #8-9 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed screenshots, see section below on adding scripts to your startup routine.
+11. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
+12. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
+13. If steps #11-12 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed screenshots, see section below on adding scripts to your startup routine.
     1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
     2. Double click to open "Session and Startup".
     3. Hit the "Add" icon to add a new routine to startup.
@@ -47,6 +47,7 @@ This will make setup a lot faster as you can make sure you have everything you n
 
 ## Troubleshooting
 
+### Installing Packages
 The apt repository preinstalled on the ROSbot may be stale and may require an update. 
 Check your ros distro by running `rosverion -d` or `ls /opt/ros`.
 If you cannot install new ros packages using `apt`, [update your apt repository](http://wiki.ros.org/melodic/Installation/Ubuntu) if necessary.
@@ -55,11 +56,20 @@ To install new packages from ROS and Husarion, you will need to update two GPG k
 If your ROSbot was manufactured before June 2022, then ROS has updated their GPG key since your ROSbot's software was installed.
 - To update your ROS apt GPG key: (link)[https://community.husarion.com/t/very-important-update-for-gpg-keys-in-ros-repositories/660]
 - To update your Husarion apt GPG key: (link)[https://community.husarion.com/t/husarion-repository-expired-key/1240/6]
+- "husarnet signature needs updating" error from husarion package repo: (link)[https://community.husarion.com/t/apt-update-invalid-signatures-fresh-system-reinstall/1054]
 
+### WiFi and Bluetooth
 If you are using a wireless network and intend to operate the ROSbot outside that network, test your ROSbot startup routine when not connected to that network. 
 You may need to disable the WiFi on your ROSbot to successfully complete the startup routine. 
 You may also want to change the `ROS_IP` set in `start_rosbot.sh`.
 
+Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.04 LTS](https://askubuntu.com/questions/1040497/bluetooth-problem-ubuntu-18-04-lts)
+
+### Husarion OS (Ubuntu 18.04 LSB OS)
 Here's a [reference](https://net2.com/how-to-run-applications-at-startup-on-ubuntu-18-04/) for adding scripts to an Ubuntu 18 LSB system.
 
 Extra docs from Ubuntu to install `bluez`: [link](https://ubuntu.com/core/docs/bluez/install-configure/install)
+
+
+### Camera calibration
+Basics of ROS camera calibration: [ros wiki](http://wiki.ros.org/camera_calibration)
