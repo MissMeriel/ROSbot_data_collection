@@ -73,3 +73,11 @@ Extra docs from Ubuntu to install `bluez`: [link](https://ubuntu.com/core/docs/b
 
 ### Camera calibration
 Basics of ROS camera calibration: [ros wiki](http://wiki.ros.org/camera_calibration)
+
+
+### Hardware diagrams and teardown
+Husarion guide: [link](https://husarion.com/manuals/rosbot/)
+
+Hackaday guide: [link](https://cdn.hackaday.io/files/21885936327840/ROSbot_assembly_instruction.pdf)
+
+RK-370CA-22170 motor datasheet (DC 6.0V 181129): [link](https://datasheetspdf.com/pdf/1017717/MABUCHI/RK-370CA/1)
