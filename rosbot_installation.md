@@ -73,7 +73,7 @@ Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.
 3. systemctl restart bluetooth
 4. forget [Xbox Wireless Controller] (via the Xbox Controller's mac address)
 5. remove [Xbox Wireless Controller]
-6. set Xbox controller to wireless mode
+6. set Xbox controller to pairable mode
 7. set pairable on
 8. start scan via "scan on"
 9. connect [Xbox Wireless Controller]
@@ -95,3 +95,11 @@ Husarion guide: [link](https://husarion.com/manuals/rosbot/)
 Hackaday guide: [link](https://cdn.hackaday.io/files/21885936327840/ROSbot_assembly_instruction.pdf)
 
 RK-370CA-22170 motor datasheet (DC 6.0V 181129): [link](https://datasheetspdf.com/pdf/1017717/MABUCHI/RK-370CA/1)
+
+
+### Getting Python files written on Windows Machines to run in linux
+
+Probably going to need to chmod +x the file. 
+
+Also use: sed -i 's/\r//' fileWindows.txt
+To convert between DOS (Windows) and CRLF (Linux) line endings
