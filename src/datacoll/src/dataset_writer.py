@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from datetime import datetime
 import rospy
 import os
 import random
@@ -25,11 +26,18 @@ class ImWriteThread(threading.Thread):
     def __init__(self, dataset_subdir):
         super(ImWriteThread, self).__init__()
         self.im = None
+        self.im_timestamp = None
         self.img_filename = ""
         self.speed_cmd = None
         self.turn_cmd = None
         self.batt_state = None
         self.vel_lin_x = None
+        # adding other lin and ang values here
+        self.vel_lin_y = None
+        self.vel_lin_z = None
+        self.vel_ang_x = None
+        self.vel_ang_y = None
+        
         self.vel_ang_z = None
         self.lidar_angle_min = None
         self.lidar_angle_max = None
@@ -58,21 +66,34 @@ class ImWriteThread(threading.Thread):
                 cv2.imwrite("{}/{}".format(self.dataset_subdir, self.img_filename), self.im)
 
                 with open(self.dataset_subdir + "/data.csv", 'a') as f:
-                    f.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(self.img_filename, self.speed_cmd, self.turn_cmd, self.batt_state, self.vel_lin_x, self.vel_ang_z, self.lidar_angle_min, self.lidar_angle_max, self.lidar_angle_increment, self.lidar_range_min, self.lidar_range_max, self.lidar_ranges, self.lidar_intensities, self.range_fl, self.range_fr, self.range_rl, self.range_rr))
+                    f.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(self.img_filename, self.im_timestamp, datetime.now(), self.speed_cmd, self.turn_cmd, self.batt_state, self.vel_lin_x, 
+                    # adding other lin and ang values here
+                    self.vel_lin_y,
+                    self.vel_lin_z,
+                    self.vel_ang_x,
+                    self.vel_ang_y,         
+                    self.vel_ang_z, self.lidar_angle_min, self.lidar_angle_max, self.lidar_angle_increment, self.lidar_range_min, self.lidar_range_max, self.lidar_ranges, self.lidar_intensities, self.range_fl, self.range_fr, self.range_rl, self.range_rr))
                 self.img_count += 1
                 # with open("{}/{}".format(dataset_subdir, self.img_filename), 'wb') as imfile:
                     # np.save(imfile, bridge_img)
             self.condition.release()
 
-    def update(self, im, speed_cmd, turn_cmd, batt_state, vel_lin_x, vel_ang_z, 
+    def update(self, im, im_timestamp, speed_cmd, turn_cmd, batt_state, 
+               vel_lin_x, vel_lin_y, vel_lin_z, vel_ang_x, vel_ang_y, vel_ang_z,
                     lidar_ranges, lidar_intensities,
                     range_fl, range_fr, range_rl, range_rr):
         self.condition.acquire()
         self.im = im
+        self.im_timestamp = im_timestamp
         self.speed_cmd = speed_cmd
         self.turn_cmd = turn_cmd
         self.batt_state = batt_state
         self.vel_lin_x = vel_lin_x
+        # adding other lin and ang values here
+        self.vel_lin_y = vel_lin_y
+        self.vel_lin_z = vel_lin_z
+        self.vel_ang_x = vel_ang_x
+        self.vel_ang_y = vel_ang_y
         self.vel_ang_z = vel_ang_z
         self.lidar_ranges = lidar_ranges
         self.lidar_intensities = lidar_intensities
@@ -181,7 +202,7 @@ def main_loop():
             
             # write dataframe file header
             # self.lidar_angle_min, self.lidar_angle_max, self.lidar_angle_increment, self.lidar_range_min, self.lidar_range_max, 
-            f.write("IMAGE,CMD_VEL_LAT,CMD_VEL_LONG,VELOCITY_LIN_X,VELOCITY_ANG_Z,BATT_VOLTAGE,LIDAR_ANGLE_MIN,LIDAR_ANGLE_MAX,LIDAR_ANGLE_INCREMENT,LIDAR_RANGE_MIN,LIDAR_RANGE_MAX,LIDAR_RANGE,LIDAR_INTENSITY,RANGE_FL,RANGE_FR,RANGE_RL,RANGE_RR\n")
+            f.write("IMAGE,IMAGE_HEADER_TIME,ROS_TIME,CMD_VEL_LAT,CMD_VEL_LONG,BATT_VOLTAGE,VELOCITY_LIN_X,VELOCITY_LIN_Y,VELOCITY_LIN_Z,VELOCITY_ANG_X,VELOCITY_ANG_Y,VELOCITY_ANG_Z,LIDAR_ANGLE_MIN,LIDAR_ANGLE_MAX,LIDAR_ANGLE_INCREMENT,LIDAR_RANGE_MIN,LIDAR_RANGE_MAX,LIDAR_RANGE,LIDAR_INTENSITY,RANGE_FL,RANGE_FR,RANGE_RL,RANGE_RR\n")
     except Exception as e:
         print(e)
         exit(0)
@@ -195,8 +216,14 @@ def main_loop():
             # print("img_count", imwrite_thread.img_count)
             if image is not None and collecting:
                 bridge_img = bridge.imgmsg_to_cv2(image, desired_encoding='passthrough')[...,::-1]
-                imwrite_thread.update(bridge_img, speed_cmd, turn_cmd, batt_state, 
-                                        vel_state.linear.x, vel_state.angular.z, 
+                imwrite_thread.update(bridge_img, str(image.header.stamp.secs) + ":" + str(image.header.stamp.nsecs), speed_cmd, turn_cmd, batt_state, 
+                                        vel_state.linear.x, 
+                                        # adding other vel values here
+                                        vel_state.linear.y,
+                                        vel_state.linear.z,
+                                        vel_state.angular.x,
+                                        vel_state.angular.y,
+                                        vel_state.angular.z, 
                                         str(lidar_state.ranges).replace(",", " "), 
                                         str(lidar_state.intensities).replace(",", " "), 
                                         range_fl, range_fr, range_rl, range_rr)
