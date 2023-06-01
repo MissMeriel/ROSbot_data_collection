@@ -1,27 +1,26 @@
 import numpy as np
 import argparse
 import pandas as pd
-import cv2
 import matplotlib.image as mpimg
-import json
 from torch.autograd import Variable
 
 # import h5py
 import os
-from PIL import Image
-import PIL
+# from PIL import Image
+# import PIL
 import matplotlib.pyplot as plt
-import csv
+# import csv
 from DatasetGenerator import MultiDirectoryDataSequence
 import time
+import sys
 sys.path.append("../models")
 from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils import data
-from torch.utils.data import DataLoader, TensorDataset
+# from torch.utils import data
+from torch.utils.data import DataLoader
 import torch.optim as optim
 from torchvision.transforms import Compose, ToPILImage, ToTensor, Resize, Lambda, Normalize
 
@@ -32,7 +31,7 @@ def parse_arguments():
     parser.add_argument("--batch", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--", type=bool, default=True)
+    parser.add_argument("--robustification", type=bool, default=True)
     parser.add_argument("--noisevar", type=int, default=15)
     parser.add_argument("--log_interval", type=int, default=50)
     args = parser.parse_args()
@@ -64,7 +63,7 @@ def main():
     args = parse_arguments()
     print(args)
     dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]),\
-                                         robustification=args.robustification, noise_level=noise_level) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
 
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
@@ -145,7 +144,7 @@ def main():
                 f"final_loss={running_loss / logfreq}\n"
                 f"{device=}\n"
                 f"{args.robustification=}\n"
-                f"{noise_level=}\n"
+                f"{args.noisevar=}\n"
                 f"dataset_moments={dataset.get_outputs_distribution()}\n"
                 f"{time_to_train=}\n"
                 f"dirs={dataset.get_directories()}")

@@ -1,3 +1,13 @@
-python3.8 -m venv .venv
+#!/usr/bin/bash
+pythonversion="$(python --version)"
+
+if echo "$pythonversion"* | grep -iq "Python 3.8" || echo "$pythonversion"* | grep -iq "Python 3.9" ; then
+  echo "Using Python version $pythonversion"
+else
+  echo "Python version $pythonversion is not compatible. Use python 3.8 or 3.9"
+  exit
+fi
+python -m venv .venv
 . .venv/bin/activate
-pip install torch torchvision numpy black mypy scipy scikit-image pandas
+pip install --upgrade pip
+pip install torch torchvision numpy black mypy scipy scikit-image pandas opencv-python matplotlib kornia
