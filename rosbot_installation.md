@@ -22,12 +22,14 @@ This will make setup a lot faster as you can make sure you have everything you n
 6. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
 7. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
 8. `cd ~/husarion_ws; source devel/setup.bash`
-9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet. 
+9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet.
 10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to troubleshooting for determining your distro and updating your ros repo and authentication.
-11. Install `bluez` and `bluetoothctl`: ` sudo apt install bluez`
-12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
+11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
+12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
+Refer to the "First time connecting your controller to the ROSbot" section if this is your first time connecting. 
+Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
 13. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
-14. If steps #11-12 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed screenshots, see section below on adding scripts to your startup routine.
+14. If steps #11-12 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed instructions and screenshots, see section below on adding scripts to your startup routine.
     1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
     2. Double click to open "Session and Startup".
     3. Hit the "Add" icon to add a new routine to startup.
@@ -45,6 +47,17 @@ This will make setup a lot faster as you can make sure you have everything you n
 ![](figures/session-and-startup-add.png)
 4. Write a name and description. In the "Command" field, type `/bin/bash -c "sleep 10 & /home/husarion/start_rosbot.sh"`.
 ![](figures/session-and-startup-add-complete.png)
+
+## First time connecting your controller to the ROSbot
+
+You should have your Xbox controller's MAC address before you begin. The easiest way to find it out is to connect it to a bluetooth-enabled laptop and inspect the device using your bluetooth settings.
+
+1. You should also have `bluetoothctl` already installed on your ROSbot. Find out by XXXX. If not, run `sudo apt install bluetoothctl`.
+2. Run `sudo service bluetooth restart`. This will take you into the bluetoothctl prompt.
+3. Within the bluetoothctl prompt, run `remove all`
+4. Within the bluetoothctl prompt, run `bluetoothctl scan on`
+4. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`
+5. You should see output similar to ``. If not, or if it is connecting and disconnecting, refer to Troubleshooting.
 
 ## Troubleshooting
 
@@ -78,6 +91,17 @@ Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.
 8. start scan via "scan on"
 9. connect [Xbox Wireless Controller]
 
+### Updating Husarnet repo key
+
+Husarion changed the ca certficate to its husarnet repo in 2021. You may need to update yours if your ROSbot shipped prior to June 2021.
+See this series of [community posts](https://community.husarion.com/t/husarion-repository-expired-key/1240/3).
+```
+sudo su root # The following command needs to be run as root
+curl https://install.husarnet.com/repo.key 22 | apt-key add -
+<ctrl-d> # revert to husarion prompt (The following commands should’t be run as root)
+sudo apt-get install -y ca-certificates
+sudo apt update
+```
 
 ### Husarion OS (Ubuntu 18.04 LSB OS)
 Here's a [reference](https://net2.com/how-to-run-applications-at-startup-on-ubuntu-18-04/) for adding scripts to an Ubuntu 18 LSB system.
