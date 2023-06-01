@@ -2,7 +2,37 @@
 
 This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot 2.0.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
+It also contains training scripts for a DAVE2 steering model and pytorch implmentations of other architectures.
 
+```python
+# documentation
+rosbot_basics.md
+rosbot_installation.md
+data_collection_quickstart.md
+# data collection
+start_rosbot.sh
+src
+├── CMakeLists.txt -> /opt/ros/noetic/share/catkin/cmake/toplevel.cmake
+└── datacoll
+    ├── CMakeLists.txt
+    ├── launch
+    │   └── data_collector.launch
+    ├── package.xml
+    └── src
+        ├── dataset_writer.py
+        └── teleop_joy_concurrent.py
+# training
+models/
+├── DAVE2pytorch.py
+├── README.md
+├── ResNet.py
+└── VAE.py
+training/
+├── DatasetGenerator.py
+├── install.sh
+├── requirements.txt
+└── train_DAVE2.py
+```
 ## ROSbot Setup
 
 To charge your ROSbot, follow the Husarion [charging instructions](https://husarion.com/manuals/rosbot/#charging-rosbot).
@@ -31,6 +61,24 @@ Data collection can be paused by pressing A and resumed by pressing B.
 The maximum turning speed can be adjusted up or down by pressing right or left on the directional pad, respectively.
 The maximum longitudinal (forward/back) speed can be adjusted up or down by pressing up or down on the directional pad, respectively.
 Each adjustment changes the max speed by ±0.2 on a scale of (-1, 1).
+
+# Training a steering model
+
+To set up your python environment:
+```bash
+# log into portal
+ssh <your-id>@portal.cs.virginia.edu
+git clone git@github.com:MissMeriel/ROSbot_data_collection.git
+cd training
+./install.sh
+mkdir ../datasets
+wget -O ../datasets <dropbox-link>
+```
+
+To start training the DAVE2 model:
+```bash
+./train.sh
+```
 
 # ROSbot data
 Husarion puts out an annotated list of ROSbot topics via the [ROSbot API](https://husarion.com/manuals/rosbot/#ros-api).

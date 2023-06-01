@@ -52,8 +52,8 @@ Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
 
 You should have your Xbox controller's MAC address before you begin. The easiest way to find it out is to connect it to a bluetooth-enabled laptop and inspect the device using your bluetooth settings.
 
-1. You should also have `bluetoothctl` already installed on your ROSbot. Find out by XXXX. If not, run `sudo apt install bluetoothctl`.
-2. Run `sudo service bluetooth restart`. This will take you into the bluetoothctl prompt.
+1. You should also have `bluez` already installed on your ROSbot. Find out by running `bluetoothctl`. If not, run `sudo apt install bluetoothctl`.
+2. Run `sudo service bluetooth restart; bluetoothctl`. This will take you into the bluetoothctl prompt.
 3. Within the bluetoothctl prompt, run `remove all`
 4. Within the bluetoothctl prompt, run `bluetoothctl scan on`
 4. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`

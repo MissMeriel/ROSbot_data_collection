@@ -2,16 +2,6 @@
 
 This is a ROS workspace for collecting a dataset by driving around using the Husarion ROSbot 2.0.
 
-## Environment Setup
-
-Run:
-```
-python3 -m venv venv-dcoll
-. venv-dcoll/bin/activate
-pip install -f requirements.txt
-```
-
-
 
 ## Connecting to the ROSbot
 
