@@ -9,21 +9,21 @@ Hardware required:
 * Bluetooth 4.0 dongle (like [this one](https://a.co/d/e7X3SpB))
 
 
-## Setup Instructions
+## Initial Setup Instructions
 
 N.B. READ THE INSTRUCTIONS ALL THE WAY THROUGH AND SKIM THE TROUBLESHOOTING SECTION BEFORE YOU BEGIN. 
 This will make setup a lot faster as you can make sure you have everything you need ready to go (keyboard, mouse, bluetooth dongle, wifi connection...).
 
-1. Plug the USB drive into a computer and format the USB drive as Fat32. Reformat the drive if needed. Be sure to retain a copy of the data on your local computer if reformatting is required. 
+1. Plug the USB drive into a computer and format the USB drive as Fat32 (see Troubleshooting). Reformat the drive if needed. Be sure to retain a copy of the data on your local computer if reformatting is required. 
 2. Copy `start_rosbot.sh` file and `src` directory to your USB drive. Plug the USB drive into your ROSbot.
 3. Connect to your ROSbot (ssh, plug in a monitor and mouse/keyboard, etc.).
-4. Copy `start_rosbot.sh` to `~` (aka `/home/husarion`). 
+4. Copy `start_rosbot.sh` to  `/home/husarion`.  In linux this directory has a shortcut, `~` and is always in location `/home/$USER` like /home/husarion. This is the script that will allow drivers and data collection scripts to start on boot. 
 5. Give `start_rosbot.sh` executable permissions by running `chmod +x start_rosbot.sh`.
 6. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
 7. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
 8. `cd ~/husarion_ws; source devel/setup.bash`
 9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet.
-10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to troubleshooting for determining your distro and updating your ros repo and authentication.
+10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to the Installing Packages section of troubleshooting for determining your distro and updating your ros repo and authentication.
 11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
 Refer to the "First time connecting your controller to the ROSbot" section if this is your first time connecting. 
@@ -60,6 +60,14 @@ You should have your Xbox controller's MAC address before you begin. The easiest
 5. You should see output similar to ``. If not, or if it is connecting and disconnecting, refer to Troubleshooting.
 
 ## Troubleshooting
+
+### Formatting a USB drive as Fat32
+
+On Mac: (link)[https://4ddig.tenorshare.com/usb-recovery/format-usb-drive-to-fat32-on-mac.html]
+
+On Windows 10/11: (link)[https://www.asus.com/support/FAQ/1044735/]
+
+On Linux: (link)[https://linuxhint.com/format-usb-drive-linux/]
 
 ### Installing Packages
 The apt repository preinstalled on the ROSbot may be stale and may require an update. 

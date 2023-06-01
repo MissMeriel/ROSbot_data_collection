@@ -33,7 +33,7 @@ training/
 ├── requirements.txt
 └── train_DAVE2.py
 ```
-## ROSbot Setup
+## Running the ROSbot
 
 To charge your ROSbot, follow the Husarion [charging instructions](https://husarion.com/manuals/rosbot/#charging-rosbot).
 
