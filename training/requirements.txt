@@ -1,0 +1,14 @@
+numpy~=1.19.5
+torch~=1.9.0+cu111
+opencv-python~=4.5.1.48
+torchvision~=0.10.0+cu111
+scipy~=1.4.1
+matplotlib~=3.3.3
+tensorflow~=2.4.1
+Pillow~=7.1.2
+Keras~=2.4.3
+pandas~=1.2.1
+scikit-image~=0.18.2
+h5py~=2.10.0
+kornia~=0.5.7
+Wand~=0.6.11
