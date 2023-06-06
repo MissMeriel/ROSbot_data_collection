@@ -72,11 +72,12 @@ git clone git@github.com:MissMeriel/ROSbot_data_collection.git
 cd training
 ./install.sh
 mkdir ../datasets
-wget -O ../datasets <dropbox-link>
+wget -O ../datasets "https://virginia.box.com/shared/static/fb9lj05cg6twkq92gh7el3q9jdu5wd1n"
 ```
 
 To start training the DAVE2 model:
 ```bash
+cd training/
 ./train.sh
 ```
 
