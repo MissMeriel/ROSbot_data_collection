@@ -69,7 +69,8 @@ Each adjustment changes the max speed by ±0.2 on a scale of (-1, 1).
 3. Navigate the location in the simplest way possible: maintain a constant speed, drive in the approximate center of the hallway/sidewalk/path, avoid obstacles when necessary. Don’t go into rooms or alcoves, don’t drive under chairs, stick to the clearly demarcated path (e.g. a linoleum hallway area, a hiking trail)
 4. Walk out of the range of the LiDAR sensor (about 12m, see components description in [ROSbot manual](https://husarion.com/manuals/rosbot/)).
 4. Drive that way for AT LEAST an hour, performing multiple laps/traversals of that location. As a human driver, your driving will vary slightly from run to run, which is fine. There is more than one "right" way to navigate a location.
-5. Remove your USB stick from the ROSbot and plug it into your computer. Label your newly collected data folder with the correct date, time, and location, and then upload your data to a networked folder, e.g. Box.
+5. Remove your USB stick from the ROSbot and plug it into your computer. Label your newly collected data folder with the correct date, time, and location in this style: `rosbot-<month>_<day>-<hour>_<minute>-<location>-<hash>`. 
+7. Then upload your data to a networked folder, e.g. Box or a portal directory.
 
 # Training a steering model
 
