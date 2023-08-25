@@ -1,7 +1,10 @@
 # ROSbot Dataset Collection
 
-| ------------- | ------------- |
-| ![](figures/IMG_8418.jpg)  |  ![](figures/dataset.jpg) |
+<p float="middle">
+  <img src="figures/IMG_8418.jpg" width="250" />
+  <img src="figures/dataset.png" width="250" /> 
+</p>
+<!-- | ![](figures/IMG_8418.jpg)  |  ![](figures/dataset.jpg) | -->
 
 This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot 2.0.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
