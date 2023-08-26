@@ -1,0 +1,9 @@
+1. Navigating an environment for delivery of an item, visiting a waypoint. Could be complicated by using cooperative robots e.g. a relay system of multiple robots
+2. Following another robot or human around
+3. Crossing guard robots
+4. Traffic cop robots to look for disabled vehicles, manage an unmetered intersection, direct traffic around construction
+5. "seeing eye" robots
+6. Cooperative robots, e.g. relay robots?
+7. Exploring an area (perimeter of a building, an infrequently-used service road) for damage or maintenance
+8. Perception-based RL behavior e.g. finding points of interest in an environment
+9. Environment mapping
