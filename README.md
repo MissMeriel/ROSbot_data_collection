@@ -18,8 +18,7 @@ docs
 ├── rosbot_installation.md
 ├── rosbot_usage.md
 ├── ROSbot-applications.txt
-├── ROSbot-pub-topics.txt
-└── datacoll
+└── ROSbot-pub-topics.txt
 # data collection
 start_rosbot.sh
 src
