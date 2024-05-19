@@ -44,3 +44,8 @@ training/
 ├── README.md
 └── train_DAVE2.py
 ```
+
+
+## Student offshoot projects from Fall 2023
+- [RosBot 2.0](https://github.com/Taylucky/Rosbot2.0)
+- [RosBot XL](https://github.com/ish-gupta/ml-robot)
