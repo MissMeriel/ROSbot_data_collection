@@ -30,7 +30,7 @@ You should have your Xbox controller's MAC address before you begin. The easiest
 3. Within the bluetoothctl prompt, run `remove all`
 4. Within the bluetoothctl prompt, run `bluetoothctl scan on`
 4. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`
-5. You should see output similar to ``. If not, or if it is connecting and disconnecting, refer to Troubleshooting.
+5. You should see a prompt similar to `Xbox Wireless Controller#`. If not, or if it is connecting and disconnecting, refer to Troubleshooting.
 
 ## Troubleshooting
 
