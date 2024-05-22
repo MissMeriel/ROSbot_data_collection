@@ -30,13 +30,12 @@ Refer to the "First time connecting your controller to the ROSbot" section if th
 Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
 13. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
 14. If steps #11-12 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed instructions and screenshots, see section below on adding scripts to your startup routine.
-    1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
-    2. Double click to open "Session and Startup".
-    3. Hit the "Add" icon to add a new routine to startup.
-    4. Write a name and description. In the "Command" field, type `/bin/bash -c "sleep 10 & /home/husarion/start_rosbot.sh"`.
-15. Test if your script starts on startup. Turn off your ROSbot and turn it back on again. The LiDAR turret should spin within 20-30 seconds. Let it run for a few seconds and then check the external USB drive to see if the dataset wrote to disk.
-16. Follow the instructions linked [here](https://support.xbox.com/en-US/help/hardware-network/controller/update-xbox-wireless-controller) to update the Xbox controller firmware.
-17. If step #10 goes smoothly, refer to [README.md](README.md) "ROSbot Setup" section for running the ROSbot. If you experience errors, refer to troubleshooting.
+    1. In the terminal enter the command: `chmod +x $HOME/start_rosbotxl.sh`
+    2. In the terminal enter the command: `crontab -e`
+    3. At the end of the crontab file, add `@reboot $HOME/start_rosbotxl.sh`
+16. Test if your script starts on startup. Turn off your ROSbot and turn it back on again. The LiDAR turret should spin within 20-30 seconds. Let it run for a few seconds and then check the external USB drive to see if the dataset wrote to disk.
+17. Follow the instructions linked [here](https://support.xbox.com/en-US/help/hardware-network/controller/update-xbox-wireless-controller) to update the Xbox controller firmware.
+18. If step #10 goes smoothly, refer to [README.md](README.md) "ROSbot Setup" section for running the ROSbot. If you experience errors, refer to troubleshooting.
 
 ## Adding scripts to your startup routine on HusarionOS
 1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
