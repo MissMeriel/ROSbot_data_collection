@@ -126,8 +126,10 @@ sudo apt-get install -y ca-certificates
 sudo apt update
 ```
 
-### Husarion OS (Ubuntu 18.04 LSB OS)
-Here's a [reference](https://net2.com/how-to-run-applications-at-startup-on-ubuntu-18-04/) for adding scripts to an Ubuntu 18 LSB system.
+### Husarion OS (Ubuntu 22.04 LTS OS)
+To check the current OS version in Linux, open the Terminator and type `lsb_release -a`
+
+Here's a [reference](https://linuxconfig.org/how-to-autostart-applications-on-ubuntu-22-04-jammy-jellyfish-linux) for adding scripts to an Ubuntu 22.04 LTS system.
 
 Extra docs from Ubuntu to install `bluez`: [link](https://ubuntu.com/core/docs/bluez/install-configure/install)
 
