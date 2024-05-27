@@ -68,5 +68,6 @@ Guide to the LED output on the back: [LEDs and buttons](https://husarion.com/man
 
 ## Husarion References
 
-* [Husarion ROS1 Tutorials](https://husarion.com/tutorials/ros-tutorials/1-ros-introduction/)
+* [Husarion ROS2 Tutorials](https://husarion.com/tutorials/ros2-tutorials/1-ros2-introduction/)
+* [Docker Images](https://husarion.com/software/docker/)
 * [ROSbot simple kinematics](https://husarion.com/tutorials/ros-tutorials/3-simple-kinematics-for-mobile-robot/)

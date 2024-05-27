@@ -85,6 +85,8 @@ If you are using a wireless network and intend to operate the ROSbot outside tha
 You may need to disable the WiFi on your ROSbot to successfully complete the startup routine. 
 You may also want to change the `ROS_IP` set in `start_rosbot.sh`.
 
+To connect to "wahoo" open network, follow the below steps:
+
 Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.04 LTS](https://askubuntu.com/questions/1040497/bluetooth-problem-ubuntu-18-04-lts)
 
 ### Bluetooth controller connection fix
