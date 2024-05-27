@@ -1,8 +1,8 @@
-# ROSbot Usage
+# ROSbot XL Usage
 
-## Running the ROSbot
+## Running the ROSbot XL
 
-To charge your ROSbot, follow the Husarion [charging instructions](https://husarion.com/manuals/rosbot/#charging-rosbot).
+To charge your ROSbot XL, follow the Husarion [charging instructions](https://husarion.com/manuals/rosbot-xl/#battery--charging).
 
 When you are ready to drive the ROSbot around, follow these steps. 
 These directions assume that you are starting with your ROSbot turned off, charged, and nothing plugged in:
