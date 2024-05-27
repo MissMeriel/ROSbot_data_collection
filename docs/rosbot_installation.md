@@ -22,7 +22,22 @@ This will make setup a lot faster as you can make sure you have everything you n
 6. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
 7. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
 8. `cd ~/husarion_ws; source devel/setup.bash`
-9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet.
+9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbotxl-quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet. 
+   1. To Connect to UVA hidden open network "wahoo":
+        1. Type command `sudo ifconfig` and find your wireless interface named as `wlan0` or `wifi0`. 
+        2. Copy the MAC Address of your ROSbot, which is listed in six groups of two hexadecimal digits.
+        3. Register your MAC Address following the step 2 on [this instruction](https://virginia.service-now.com/its?id=itsweb_kb_article&sys_id=ca13d12bdb8153404f32fb671d961969) 
+        4. In `01-network-manager-all.yaml`, set 
+            ```
+             wifis:
+               wlan0:
+                 dhcp4: true
+                 dhcp6: true
+                 optional: true
+                 access-points:
+                   "wahoo": 
+                      hidden: true
+           ```
 10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to the Installing Packages section of troubleshooting for determining your distro and updating your ros repo and authentication.
 11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
@@ -84,8 +99,6 @@ If your ROSbot was manufactured before June 2022, then ROS has updated their GPG
 If you are using a wireless network and intend to operate the ROSbot outside that network, test your ROSbot startup routine when not connected to that network. 
 You may need to disable the WiFi on your ROSbot to successfully complete the startup routine. 
 You may also want to change the `ROS_IP` set in `start_rosbot.sh`.
-
-To connect to "wahoo" open network, follow the below steps:
 
 Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.04 LTS](https://askubuntu.com/questions/1040497/bluetooth-problem-ubuntu-18-04-lts)
 
