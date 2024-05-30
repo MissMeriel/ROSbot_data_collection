@@ -43,7 +43,7 @@ For Logitech Gamepad F710, follow the instruction in [Husarion Tutorial](https:/
 
 For **Xbox** controller that we use in the project:
 1. Connect your controller to the ROSbot through bluetooth. For instructions on connecting as the first time, refer to the [rosbot_installation First time connecting your controller to the ROSbot](rosbot_installation.md#first-time-connecting-your-controller-to-the-rosbot) section.
-2. Install [`joystick_drivers`](https://github.com/ros-drivers/joystick_drivers/tree/ros2?tab=readme-ov-file) and [`teleop_twist_joy`](https://github.com/ros2/teleop_twist_joy?tab=readme-ov-file) packages.
+2. Install [`joystick_drivers`](https://github.com/ros-drivers/joystick_drivers/tree/ros2?tab=readme-ov-file) and [`teleop_twist_joy`](https://github.com/ros2/teleop_twist_joy/tree/humble) packages.
 3. Run `ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'` to start the `/teleop_twist_joy_node`.
 
 If your controller cannot operate your ROSbot to move, but your controller is successfully connected to ROSbot and both `/joy_node` and `/teleop_twist_joy_node` show in your `ros2 node list` AND `/joy` and `/cmd_vel` show in your `ros2 topic list`:
