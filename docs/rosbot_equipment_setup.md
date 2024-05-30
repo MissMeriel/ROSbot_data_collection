@@ -33,10 +33,22 @@ If encounter the Error `[rplidar_node]: Error, operation time out. SL_RESULT_OPE
 1. Set the parameter `serial_port` to match the USB port of your lidar. Usually the port the lidar uses is `ttyUSB1` or `ttyUSB0`.
 2. Make sure to give port permission to the USB port of the lidar through `sudo chmod 777 /dev/ttyUSB1` or `sudo chmod 777 /dev/ttyUSB0` depending on the USB port your lidar is using.
 3. Set the appropriate baudrate for your lidar. For RPlidar A3 that we use in the project, baudrate is `256000`.
-4. Connect the lidar to the USB serial converter that comes in the box with lidar. Plug the USB serial converter cable in the USB port inside the robot (serial port on the auxiliary board). Check below two images for reference. The yellow box on image shows where the USB serial converter cable plugged in.
+4. Connect the lidar to the USB serial converter that comes in the box with lidar. Plug the USB serial converter cable in the USB port inside the ROSbot (serial port on the auxiliary board). Check below two images for reference. The yellow box on image shows where the USB serial converter cable plugged in.
    - [RPLidar USB Serial Converter Plugged](image/RPLidar%20USB%20Serial%20Converter%20Plugged.png)
    - [RPLidar USB Serial Converter Plugged CloseUp](image/RPLidar%20USB%20Serial%20Converter%20Plugged%20CloseUp.png)
 
 ## Wireless Controller
 
+For Logitech Gamepad F710, follow the instruction in [Husarion Tutorial](https://husarion.com/tutorials/ros-equipment/gamepad-f710/).
+
+For **Xbox** controller that we use in the project:
+1. Connect your controller to the ROSbot through bluetooth. For instructions on connecting as the first time, refer to the [rosbot_installation First time connecting your controller to the ROSbot](rosbot_installation.md#first-time-connecting-your-controller-to-the-rosbot) section.
+2. Install [`joystick_drivers`](https://github.com/ros-drivers/joystick_drivers/tree/ros2?tab=readme-ov-file) and [`teleop_twist_joy`](https://github.com/ros2/teleop_twist_joy?tab=readme-ov-file) packages.
+3. Run `ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'` to start the `/teleop_twist_joy_node`.
+
+If your controller cannot operate your ROSbot to move, but your controller is successfully connected to ROSbot and both `/joy_node` and `/teleop_twist_joy_node` show in your `ros2 node list` AND `/joy` and `/cmd_vel` show in your `ros2 topic list`:
+1. Run `ros2 topic echo /joy`. Press buttons and move the joystick on your controller to check whether the `axes` and `buttons` values change accordingly.
+2. Run `ros2 topic echo /cmd_vel`. Press the button displayed as your `Teleop enable button` in `[INFO] [TeleopTwistJoy]` message, and observe whether `linear` and `angular` values change accordingly.
+- To change the `Teleop enable button`, modify the `enable_button` value in `xbox.config.yaml`.
+- You can use `ros2 topic echo /joy` to inspect each button's corresponding `enable_button` value.
 
