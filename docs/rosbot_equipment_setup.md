@@ -52,8 +52,9 @@ For **Xbox** controller that we use in the project:
 3. Run `ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'` to start the `/teleop_twist_joy_node`.
 
 If your controller cannot operate your ROSbot to move, but your controller is successfully connected to ROSbot and both `/joy_node` and `/teleop_twist_joy_node` show in your `ros2 node list` AND `/joy` and `/cmd_vel` show in your `ros2 topic list`:
-1. Run `ros2 topic echo /joy`. Press buttons and move the joystick on your controller to check whether the `axes` and `buttons` values change accordingly.
-2. Run `ros2 topic echo /cmd_vel`. Press the button displayed as your `Teleop enable button` in `[INFO] [TeleopTwistJoy]` message, and observe whether `linear` and `angular` values change accordingly.
-- To change the `Teleop enable button`, modify the `enable_button` value in `xbox.config.yaml`.
-- You can use `ros2 topic echo /joy` to inspect each button's corresponding `enable_button` value.
-
+1. If the LED2 light is also flashing in red, run `docker compose up` or `docker compose up rosbot-xl microros` to (re)create and start your docker container `rosbot-xl` and `microros`. 
+Confirm the docker containers running status by the command `docker ps`.
+2. Run `ros2 topic echo /joy`. Press buttons and move the joystick on your controller to check whether the `axes` and `buttons` values change accordingly.
+3. Run `ros2 topic echo /cmd_vel`. Press the button displayed as your `Teleop enable button` in `[INFO] [TeleopTwistJoy]` message, and observe whether `linear` and `angular` values change accordingly.
+   - To change the `Teleop enable button`, modify the `enable_button` value in `xbox.config.yaml`.
+   - You can use `ros2 topic echo /joy` to inspect each button's corresponding `enable_button` value.
