@@ -7,6 +7,16 @@ The ROS Equipments included in this document:
 - [SLAMTEC RPlidar](https://husarion.com/tutorials/ros-equipment/rplidar/)
 - Wireless Controller
 
+## Equipment Mounting
+1. Run the cable of the equipment through your ROSbot's cover
+2. The Zed camera stand is mounted on ROSbot's cover with one screw. The RPLidar is mounted on ROSbot's cover with two screws.
+   - Check this [Husarion tutorial video](https://youtu.be/FKI4aFbu7lo) for demonstration of mounting external components on ROSbot.
+3. For the mounting location, please check the following images for reference:
+   - [ROSbot's Cover Top-Side View](image/ROSbot's%20Cover%20Top.jpg)
+   - [ROSbot's Cover Top-Side View Labeled](image/ROSbot's%20Cover%20Top%20Labeled.jpg)
+   - [ROSbot's Cover Bottom-Side View](image/ROSbot's%20Cover%20Bottom.jpg)
+   - [ROSbot's Cover Bottom-Side View Labeled](image/ROSbot's%20Cover%20Bottom%20Labeled.jpg)
+
 ## Zed Camera
 [Stereolabs ZED Official Documentation](https://www.stereolabs.com/docs/)
 
