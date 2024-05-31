@@ -32,6 +32,7 @@ If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
      The default `video_device` is `/dev/video0`. Check if `/video0` is shown in your `/dev` directory by running `ls /dev`. If `/video0` is absent, change `video_device` to the video device displayed after running `ls -l /dev/video*`.
    - Set `camera_name` to your camera model name. In our project, we use `ZED2`.
 4. Run `ros2 run usb_cam usb_cam_node_exe --ros-args --params-file /home/husarion/.ros/camera_info/default_cam.yaml` to start the camera.
+5. Run ROS visualization through `rviz2`. Inside RViz, click `Add` button and create visualization `By topic`. The image data is published to the `/image_raw` topic.
 
 Other resources to view:
 [ZED Docker Repository](https://github.com/husarion/zed-docker)
@@ -48,6 +49,8 @@ If encounter the Error `[rplidar_node]: Error, operation time out. SL_RESULT_OPE
 4. Connect the lidar to the USB serial converter that comes in the box with lidar. Plug the USB serial converter cable in the USB port inside the ROSbot (serial port on the auxiliary board). Check below two images for reference. The yellow box on image shows where the USB serial converter cable plugged in.
    - [RPLidar USB Serial Converter Plugged](image/RPLidar%20USB%20Serial%20Converter%20Plugged.jpg)
    - [RPLidar USB Serial Converter Plugged CloseUp](image/RPLidar%20USB%20Serial%20Converter%20Plugged%20CloseUp.png)
+
+If RViz is not automatically prompted open, run ROS visualization through `rviz2`. Inside RViz, click `Add` button and create visualization `By topic`. The Lidar scan is published to the `/scan` topic.
 
 Other resources to view:
 [RPlidar Docker Repository](https://github.com/husarion/rplidar-docker)
