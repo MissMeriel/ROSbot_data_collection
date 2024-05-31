@@ -27,7 +27,8 @@ This will make setup a lot faster as you can make sure you have everything you n
         1. Type command `sudo ifconfig` and find your wireless interface named as `wlan0` or `wifi0`. 
         2. Copy the MAC Address of your ROSbot, which is listed in six groups of two hexadecimal digits.
         3. Register your MAC Address following the step 2 on [this instruction](https://virginia.service-now.com/its?id=itsweb_kb_article&sys_id=ca13d12bdb8153404f32fb671d961969) 
-        4. In `01-network-manager-all.yaml`, set 
+        4. Edit the `01-network-manager-all.yaml` file through `sudo nano /etc/netplan/01-network-manager-all.yaml`.\
+           In the file, set 
             ```
              wifis:
                wlan0:
@@ -38,6 +39,7 @@ This will make setup a lot faster as you can make sure you have everything you n
                    "wahoo": 
                       hidden: true
            ```
+        6. To configure netplan, save the `01-network-manager-all.yaml` file, then run `sudo netplan -d apply`.
 10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to the Installing Packages section of troubleshooting for determining your distro and updating your ros repo and authentication.
 11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
