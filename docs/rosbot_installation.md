@@ -22,7 +22,24 @@ This will make setup a lot faster as you can make sure you have everything you n
 6. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
 7. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
 8. `cd ~/husarion_ws; source devel/setup.bash`
-9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbot---quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet.
+9. Refer to the instructions [here](https://husarion.com/tutorials/howtostart/rosbotxl-quick-start/#connecting-rosbot-to-your-wi-fi-network) to connect your ROSbot to wifi or ethernet. 
+   1. To Connect to UVA hidden open network "wahoo":
+        1. Type command `sudo ifconfig` and find your wireless interface named as `wlan0` or `wifi0`. 
+        2. Copy the MAC Address of your ROSbot, which is listed in six groups of two hexadecimal digits.
+        3. Register your MAC Address following the step 2 on [this instruction](https://virginia.service-now.com/its?id=itsweb_kb_article&sys_id=ca13d12bdb8153404f32fb671d961969) 
+        4. Edit the `01-network-manager-all.yaml` file through `sudo nano /etc/netplan/01-network-manager-all.yaml`.\
+           In the file, set 
+            ```
+             wifis:
+               wlan0:
+                 dhcp4: true
+                 dhcp6: true
+                 optional: true
+                 access-points:
+                   "wahoo": 
+                      hidden: true
+           ```
+        6. To configure netplan, save the `01-network-manager-all.yaml` file, then run `sudo netplan -d apply`.
 10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to the Installing Packages section of troubleshooting for determining your distro and updating your ros repo and authentication.
 11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
@@ -85,8 +102,6 @@ If you are using a wireless network and intend to operate the ROSbot outside tha
 You may need to disable the WiFi on your ROSbot to successfully complete the startup routine. 
 You may also want to change the `ROS_IP` set in `start_rosbot.sh`.
 
-To connect to "wahoo" open network, follow the below steps:
-
 Fix for controller bluetooth disconnect-reconnect: [Bluetooth Problem Ubuntu 18.04 LTS](https://askubuntu.com/questions/1040497/bluetooth-problem-ubuntu-18-04-lts)
 
 ### Bluetooth controller connection fix
@@ -113,8 +128,10 @@ sudo apt-get install -y ca-certificates
 sudo apt update
 ```
 
-### Husarion OS (Ubuntu 18.04 LSB OS)
-Here's a [reference](https://net2.com/how-to-run-applications-at-startup-on-ubuntu-18-04/) for adding scripts to an Ubuntu 18 LSB system.
+### Husarion OS (Ubuntu 22.04 LTS OS)
+To check the current OS version in Linux, open the Terminator and type `lsb_release -a`
+
+Here's a [reference](https://linuxconfig.org/how-to-autostart-applications-on-ubuntu-22-04-jammy-jellyfish-linux) for adding scripts to an Ubuntu 22.04 LTS system.
 
 Extra docs from Ubuntu to install `bluez`: [link](https://ubuntu.com/core/docs/bluez/install-configure/install)
 
