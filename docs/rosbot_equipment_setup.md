@@ -32,7 +32,7 @@ Other resources to view:
 [RPlidar ROS 2 Repository](https://github.com/Slamtec/rplidar_ros/tree/ros2/)
 
 If encounter the Error `[rplidar_node]: Error, operation time out. SL_RESULT_OPERATION_TIMEOUT`:
-1. Set the parameter `serial_port` to match the USB port of your lidar. Usually the port the lidar uses is `ttyUSB1` or `ttyUSB0`.
+1. Set the parameter `serial_port` to match the USB port of your lidar. Usually the port the lidar uses is `ttyUSB1` or `ttyUSB0`. You can determine the device number by observing the changes for `ttyUSB` devices detected in your `/dev` directory by running `ls /dev` when you plug and unplug the lidar. 
 2. Make sure to give port permission to the USB port of the lidar through `sudo chmod 777 /dev/ttyUSB1` or `sudo chmod 777 /dev/ttyUSB0` depending on the USB port your lidar is using.
 3. Set the appropriate baudrate for your lidar. For RPlidar A3 that we use in the project, baudrate is `256000`.
 4. Connect the lidar to the USB serial converter that comes in the box with lidar. Plug the USB serial converter cable in the USB port inside the ROSbot (serial port on the auxiliary board). Check below two images for reference. The yellow box on image shows where the USB serial converter cable plugged in.
