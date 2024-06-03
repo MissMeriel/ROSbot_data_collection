@@ -71,7 +71,7 @@ You should have your Xbox controller's MAC address before you begin. The easiest
 1. You should also have `bluez` already installed on your ROSbot. Find out by running `bluetoothctl`. If not, run `sudo apt install bluetoothctl`.
 2. Run `sudo service bluetooth restart; bluetoothctl`. This will take you into the bluetoothctl prompt.
 3. Within the bluetoothctl prompt, run `remove all`
-4. Within the bluetoothctl prompt, run `bluetoothctl scan on`
+4. Within the bluetoothctl prompt, run `scan on`
 4. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`
 5. You should see output similar to `Connection successful` and the prompt should change to
 `[Xbox Wireless Controller]#`. The light on the Xbox controller should shine steadily. If not, or if the prompt shows the controller disconnecting and reconnecting, refer to Troubleshooting.
