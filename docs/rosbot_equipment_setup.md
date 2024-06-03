@@ -20,7 +20,7 @@ The ROS Equipments included in this document:
 ## Zed Camera
 [Stereolabs ZED Official Documentation](https://www.stereolabs.com/docs/)
 
-Download [ZED SDK v4.1](https://www.stereolabs.com/developers/release) for Ubuntu 22.\
+Download [ZED SDK v4.1](https://www.stereolabs.com/developers/release) for Ubuntu 22. Install the ZED SDK following the instruction [here](https://www.stereolabs.com/docs/installation/linux#download-and-install-the-zed-sdk).\
 Install the ROS 2 package `zed_ros2_wrapper` for using Stereolabs ZED Camera cameras: [ZED ROS 2 Repository](https://github.com/stereolabs/zed-ros2-wrapper).
 
 If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
