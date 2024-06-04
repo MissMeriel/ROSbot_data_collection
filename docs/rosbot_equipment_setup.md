@@ -23,6 +23,13 @@ The ROS Equipments included in this document:
 Download [ZED SDK v4.1](https://www.stereolabs.com/developers/release) for Ubuntu 22. Install the ZED SDK following the instruction [here](https://www.stereolabs.com/docs/installation/linux#download-and-install-the-zed-sdk).\
 Install the ROS 2 package `zed_ros2_wrapper` for using Stereolabs ZED Camera cameras: [ZED ROS 2 Repository](https://github.com/stereolabs/zed-ros2-wrapper).
 
+Use Cheese to test your camera:
+1. In your terminal, install cheese through `sudo apt-get install cheese`.
+2. Run `cheese`. Cheese should automatically detect your webcam and display live video stream.
+3. To record video or take a snapshot, click either on photo or video and select Take a Photo or Start recording.
+   - If Cheese doesn't display the output from your webcam, test that the problem is not with Cheese before trying anything else by using one of the programs in the next section.
+   - If Cheese displays a garbled picture or one with poor colour/brightness/contrast, go to the Ubuntu wiki [Webcam Troubleshooting](https://help.ubuntu.com/community/Webcam/Troubleshooting) page for steps to resolve this.
+
 If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
 1. Use the usb_cam package to parse the input of the ZED2 camera.
 [usb_cam](https://github.com/ros-drivers/usb_cam)
@@ -36,6 +43,7 @@ If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
 
 Other resources to view:
 [ZED Docker Repository](https://github.com/husarion/zed-docker)
+[Ubuntu Documentation on how to choose, setup and use a webcam](https://help.ubuntu.com/community/Webcam)
 
 ## SLAMTEC RPlidar
 [Slamtec RPlidar Official Documentation](https://www.slamtec.com/en/) 
@@ -62,7 +70,8 @@ For Logitech Gamepad F710, follow the instruction in [Husarion Tutorial](https:/
 
 For **Xbox** controller that we use in the project:
 1. Connect your controller to the ROSbot through bluetooth. For instructions on connecting as the first time, refer to the [rosbot_installation First time connecting your controller to the ROSbot](rosbot_installation.md#first-time-connecting-your-controller-to-the-rosbot) section.
-2. Install [`joystick_drivers`](https://github.com/ros-drivers/joystick_drivers/tree/ros2?tab=readme-ov-file) and [`teleop_twist_joy`](https://github.com/ros2/teleop_twist_joy/tree/humble) packages.
+   - If you encounter bluetooth connection problem, refer to the [bluetooth-controller-connection-fix](rosbot_installation.md#bluetooth-controller-connection-fix) section.
+3. Install [`joystick_drivers`](https://github.com/ros-drivers/joystick_drivers/tree/ros2?tab=readme-ov-file) and [`teleop_twist_joy`](https://github.com/ros2/teleop_twist_joy/tree/humble) packages.
 3. Run `ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'` to start the `/teleop_twist_joy_node`.
 
 If your controller cannot operate your ROSbot to move, but your controller is successfully connected to ROSbot and both `/joy_node` and `/teleop_twist_joy_node` show in your `ros2 node list` AND `/joy` and `/cmd_vel` show in your `ros2 topic list`:
