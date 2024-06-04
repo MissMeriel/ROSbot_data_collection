@@ -23,6 +23,13 @@ The ROS Equipments included in this document:
 Download [ZED SDK v4.1](https://www.stereolabs.com/developers/release) for Ubuntu 22. Install the ZED SDK following the instruction [here](https://www.stereolabs.com/docs/installation/linux#download-and-install-the-zed-sdk).\
 Install the ROS 2 package `zed_ros2_wrapper` for using Stereolabs ZED Camera cameras: [ZED ROS 2 Repository](https://github.com/stereolabs/zed-ros2-wrapper).
 
+Use Cheese to test your camera:
+1. In your terminal, install cheese through `sudo apt-get install cheese`.
+2. Run `cheese`. Cheese should automatically detect your webcam and display live video stream.
+3. To record video or take a snapshot, click either on photo or video and select Take a Photo or Start recording.
+   - If Cheese doesn't display the output from your webcam, test that the problem is not with Cheese before trying anything else by using one of the programs in the next section.
+   - If Cheese displays a garbled picture or one with poor colour/brightness/contrast, go to the Ubuntu wiki [Webcam Troubleshooting](https://help.ubuntu.com/community/Webcam/Troubleshooting) page for steps to resolve this.
+
 If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
 1. Use the usb_cam package to parse the input of the ZED2 camera.
 [usb_cam](https://github.com/ros-drivers/usb_cam)
@@ -36,6 +43,7 @@ If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
 
 Other resources to view:
 [ZED Docker Repository](https://github.com/husarion/zed-docker)
+[Ubuntu Documentation on how to choose, setup and use a webcam](https://help.ubuntu.com/community/Webcam)
 
 ## SLAMTEC RPlidar
 [Slamtec RPlidar Official Documentation](https://www.slamtec.com/en/) 
