@@ -47,7 +47,8 @@ If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
          - In your params.yaml file set `pixel_format` to `yuyv2rgb`. 
 6. Run ROS visualization through `rviz2`. Inside RViz, click `Add` button and create visualization `By topic`. The image data is published to the `/image_raw` topic.
    - Check the camera screen displayed and make sure it is clear. 
-   - If it looks somethhing like this (but cheese is clear):
+   - If it looks something like this (but cheese is clear):
+   ![Photo Jun 11 2024, 15 33 43](https://github.com/jamission/ROSbot_data_collection/assets/171875030/20639f93-e673-4c9c-99cc-b8280abebf26)
 
    - You have the wrong resolution in your configuration file.
    - Open the .yaml file you are using for params, this should be found under `~/ros2_ws/src/usb_cam/config`.
