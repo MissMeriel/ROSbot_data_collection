@@ -40,17 +40,17 @@ If encounter the Error `[zed.zed_node]: Error opening camera: NO GPU DETECTED`:
      The default `video_device` is `/dev/video0`. Check if `/video0` is shown in your `/dev` directory by running `ls /dev`. If `/video0` is absent, change `video_device` to the video device displayed after running `ls -l /dev/video*`.
    - Set `camera_name` to your camera model name. In our project, we use `ZED2`.
 4. Run `ros2 run usb_cam usb_cam_node_exe --ros-args --params-file /home/husarion/.ros/camera_info/default_cam.yaml` to start the camera.
-   - If the above command does not work, try running 'ros2 run usb_cam usb_cam_node_exe --ros-args --params-file ~/ros2_ws/src/usb_cam/config/params_1.yaml'. 
-   - You can replace 'params_1.yaml' with your designated configuration file.
-   - If you encounter the error to the effect of "specified format 'mjpeg2rgb' is unsupported by the selected device":
-         - Open the .yaml file you are using for params, this should be found under '~/ros2_ws/src/usb_cam/config'.
-         - In your params.yaml file set 'pixel_format' to 'yuyv2rgb'. 
+   - If the above command does not work, try running `ros2 run usb_cam usb_cam_node_exe --ros-args --params-file ~/ros2_ws/src/usb_cam/config/params_1.yaml`. 
+   - You can replace `params_1.yaml` with your designated configuration file.
+   - If you encounter the error to the effect of "specified format `mjpeg2rgb` is unsupported by the selected device":
+         - Open the .yaml file you are using for params, this should be found under `~/ros2_ws/src/usb_cam/config`.
+         - In your params.yaml file set `pixel_format` to `yuyv2rgb`. 
 6. Run ROS visualization through `rviz2`. Inside RViz, click `Add` button and create visualization `By topic`. The image data is published to the `/image_raw` topic.
    - Check the camera screen displayed and make sure it is clear, if it is not (but cheese is clear):
-         - You have the wrong resolution in your configuration file.
-         - Open the .yaml file you are using for params, this should be found under '~/ros2_ws/src/usb_cam/config'.
-         - In your params.yaml file set 'image_width' and 'image_height' to the same resolution as output by your camera. For the ZED camera in this project, it is 1344 x 376 respectively. 
-         - If the camera is different and you do not know the resolution, run 'cheese' and take a photo, and open the photo in the photoviewer, you will see the resolution.
+   - You have the wrong resolution in your configuration file.
+   - Open the .yaml file you are using for params, this should be found under `~/ros2_ws/src/usb_cam/config`.
+   - In your params.yaml file set `image_width` and `image_height` to the same resolution as output by your camera. For the ZED camera in this project, it is 1344 x 376 respectively. 
+   - If the camera is different and you do not know the resolution, run `cheese` and take a photo, and open the photo in the photoviewer, you will see the resolution.
      
 Other resources to view:
 [ZED Docker Repository](https://github.com/husarion/zed-docker)
