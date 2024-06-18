@@ -41,7 +41,12 @@ def data_analysis_in_collection(collection_dir):
                 return
         print(f"{df.columns=}")
         # iterate over columns in csv
+        print(f"datadrame loaded froom {collection_dir}:")
+        print(df.head()) # Print the first few rows to check the contents
         for col in df.columns:
+            if df[col].empty:
+                print(f"{col} is empty")
+                continue
             # get all the values for a column
             column_values = df[col].to_numpy()
             print(f"\n{col} {df[col].apply(type)[0]}")
