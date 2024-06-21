@@ -111,7 +111,7 @@ def main():
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
         print(f"Finished {epoch=}")
-        model_name = f"/u/afr8gr/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
+        model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
         print(f"Saving model to {model_name}")
         torch.save(model, model_name)
         # if loss < 0.002:
@@ -121,19 +121,19 @@ def main():
 
     # save model
     # torch.save(model.state_dict(), f'H:/GitHub/DAVE2-Keras/test{iteration}-weights.pt')
-    model_name = f'/u/afr8gr/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}.pt'
+    model_name = f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}.pt'
     torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
     print("Deleting models from previous epochs...")
     for epoch in range(args.epochs):
-        os.remove(f"/u/afr8gr/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt")
+        os.remove(f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt")
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
-    with open(f'/u/afr8gr/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-metainfo.txt', "w") as f:
+    with open(f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
                 f"total_samples={dataset.get_total_samples()}\n"
                 f"{args.epochs=}\n"
