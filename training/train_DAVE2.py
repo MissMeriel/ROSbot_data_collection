@@ -58,13 +58,12 @@ def characterize_steering_distribution(y_steering, generator):
 
 def main():
     start_time = time.time()
-    input_shape = (135, 240)
+    input_shape = (2560, 720)  # Example input shape: width x height
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
     print(args)
     dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]),\
                                          robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
-
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
@@ -86,8 +85,8 @@ def main():
     for epoch in range(args.epochs):
         running_loss = 0.0
         for i, hashmap in enumerate(trainloader, 0):
-            x = hashmap['image'].float().to(device)
-            y = hashmap['steering_input'].float().to(device)
+            x = hashmap['image name'].float().to(device)
+            y = hashmap['angular_speed_z'].float().to(device)
             x = Variable(x, requires_grad=True)
             y = Variable(y, requires_grad=False)
 
@@ -106,13 +105,13 @@ def main():
                       (epoch + 1, i + 1, running_loss / logfreq))
                 if (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! MSE loss: {running_loss / logfreq}")
-                    model_name = f"./model-fixnoise-{iteration}-best.pt"
+                    model_name = f"./model-{iteration}-best.pt"
                     print(f"Saving model to {model_name}")
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
         print(f"Finished {epoch=}")
-        model_name = f"H:/GitHub/DAVE2-Keras/model-fixnoise-{iteration}-epoch{epoch}.pt"
+        model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
         print(f"Saving model to {model_name}")
         torch.save(model, model_name)
         # if loss < 0.002:
@@ -122,19 +121,19 @@ def main():
 
     # save model
     # torch.save(model.state_dict(), f'H:/GitHub/DAVE2-Keras/test{iteration}-weights.pt')
-    model_name = f'H:/GitHub/DAVE2-Keras/model-{iteration}.pt'
-    torch.save(model, model_name)
+    model_name = f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}.pt'
+    torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
     print("Deleting models from previous epochs...")
     for epoch in range(args.epochs):
-        os.remove(f"H:/GitHub/DAVE2-Keras/model-{iteration}-epoch{epoch}.pt")
+        os.remove(f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt")
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
-    with open(f'H:/GitHub/DAVE2-Keras/model-{iteration}-metainfo.txt', "w") as f:
+    with open(f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
                 f"total_samples={dataset.get_total_samples()}\n"
                 f"{args.epochs=}\n"
