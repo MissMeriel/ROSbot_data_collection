@@ -21,7 +21,18 @@ parser.add_argument("--level", type=str, choices=['rosbotxl_data', 'collection']
 args = parser.parse_args()
 print("args:" + str(args))
 
-def add_shadow(image):
+def add_shadow(image, level=0.5):
+    """
+    Adds a shadow effect to the given image.
+
+    Args:
+    - image (PIL.Image): The input image to which the shadow effect will be applied.
+    - level (float): The intensity level of the shadow effect (0.01 to 0.9).
+
+    Returns:
+    - PIL.Image: The image with the shadow effect applied.
+    """
+    level = min(max(level, 0.01), 0.9)
     width, height = image.size
     x1, y1 = width * random.uniform(0, 1), 0
     x2, y2 = width * random.uniform(0, 1), height
@@ -30,62 +41,183 @@ def add_shadow(image):
         for j in range(height):
             a = (i - x1) * (y2 - y1) - (x2 - x1) * (j - y1)
             if a > 0:
-                shadow.putpixel((i, j), (0, 0, 0, 127))
+                shadow.putpixel((i, j), (0, 0, 0, int(127 * level)))
     combined = Image.alpha_composite(image.convert('RGBA'), shadow)
     return combined.convert('RGB')
 
-def add_fog(image):
+def add_fog(image, level=0.5):
+    """
+    Adds a fog effect to the given image.
+
+    Args:
+    - image (PIL.Image): The input image to which the fog effect will be applied.
+    - level (float): The intensity level of the fog effect (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with the fog effect applied.
+    """
+    level = min(max(level, 0.01), 1.0)
     width, height = image.size
-    fog = Image.new('RGBA', (width, height), (255, 255, 255, 50))
+    fog = Image.new('RGBA', (width, height), (255, 255, 255, int(255 * level)))
     combined = Image.alpha_composite(image.convert('RGBA'), fog)
     return combined.convert('RGB')
 
-def time_of_day_transform_dusk(image):
-    enhancer = ImageEnhance.Color(image)
-    return enhancer.enhance(0.5)
+def time_of_day_transform_dusk(image, level=0.5):
+    """
+    Applies a dusk time-of-day effect to the given image by reducing the color saturation.
 
-def time_of_day_transform_dawn(image):
-    enhancer = ImageEnhance.Color(image)
-    return enhancer.enhance(1.5)
+    Args:
+    - image (PIL.Image): The input image to which the dusk effect will be applied.
+    - level (float): The intensity level of the dusk effect (0.01 to 1.0).
 
-def add_elastic_transform(image):
+    Returns:
+    - PIL.Image: The image with the dusk effect applied.
+    """
+    level = min(max(level, 0.01), 1.0)
+    enhancer = ImageEnhance.Color(image)
+    return enhancer.enhance(1 - level)
+
+def time_of_day_transform_dawn(image, level=0.5):
+    """
+    Applies a dawn time-of-day effect to the given image by increasing the color saturation.
+
+    Args:
+    - image (PIL.Image): The input image to which the dawn effect will be applied.
+    - level (float): The intensity level of the dawn effect (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with the dawn effect applied.
+    """
+    level = min(max(level, 0.01), 1.0)
+    enhancer = ImageEnhance.Color(image)
+    return enhancer.enhance(1 + level)
+
+def add_elastic_transform(image, level=0.5):
+    """
+    Applies an elastic transformation to the given image.
+
+    Args:
+    - image (PIL.Image): The input image to which the elastic transformation will be applied.
+    - level (float): The intensity level of the elastic transformation (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with the elastic transformation applied.
+    """
+    level = min(max(level, 0.01), 1.0)
     image = np.array(image)
-    transform = A.ElasticTransform(p=1.0)
+    transform = A.ElasticTransform(alpha=level * 100, sigma=level * 10, alpha_affine=level * 10, p=1.0)
     augmented = transform(image=image)
     return Image.fromarray(augmented['image'])
 
-def add_lens_distortion(image):
+def add_lens_distortion(image, level=0.5):
+    """
+    Applies a lens distortion effect to the given image.
+
+    Args:
+    - image (PIL.Image): The input image to which the lens distortion effect will be applied.
+    - level (float): The intensity level of the lens distortion effect (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with the lens distortion effect applied.
+    """
+    level = min(max(level, 0.01), 1.0)
     image = np.array(image)
-    transform = A.OpticalDistortion(distort_limit=0.2, shift_limit=0.2, p=1.0)
+    transform = A.OpticalDistortion(distort_limit=0.2 * level, shift_limit=0.2 * level, p=1.0)
     augmented = transform(image=image)
     return Image.fromarray(augmented['image'])
 
-def add_noise(image, noise_level):
+def add_noise(image, level=0.5):
+    """
+    Adds Gaussian noise to the given image.
+
+    Args:
+    - image (PIL.Image): The input image to which the noise will be added.
+    - level (float): The standard deviation of the Gaussian noise to be added (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with Gaussian noise added.
+    """
+    level = min(max(level, 0.01), 1.0)
     array = np.array(image)
-    noise = np.random.normal(0, noise_level * 255, array.shape)
+    noise = np.random.normal(0, level * 255, array.shape)
     array = np.clip(array + noise, 0, 255)
     return Image.fromarray(array.astype('uint8'))
 
-def add_blur_fn(img, blur_level):
-    kernel_size = int(np.ceil(blur_level * 8))  # Kernel size from 1 to 8
+def add_blur_fn(img, level=0.5):
+    """
+    Adds a Gaussian blur effect to the given image.
+
+    Args:
+    - img (PIL.Image): The input image to which the blur effect will be applied.
+    - level (float): The level of blur to apply, controlling the kernel size (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with the blur effect applied.
+    """
+    level = min(max(level, 0.01), 1.0)
+    kernel_size = int(np.ceil(level * 8))  # Kernel size from 1 to 8
     if kernel_size % 2 == 0:  # Kernel size must be odd
         kernel_size += 1
     return transforms.GaussianBlur(kernel_size=(kernel_size, kernel_size), sigma=(0.1, 5))(img)
 
-def adjust_brightness_fn(img, brightness_level):
+def adjust_brightness_fn(img, level=0.5):
+    """
+    Adjusts the brightness of the given image.
+
+    Args:
+    - img (PIL.Image): The input image whose brightness will be adjusted.
+    - level (float): The factor by which to adjust the brightness (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with adjusted brightness.
+    """
+    level = min(max(level, 0.01), 1.0)
     enhancer = ImageEnhance.Brightness(img)
-    return enhancer.enhance(brightness_level)
+    return enhancer.enhance(level)
 
-def adjust_contrast_fn(img, contrast_level):
+def adjust_contrast_fn(img, level=0.5):
+    """
+    Adjusts the contrast of the given image.
+
+    Args:
+    - img (PIL.Image): The input image whose contrast will be adjusted.
+    - level (float): The factor by which to adjust the contrast (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with adjusted contrast.
+    """
+    level = min(max(level, 0.01), 1.0)
     enhancer = ImageEnhance.Contrast(img)
-    return enhancer.enhance(contrast_level)
+    return enhancer.enhance(level)
 
-def adjust_saturation_fn(img, saturation_level):
+def adjust_saturation_fn(img, level=0.5):
+    """
+    Adjusts the saturation of the given image.
+
+    Args:
+    - img (PIL.Image): The input image whose saturation will be adjusted.
+    - level (float): The factor by which to adjust the saturation (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with adjusted saturation.
+    """
+    level = min(max(level, 0.01), 1.0)
     enhancer = ImageEnhance.Color(img)
-    return enhancer.enhance(saturation_level)
+    return enhancer.enhance(level)
 
-def adjust_hue_fn(img, hue_level):
-    return transforms.functional.adjust_hue(img, hue_level)
+def adjust_hue_fn(img, level=0.5):
+    """
+    Adjusts the hue of the given image.
+
+    Args:
+    - img (PIL.Image): The input image whose hue will be adjusted.
+    - level (float): The factor by which to adjust the hue (0.01 to 1.0).
+
+    Returns:
+    - PIL.Image: The image with adjusted hue.
+    """
+    level = min(max(level, 0.01), 1.0)
+    return transforms.functional.adjust_hue(img, level)
 
 # Define individual transformations with adjustable parameters
 individual_transforms = {
@@ -102,12 +234,12 @@ individual_transforms = {
     "brightness": lambda img, level: adjust_brightness_fn(img, level),
     "contrast": lambda img, level: adjust_contrast_fn(img, level),
     "scaling_zooming": transforms.RandomResizedCrop(224, scale=(0.8, 1.2)),
-    "shadow": lambda img: add_shadow(img),
-    "fog": lambda img: add_fog(img),
-    "time_of_day_dusk": lambda img: time_of_day_transform_dusk(img),
-    "time_of_day_dawn": lambda img: time_of_day_transform_dawn(img),
-    "elastic_transform": lambda img: add_elastic_transform(img),
-    "lens_distortion": lambda img, level: add_lens_distortion(img),
+    "shadow": lambda img, level: add_shadow(img, level),
+    "fog": lambda img, level: add_fog(img, level),
+    "time_of_day_dusk": lambda img, level: time_of_day_transform_dusk(img, level),
+    "time_of_day_dawn": lambda img, level: time_of_day_transform_dawn(img, level),
+    "elastic_transform": lambda img, level: add_elastic_transform(img, level),
+    "lens_distortion": lambda img, level: add_lens_distortion(img, level),
     "noise": lambda img, level: add_noise(img, level)
 }
 
@@ -153,32 +285,32 @@ composed_transforms = {
     ]),
     "blur_lens_distortion_noise": lambda img, level: transforms.Compose([
         transforms.Lambda(lambda img: add_blur_fn(img, level)),
-        transforms.Lambda(lambda img: add_lens_distortion(img)),
+        transforms.Lambda(lambda img: add_lens_distortion(img, level)),
         transforms.Lambda(lambda img: add_noise(img, level)),
         transforms.ToTensor(),
         transforms.ToPILImage()
     ]),
     "lens_distortion_noise": lambda img, level: transforms.Compose([
-        transforms.Lambda(lambda img: add_lens_distortion(img)),
+        transforms.Lambda(lambda img: add_lens_distortion(img, level)),
         transforms.Lambda(lambda img: add_noise(img, level)),
         transforms.ToTensor(),
         transforms.ToPILImage()
     ]),
     "only_lens_distortion": lambda img: transforms.Compose([
-        transforms.Lambda(lambda img: add_lens_distortion(img)),
+        transforms.Lambda(lambda img: add_lens_distortion(img, 0.5)),  # Default level for this composed transform
         transforms.ToTensor(),
         transforms.ToPILImage()
     ]),
-    "dusk_shadow_rotation": lambda img: transforms.Compose([
-        transforms.Lambda(lambda img: time_of_day_transform_dusk(img)),
-        transforms.Lambda(lambda img: add_shadow(img)),
+    "dusk_shadow_rotation": lambda img, level: transforms.Compose([
+        transforms.Lambda(lambda img: time_of_day_transform_dusk(img, level)),
+        transforms.Lambda(lambda img: add_shadow(img, level)),
         individual_transforms["random_rotation"](img),
         transforms.ToTensor(),
         transforms.ToPILImage()
     ]),
-    "dawn_shadow_rotation": lambda img: transforms.Compose([
-        transforms.Lambda(lambda img: time_of_day_transform_dawn(img)),
-        transforms.Lambda(lambda img: add_shadow(img)),
+    "dawn_shadow_rotation": lambda img, level: transforms.Compose([
+        transforms.Lambda(lambda img: time_of_day_transform_dawn(img, level)),
+        transforms.Lambda(lambda img: add_shadow(img, level)),
         individual_transforms["random_rotation"](img),
         transforms.ToTensor(),
         transforms.ToPILImage()
@@ -189,6 +321,20 @@ composed_transforms = {
 all_transforms_dict = {**individual_transforms, **composed_transforms}
 
 def augment_and_save_image(args):
+    """
+    Applies a specified transformation to an image and saves the result.
+
+    Args:
+    - args (tuple): Contains the following elements:
+        - image_path (Path): Path to the input image.
+        - output_dir (Path): Directory where the augmented image will be saved.
+        - transform_name (str): Name of the transformation to apply.
+        - level (float): Level or intensity of the transformation.
+        - row (pd.Series): Row from the CSV file corresponding to the image.
+
+    Returns:
+    - pd.Series: Updated row with the new image name if the transformation is horizontal flip.
+    """
     image_path, output_dir, transform_name, level, row = args
     try:
         image = Image.open(image_path)
@@ -196,7 +342,7 @@ def augment_and_save_image(args):
             augmented_image = all_transforms_dict[transform_name](image, level)
         else:
             augmented_image = all_transforms_dict[transform_name](image)
-        save_path = output_dir / f"{image_path.stem}_{transform_name}_{level}.jpg"
+        save_path = output_dir / f"{image_path.stem}_{transform_name}_{int(level * 100)}.jpg"
         augmented_image.save(save_path)
 
         # Update the CSV file row if the transformation is horizontal flip
@@ -211,6 +357,16 @@ def augment_and_save_image(args):
     return None
 
 def process_collection_dir(collection_dir, img_filename_key="image name"):
+    """
+    Processes a directory containing a collection of images, applying augmentations and saving the results.
+
+    Args:
+    - collection_dir (Path): Path to the directory containing the image collection.
+    - img_filename_key (str): Key in the CSV file that corresponds to image filenames.
+
+    Returns:
+    - None
+    """
     main_output_dir = collection_dir / "augmented_data"
     main_output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -224,7 +380,8 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
 
     for pp in image_paths:
         for transform_name, transform in all_transforms_dict.items():
-            for level in range(1, 101):  # 1% to 100% in 1% increments
+            max_level = 90 if transform_name == "shadow" else 100
+            for level in range(1, max_level + 1):  # 1% to 100% in 1% increments, 1% to 90% for shadow
                 level_value = level / 100
                 output_dir = main_output_dir / transform_name
                 output_dir.mkdir(parents=True, exist_ok=True)
@@ -247,7 +404,20 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
     elapsed_time = end_time - start_time
     print(f"Total processing time: {elapsed_time // 60:.0f} minutes {elapsed_time % 60:.2f} seconds")
 
+
+#ignore
 def process_parent_dir(parentdir, level, img_filename_key="image name"):
+    """
+    Processes the parent directory containing multiple collections of images.
+
+    Args:
+    - parentdir (str): Path to the parent directory.
+    - level (str): The level of directory processing ('rosbotxl_data' or 'collection').
+    - img_filename_key (str): Key in the CSV file that corresponds to image filenames.
+
+    Returns:
+    - None
+    """
     if level == 'rosbotxl_data':
         collection_dirs = [p for p in Path(parentdir).iterdir() if p.is_dir()]
     elif level == 'collection':
