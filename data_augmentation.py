@@ -1,16 +1,86 @@
-import numpy as np
-import os
-import pandas as pd
+"""
+Script to generate images with varying intensities of transformations.
+
+This script processes a list of image paths, applies a series of transformations,
+and generates new images with incremental intensity levels for each transformation.
+The intensity increases by 5% per step, up to a maximum of 80%.
+
+Amount of space needed:
+- Each image takes approximately 584 KiB.
+- For 784 images, the total storage required for images is approximately:
+  - 457,856 KiB
+  - 447.33 MiB
+  - 0.44 GiB
+- The CSV file is initially 12 KiB and adds a new row for each generated image.
+- Additional storage for the CSV file with 784 new rows is approximately:
+  - 24 KiB
+- The storage for directories is approximately:
+  - 9 KiB
+
+Total storage needed:
+- 457,889 KiB
+- 447.35 MiB
+- 0.44 GiB
+
+Constant Cost:
+- 21 KiB
+- 0.02 MiB
+- 0.00002 GiB
+
+Dynamic Cost :
+- 457,868 KiB
+- 447.33 MiB
+- 0.44 GiB
+
+Dependencies:
+- Ensure the following modules and data structures are available:
+  - image_paths: List of image file paths.
+  - all_transforms_dict: Dictionary containing transformation names and their corresponding functions.
+  - main_output_dir: Main directory where output images will be stored.
+  - df: DataFrame containing image metadata, with img_filename_key as the key column.
+
+"""
+
+import argparse
+import traceback
 from pathlib import Path
 from PIL import Image, ImageEnhance
-import torch
-from torchvision import transforms
+import numpy as np
 import random
-import albumentations as A
-import argparse
+import pandas as pd
+import time
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
-import time
+import albumentations as A
+from torchvision import transforms
+
+"""
+
+Command Line Arguments:
+- --parentdir: Specifies the parent directory where the data is stored.
+  - Type: str
+  - Default: '/home/husarion/media/usb/rosbotxl_data'
+  - Example: --parentdir /path/to/data
+
+- --img_filename_key: Specifies the key used to identify image filenames in the dataset.
+  - Type: str
+  - Default: "image name"
+  - Example: --img_filename_key "image filename"
+
+- --level: Specifies the directory level to process. It can be either 'rosbotxl_data' for the whole dataset 
+  or 'collection' for a single collection.
+  - Type: str
+  - Choices: ['rosbotxl_data', 'collection']
+  - Default: 'rosbotxl_data'
+  - Example: --level collection
+  - Help: Specify the directory level to process: 'rosbotxl_data' for the whole dataset or 'collection' for a single collection.
+
+Usage Example:
+To run the script with custom arguments:
+```sh
+python script.py --parentdir /path/to/data --img_filename_key "image filename" --level collection
+
+"""
 
 # Parse command line args into 'args' variable
 parser = argparse.ArgumentParser()
@@ -33,13 +103,6 @@ def add_shadow(image, level=0.5):
             if a > 0:
                 shadow.putpixel((i, j), (0, 0, 0, int(127 * level)))
     combined = Image.alpha_composite(image.convert('RGBA'), shadow)
-    return combined.convert('RGB')
-
-def add_fog(image, level=0.5):
-    level = min(max(level, 0.01), 1.0)
-    width, height = image.size
-    fog = Image.new('RGBA', (width, height), (255, 255, 255, int(255 * level)))
-    combined = Image.alpha_composite(image.convert('RGBA'), fog)
     return combined.convert('RGB')
 
 def time_of_day_transform_dusk(image, level=0.5):
@@ -95,10 +158,6 @@ def adjust_saturation_fn(img, level=0.5):
     enhancer = ImageEnhance.Color(img)
     return enhancer.enhance(level)
 
-def adjust_hue_fn(img, level=0.5):
-    level = min(max(level, 0.01), 1.0)
-    return transforms.functional.adjust_hue(img, level)
-
 def horizontal_flip(image, level=1.0):
     return image.transpose(Image.FLIP_LEFT_RIGHT)
 
@@ -107,45 +166,62 @@ def random_crop(image, level=0.5):
     crop_size = int(level * min(image.size))
     return transforms.RandomCrop(crop_size)(image)
 
+def color_jitter_fn(image, level):
+    """
+    Applies a color jitter transformation to an image by adjusting brightness, contrast, saturation, and hue.
+
+    Args:
+    - image (PIL.Image.Image): The input image to be transformed.
+    - level (float): The level or intensity of the color jitter. This should be a value between 0 and 1.
+
+    Returns:
+    - PIL.Image.Image: The transformed image with adjusted color properties.
+    """
+    # Ensure the level is within the expected range
+    level = max(0, min(level, 1))
+
+    # Define the factors for brightness, contrast, saturation, and hue based on the level
+    brightness_factor = 1 + (level * 0.5)
+    contrast_factor = 1 + (level * 0.5)
+    saturation_factor = 1 + (level * 0.5)
+    hue_factor = level * 0.1
+
+    # Define the transformation using torchvision.transforms
+    transform = transforms.ColorJitter(
+        brightness=brightness_factor,
+        contrast=contrast_factor,
+        saturation=saturation_factor,
+        hue=hue_factor
+    )
+
+    # Apply the transformation to the image
+    transformed_image = transform(image)
+    return transformed_image
+
 def compose_transformations(transformations):
     """
     Composes a sequence of transformations into a single transformation function.
 
     Args:
-    - transformations (list): A list of tuples where each tuple contains a transformation function and its corresponding level.
+    - transformations (list): A list of transformation functions.
 
     Returns:
     - function: A function that applies the composed transformations to an image.
     """
-    def composed_transformation(image):
-        for transform, level in transformations:
-            image = transform(image, level) if level is not None else transform(image)
+    def composed_transformation(image, level):
+        for transform in transformations:
+            image = transform(image, level)
         return image
     return composed_transformation
 
-
-composed_transforms = {
-    "dusk_fog": compose_transformations([(time_of_day_transform_dusk, 0.5), (add_fog, 0.5)]),
-    "dawn_shadow": compose_transformations([(time_of_day_transform_dawn, 0.5), (add_shadow, 0.5)]),
-    "elastic_noise": compose_transformations([(add_elastic_transform, 0.5), (add_noise, 0.5)]),
-    "blur_brightness_flip": compose_transformations([(add_blur_fn, 0.5), (adjust_brightness_fn, 0.5), (horizontal_flip, None)]),
-    "crop_contrast": compose_transformations([(random_crop, 0.5), (adjust_contrast_fn, 0.5)])
-}
-
 # Define both individual and composed transformations
-all_transforms_dict = {**individual_transforms_with_level, **individual_transformations_without_level, **composed_transforms}
-
-
-
-# Define individual and composed transformations
 individual_transforms_with_level = {
     "blur": add_blur_fn,
-    "color_jitter": transforms.ColorJitter,
-    "random_crop": random_crop,
+    "color_jitter": color_jitter_fn,
+    "random_crop": random_crop,    
     "brightness": adjust_brightness_fn,
     "contrast": adjust_contrast_fn,
     "shadow": add_shadow,
-    "fog": add_fog,
     "time_of_day_dusk": time_of_day_transform_dusk,
     "time_of_day_dawn": time_of_day_transform_dawn,
     "elastic_transform": add_elastic_transform,
@@ -154,8 +230,161 @@ individual_transforms_with_level = {
 }
 
 individual_transformations_without_level = {
-	"horizontal_flip": horizontal_flip,
+    "horizontal_flip": horizontal_flip,
 }
+
+composed_transforms = {
+    "random_crop_elastic_distortion": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["elastic_transform"]
+    ]),
+    "random_crop_color_jitter": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["color_jitter"]
+    ]),
+    "random_crop_brightness_adjustment": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["brightness"]
+    ]),
+    "random_crop_shadow_effect": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["shadow"]
+    ]),
+    "random_crop_time_of_day_dusk": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["time_of_day_dusk"]
+    ]),
+    "elastic_distortion_color_jitter": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["color_jitter"]
+    ]),
+    "elastic_distortion_brightness_adjustment": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["brightness"]
+    ]),
+    "elastic_distortion_shadow_effect": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["shadow"]
+    ]),
+    "elastic_distortion_time_of_day_dusk": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["time_of_day_dusk"]
+    ]),
+    "elastic_distortion_time_of_day_dawn": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["time_of_day_dawn"]
+    ]),
+    "elastic_distortion_lens_distortion": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "elastic_distortion_motion_blur": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "elastic_distortion_sensor_noise": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "color_jitter_shadow_effect": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["shadow"]
+    ]),
+    "color_jitter_time_of_day_dusk": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["time_of_day_dusk"]
+    ]),
+    "color_jitter_time_of_day_dawn": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["time_of_day_dawn"]
+    ]),
+    "color_jitter_lens_distortion": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "color_jitter_motion_blur": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "color_jitter_sensor_noise": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "brightness_adjustment_shadow_effect": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["shadow"]
+    ]),
+    "brightness_adjustment_time_of_day_dusk": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["time_of_day_dusk"]
+    ]),
+    "brightness_adjustment_time_of_day_dawn": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["time_of_day_dawn"]
+    ]),
+    "brightness_adjustment_lens_distortion": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "brightness_adjustment_motion_blur": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "shadow_effect_time_of_day_dawn": compose_transformations([
+        individual_transforms_with_level["shadow"],
+        individual_transforms_with_level["time_of_day_dawn"]
+    ]),
+    "shadow_effect_lens_distortion": compose_transformations([
+        individual_transforms_with_level["shadow"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "shadow_effect_motion_blur": compose_transformations([
+        individual_transforms_with_level["shadow"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "shadow_effect_sensor_noise": compose_transformations([
+        individual_transforms_with_level["shadow"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "time_of_day_dusk_lens_distortion": compose_transformations([
+        individual_transforms_with_level["time_of_day_dusk"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "time_of_day_dusk_motion_blur": compose_transformations([
+        individual_transforms_with_level["time_of_day_dusk"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "time_of_day_dusk_sensor_noise": compose_transformations([
+        individual_transforms_with_level["time_of_day_dusk"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "time_of_day_dawn_lens_distortion": compose_transformations([
+        individual_transforms_with_level["time_of_day_dawn"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
+    "time_of_day_dawn_motion_blur": compose_transformations([
+        individual_transforms_with_level["time_of_day_dawn"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "time_of_day_dawn_sensor_noise": compose_transformations([
+        individual_transforms_with_level["time_of_day_dawn"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "lens_distortion_motion_blur": compose_transformations([
+        individual_transforms_with_level["lens_distortion"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "lens_distortion_sensor_noise": compose_transformations([
+        individual_transforms_with_level["lens_distortion"],
+        individual_transforms_with_level["noise"]
+    ]),
+    "motion_blur_sensor_noise": compose_transformations([
+        individual_transforms_with_level["blur"],
+        individual_transforms_with_level["noise"]
+    ])
+}
+
+all_transforms_dict = {**individual_transforms_with_level, **individual_transformations_without_level, **composed_transforms}
 
 
 def augment_and_save_image(args):
@@ -174,23 +403,20 @@ def augment_and_save_image(args):
     - pd.Series: Updated row with the new image name if the transformation is horizontal flip.
     """
     
-    #unpack args
+    # Unpack the arguments
     image_path, output_dir, transform_name, level, row = args
     
-    
     try:
-    
-    	#open the image
+        # Open the image
         image = Image.open(image_path)
         
-        #use intensity level if provided
-        
+        # Apply transformation with the provided level
         if level is not None:
             augmented_image = all_transforms_dict[transform_name](image, level)
         else:
             augmented_image = all_transforms_dict[transform_name](image)
             
-        #save the path and images
+        # Save the transformed image to the specified path
         save_path = output_dir / f"{image_path.stem}_{transform_name}_{int(level * 100)}.jpg"
         augmented_image.save(save_path)
 
@@ -202,6 +428,7 @@ def augment_and_save_image(args):
         row['image name'] = save_path.name
         return row
     except Exception as e:
+        # Print error message and traceback if an exception occurs
         print(f"Error processing {image_path}: {e}")
         traceback.print_exc()
     return None
@@ -218,60 +445,61 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
     - None
     """
     
-    #intiialization
+    # Create main output directory for augmented images
     main_output_dir = collection_dir / "augmented_data"
     main_output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Paths to the CSV files
     data_csv_path = collection_dir / "data.csv"
     augmented_data_csv_path = main_output_dir / "augmented_data.csv"
+    
+    # Read the CSV file into a DataFrame
     df = pd.read_csv(data_csv_path)
     augmented_df = pd.DataFrame(columns=df.columns)
-	
-	
-	# get images
+    
+    # Get paths to all images in the collection directory
     image_paths = [pp for pp in Path(collection_dir).iterdir() if pp.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"]]
     
-    #stores the tuples
+    # List to store tasks for multiprocessing
     tasks = []
 
-
-	# loop thru each image path 
+    # Loop through each image path
     for pp in image_paths:
     
-    	#loop thru the possible transformations
+        # Loop through the possible transformations
         for transform_name in all_transforms_dict.keys():
-        	#defines the maximum possible intensity
+            # Define the maximum possible intensity
             max_level = 80
             
-            #for each image create a new image where the intensity is increased by 1%. Per 1% increase we create a new image. 
-            for level in range(1, max_level + 1): 
+            # For each image, create a new image where the intensity is increased by 5% per step
+            for level in range(5, max_level + 5, 5): 
                 level_value = level / 100
                 
-                #system stuff to create images etc 
+                # Create output directory for each transformation
                 output_dir = main_output_dir / transform_name
                 output_dir.mkdir(parents=True, exist_ok=True)
-                #select the row for each image
+                
+                # Select the row for each image from the DataFrame
                 row = df[df[img_filename_key] == pp.name].iloc[0].copy()
                 
-                #add the tuple
+                # Add the task tuple to the tasks list
                 tasks.append((pp, output_dir, transform_name, level_value, row))
 
     # Use multiprocessing Pool to process images in parallel
     num_workers = cpu_count()
     start_time = time.time()
     
-    #create a pool of worker
+    # Create a pool of workers
     with Pool(num_workers) as pool:
         results = []
         
-        #process the tasks in parallel 
+        # Process the tasks in parallel and collect the results
         for result in tqdm(pool.imap_unordered(augment_and_save_image, tasks), total=len(tasks)):
-        	#all valid non null/empty results are stored in the results array
+            # Append valid (non-null) results to the results list
             if result is not None:
                 results.append(result)
 
-	#record end time, write to the new csv, and print the runtime.
-	
+    # Record end time, write results to the new CSV file, and print the runtime
     end_time = time.time()
     augmented_df = pd.DataFrame(results)
     augmented_df.to_csv(augmented_data_csv_path, index=False)
@@ -291,11 +519,16 @@ def process_parent_dir(parentdir, level, img_filename_key="image name"):
     Returns:
     - None
     """
+    
+    # Determine the collection directories based on the specified level
     if level == 'rosbotxl_data':
+        # If processing the entire dataset, get all subdirectories
         collection_dirs = [p for p in Path(parentdir).iterdir() if p.is_dir()]
     elif level == 'collection':
+        # If processing a single collection, use the parent directory itself
         collection_dirs = [Path(parentdir)]
 
+    # Process each collection directory
     for collection_dir in collection_dirs:
         process_collection_dir(collection_dir, img_filename_key)
 
