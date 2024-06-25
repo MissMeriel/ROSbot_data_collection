@@ -30,9 +30,19 @@ gnolim       up 20-00:00:0     14   idle ai[01-02,04-05,07-08,10],jinx[01-02],ti
 Nodes marked `idle` mean they are available for you to launch jobs on them. Refer to the CS documentation here for more info: [CS computing info](https://www.cs.virginia.edu/wiki/doku.php?id=start).
 The CS grad student orientation to slurm presentation is helpful as well to get started with slurm: [link to slides](https://www.cs.virginia.edu/wiki/lib/exe/fetch.php?media=introtoslurm.pdf).
 
-7. Launch the job on slurm using one of the following configurations: 
+8. Launch the job on slurm using one of the following configurations: 
 ```
 sbatch -w ai01 -p gnolim --gres=gpu:1 --exclusive=user train.sh # for gnolim partition nodes
 sbatch -w adriatic05 -p gpu --gres=gpu:1 --exclusive=user train.sh # for gpu partition nodes
 ```
-8. Check the job periodically to be sure it is progressing using the `squeue -u $USER` command, and check the log according to the `$SLURM_JOB_ID` in `slurm-$SLURM_JOB_ID.out`.
+ - As of 06/2024, the portal has been updated and specifying a node is no longer necessary. Not specifying a node will likely get you a node faster than waiting for a specific one:
+  ```
+   sbatch -p gpu --gres=gpu:1 --exclusive=user train.sh
+```
+- If you reach OOM (Out of memory) errors, you can specify the amount of memory required using `--mem`. Keep in mind that the higher memory you request, the less nodes are available to use.
+ ```
+  sbatch -p gpu --gres=gpu:1 --mem=256G --exclusive=user train.sh
+```
+  
+9. Check the job periodically to be sure it is progressing using the `squeue -u $USER` command, and check the log according to the `$SLURM_JOB_ID` in `slurm-$SLURM_JOB_ID.out`. You can also view all jobs being run by all users using the `squeue` command. 
+   
