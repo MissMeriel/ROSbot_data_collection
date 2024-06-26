@@ -91,6 +91,8 @@ parser.add_argument("--level", type=str, choices=['rosbotxl_data', 'collection']
 args = parser.parse_args()
 print("args:" + str(args))
 
+
+#chatgpt - make similiar transformations that will add shadow to my images
 def add_shadow(image, level=0.5):
     level = min(max(level, 0.01), 0.9)
     width, height = image.size
@@ -161,11 +163,15 @@ def adjust_saturation_fn(img, level=0.5):
 def horizontal_flip(image, level=1.0):
     return image.transpose(Image.FLIP_LEFT_RIGHT)
 
+
+#chatgpt - implement a random crop definition
 def random_crop(image, level=0.5):
     level = min(max(level, 0.01), 1.0)
     crop_size = int(level * min(image.size))
     return transforms.RandomCrop(crop_size)(image)
 
+
+#chatgpt - implement color jitter into my definitions
 def color_jitter_fn(image, level):
     """
     Applies a color jitter transformation to an image by adjusting brightness, contrast, saturation, and hue.
@@ -233,6 +239,8 @@ individual_transformations_without_level = {
     "horizontal_flip": horizontal_flip,
 }
 
+
+#chatgpt - make these composed transformations given my compose_transformations definition
 composed_transforms = {
     "random_crop_elastic_distortion": compose_transformations([
         individual_transforms_with_level["random_crop"],
@@ -387,6 +395,8 @@ composed_transforms = {
 all_transforms_dict = {**individual_transforms_with_level, **individual_transformations_without_level, **composed_transforms}
 
 
+
+
 def augment_and_save_image(args):
     """
     Applies a specified transformation to an image and saves the result.
@@ -427,6 +437,7 @@ def augment_and_save_image(args):
         # Save the new image path and row data to the CSV file
         row['image name'] = save_path.name
         return row
+        
     except Exception as e:
         # Print error message and traceback if an exception occurs
         print(f"Error processing {image_path}: {e}")
@@ -463,6 +474,8 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
     # List to store tasks for multiprocessing
     tasks = []
 
+
+	#chatgpt - implement multiprocessing to my for loop
     # Loop through each image path
     for pp in image_paths:
     
@@ -489,6 +502,8 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
     num_workers = cpu_count()
     start_time = time.time()
     
+    
+    #chatgpt - implement multiprocessing to my for loop
     # Create a pool of workers
     with Pool(num_workers) as pool:
         results = []
