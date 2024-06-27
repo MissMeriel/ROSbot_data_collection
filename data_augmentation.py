@@ -398,6 +398,10 @@ def augment_and_save_image(args):
         # Update the CSV file row if the transformation is horizontal flip
         if 'horizontal_flip' in transform_name:
             row['angular_speed_z'] = -row['angular_speed_z']
+            # Flip the lidar_ranges data
+            lidar_data = np.array([float(x) for x in row['lidar_ranges'].split()])
+            flipped_lidar_data = np.flip(lidar_data).tolist()
+            row['lidar_ranges'] = ' '.join(map(str, flipped_lidar_data))
 
         # Save the new image path and row data to the CSV file
         row['image name'] = save_path.name
@@ -407,7 +411,8 @@ def augment_and_save_image(args):
         print(f"Error processing {image_path}: {e}")
         traceback.print_exc()
     return None
-
+    
+    
 def process_collection_dir(collection_dir, img_filename_key="image name"):
     """
     Processes a directory containing a collection of images, applying augmentations and saving the results.
@@ -509,10 +514,8 @@ def process_parent_dir(parentdir, level, img_filename_key="image name"):
     for collection_dir in collection_dirs:
         process_collection_dir(collection_dir, img_filename_key)
 
-if __name__ == '__main__':
-
-	
-	# Parse command line args into 'args' variable
+def parse_args():
+    # Parse command line args into 'args' variable
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--parentdir", type=str, default='/home/husarion/media/usb/rosbotxl_data')
 	parser.add_argument("--img_filename_key", type=str, default="image name")
@@ -535,9 +538,33 @@ if __name__ == '__main__':
 	# Transformations that do not require an intensity level
 	parser.add_argument("-f", "--horizontal_flip", action='store_true', help="Apply horizontal flip to the images.")
 	
-	
-	args = parser.parse_args()
-	print("args:" + str(args))
 
-	
+    args = parser.parse_args()
+
+    specifiedTransformations = {}
+    #Create a dictionary of all the transformations specified 
+    
+    #obtain the kv pairs
+    for transformation, intensity in vars(args).items():
+
+        #store the transformations in a hashmap with their provided intensity
+        if transformation in individual_transforms_with_level and intensity is not None:
+            transformations[transformation]  = intensity
+
+
+        #no intensity/level is needed for a horizontal flip
+        elif transformation == 'horizontal_flip' and value:
+            transformations[transformation] = None
+
+    combinedTransformations = {} # store the composed transformations like '-tae 0.5 0.5 0.1'
+    transform_names = list(transformations.keys()) #get all the transformation names
+
+
+    
+
+
+if __name__ == '__main__':
+	args, transformations = parse_args()
+	print("args:" + str(args))
+    print("transformations: " + str(transformations))
     process_parent_dir(args.parentdir, args.level, args.img_filename_key)
