@@ -1,5 +1,4 @@
-
- """
+"""
 Script to generate images with varying intensities of transformations.
 
 This script processes a list of image paths, applies a series of transformations,
@@ -58,36 +57,6 @@ import albumentations as A
 from torchvision import transforms
 from collections import deque 
 
-# Define the argument parser
-parser = argparse.ArgumentParser(description="Script to generate images with varying intensities of transformations.")
-
-# Add arguments to the parser
-parser.add_argument("--parentdir", "-p", type=str, required=True, help="Main directory where output images will be stored.")
-parser.add_argument("--img_filename_key", "-k", type=str, default="image name", help="Key in the CSV file that corresponds to image filenames.")
-parser.add_argument("--level", "-l", type=str, choices=['rosbotxl_data', 'collection'], default='rosbotxl_data', help="Specify the directory level to process: 'rosbotxl_data' for the whole dataset or 'collection' for a single collection.")
-parser.add_argument("--intensity", "-i", type=float, default=0.5, help="Intensity level of the transformation.")
-parser.add_argument("--noise_level", "-n", type=float, default=0.05, help="Standard deviation of the Gaussian noise to be added to LiDAR data.")
-parser.add_argument("--max_level", "-m", type=int, default=80, help="Maximum intensity level for transformations.")
-parser.add_argument("--step", "-s", type=int, default=5, help="Step size for increasing intensity levels.")
-parser.add_argument("--num_workers", "-w", type=int, default=cpu_count(), help="Number of parallel workers for processing images.")
-
-# Add transformation flags
-transform_flags = parser.add_argument_group('transformations')
-transform_flags.add_argument("-b", "--blur", action="store_true", help="Apply blur transformation.")
-transform_flags.add_argument("-c", "--color_jitter", action="store_true", help="Apply color jitter transformation.")
-transform_flags.add_argument("-r", "--random_crop", action="store_true", help="Apply random crop transformation.")
-transform_flags.add_argument("-B", "--brightness", action="store_true", help="Apply brightness adjustment.")
-transform_flags.add_argument("-C", "--contrast", action="store_true", help="Apply contrast adjustment.")
-transform_flags.add_argument("-S", "--shadow", action="store_true", help="Apply shadow effect.")
-transform_flags.add_argument("-d", "--time_of_day_dusk", action="store_true", help="Apply dusk lighting condition.")
-transform_flags.add_argument("-D", "--time_of_day_dawn", action="store_true", help="Apply dawn lighting condition.")
-transform_flags.add_argument("-e", "--elastic_transform", action="store_true", help="Apply elastic transformation.")
-transform_flags.add_argument("-L", "--lens_distortion", action="store_true", help="Apply lens distortion.")
-transform_flags.add_argument("-N", "--noise", action="store_true", help="Apply noise transformation.")
-transform_flags.add_argument("-H", "--horizontal_flip", action="store_true", help="Apply horizontal flip.")
-
-# Parse the arguments
-args = parser.parse_args()
 
 
 #chatgpt
@@ -219,264 +188,180 @@ def compose_transformations(transformations):
             image = transform(image, level)
         return image
     return composed_transformation
-    
-    
-    
- 	#chatgpt - make a function that adds gaussian noise to my lidar data. Here is how my lidar data is stored and here is how I flipped the lidar data.
-def add_lidar_noise(lidar_ranges_str, noise_level=0.05):
-    """
-    Adds Gaussian noise to the LiDAR readings.
-
-    Args:
-    - lidar_ranges_str (str): Original LiDAR readings as a space-separated string.
-    - noise_level (float): Standard deviation of the Gaussian noise to be added. Default is 0.05.
-
-    Returns:
-    - str: LiDAR readings with added noise, as a space-separated string.
-    """
-    # Split the 'lidar_ranges' string into a list of string values
-    lidar_ranges_list = lidar_ranges_str.split()
-    
-    # Convert each string value in the list to a float
-    lidar_ranges = []
-    for range_value in lidar_ranges_list:
-        lidar_ranges.append(float(range_value))
-    
-    # Convert the list to a NumPy array for easier manipulation
-    lidar_ranges_array = np.array(lidar_ranges)
-    
-    # Generate Gaussian noise
-    noise = np.random.normal(0, noise_level, size=lidar_ranges_array.shape)
-    
-    # Add the noise to the LiDAR readings
-    noisy_lidar_ranges = lidar_ranges_array + noise
-    
-    # Ensure the LiDAR readings are within a realistic range (e.g., non-negative)
-    noisy_lidar_ranges = np.clip(noisy_lidar_ranges, a_min=0, a_max=None)
-    
-    # Convert the NumPy array back to a list of strings
-    noisy_lidar_ranges_list = [str(value) for value in noisy_lidar_ranges]
-    
-    # Join the list into a space-separated string
-    noisy_lidar_ranges_str = ' '.join(noisy_lidar_ranges_list)
-    
-    return noisy_lidar_ranges_str
 
 # Define both individual and composed transformations
-# Compose transformations to apply multiple effects sequentially
+individual_transforms_with_level = {
+    "blur": add_blur_fn,
+    "color_jitter": color_jitter_fn,
+    "random_crop": random_crop,    
+    "brightness": adjust_brightness_fn,
+    "contrast": adjust_contrast_fn,
+    "shadow": add_shadow,
+    "time_of_day_dusk": time_of_day_transform_dusk,
+    "time_of_day_dawn": time_of_day_transform_dawn,
+    "elastic_transform": add_elastic_transform,
+    "lens_distortion": add_lens_distortion,
+    "noise": add_noise
+}
+
+individual_transformations_without_level = {
+    "horizontal_flip": horizontal_flip,
+}
+
 composed_transforms = {
-
-
     "random_crop_elastic_distortion": compose_transformations([
         individual_transforms_with_level["random_crop"],
         individual_transforms_with_level["elastic_transform"]
     ]),
-    # Randomly crops the image to simulate different viewing angles or distances,
-    # then applies elastic distortion to simulate realistic deformations.
-    
+    "random_crop_color_jitter": compose_transformations([
+        individual_transforms_with_level["random_crop"],
+        individual_transforms_with_level["color_jitter"]
+    ]),
     "random_crop_brightness_adjustment": compose_transformations([
         individual_transforms_with_level["random_crop"],
         individual_transforms_with_level["brightness"]
     ]),
-    # Randomly crops the image to change the perspective, followed by adjusting brightness 
-    # to simulate varying lighting conditions.
-
     "random_crop_shadow_effect": compose_transformations([
         individual_transforms_with_level["random_crop"],
         individual_transforms_with_level["shadow"]
     ]),
-    # Randomly crops the image to simulate different perspectives and then adds shadows 
-    # to simulate real-world lighting effects.
-
     "random_crop_time_of_day_dusk": compose_transformations([
         individual_transforms_with_level["random_crop"],
         individual_transforms_with_level["time_of_day_dusk"]
     ]),
-    # Randomly crops the image to change the perspective, followed by adjusting the colors 
-    # to simulate dusk lighting conditions.
-
     "elastic_distortion_color_jitter": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["color_jitter"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations and then adjusts color 
-    # properties to simulate different lighting conditions.
-
+    "elastic_distortion_brightness_adjustment": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["brightness"]
+    ]),
     "elastic_distortion_shadow_effect": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["shadow"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations, then adds shadows to 
-    # simulate real-world lighting effects.
-
     "elastic_distortion_time_of_day_dusk": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["time_of_day_dusk"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations, followed by adjusting 
-    # the colors to simulate dusk lighting conditions.
-
     "elastic_distortion_time_of_day_dawn": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["time_of_day_dawn"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations, followed by adjusting 
-    # the colors to simulate dawn lighting conditions.
-
-
+    "elastic_distortion_lens_distortion": compose_transformations([
+        individual_transforms_with_level["elastic_transform"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
     "elastic_distortion_motion_blur": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["blur"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations and then adds motion 
-    # blur to simulate camera movement.
-
     "elastic_distortion_sensor_noise": compose_transformations([
         individual_transforms_with_level["elastic_transform"],
         individual_transforms_with_level["noise"]
     ]),
-    # Applies elastic distortion to simulate realistic deformations and then adds sensor 
-    # noise to simulate real-world sensor imperfections.
-
     "color_jitter_shadow_effect": compose_transformations([
         individual_transforms_with_level["color_jitter"],
         individual_transforms_with_level["shadow"]
     ]),
-    # Adjusts color properties to simulate different lighting conditions and then adds 
-    # shadows to enhance real-world lighting effects.
-
     "color_jitter_time_of_day_dusk": compose_transformations([
         individual_transforms_with_level["color_jitter"],
         individual_transforms_with_level["time_of_day_dusk"]
     ]),
-    # Adjusts color properties to simulate different lighting conditions, followed by 
-    # adjusting colors to simulate dusk lighting conditions.
-
     "color_jitter_time_of_day_dawn": compose_transformations([
         individual_transforms_with_level["color_jitter"],
         individual_transforms_with_level["time_of_day_dawn"]
     ]),
-    # Adjusts color properties to simulate different lighting conditions, followed by 
-    # adjusting colors to simulate dawn lighting conditions.
-
-
+    "color_jitter_lens_distortion": compose_transformations([
+        individual_transforms_with_level["color_jitter"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
     "color_jitter_motion_blur": compose_transformations([
         individual_transforms_with_level["color_jitter"],
         individual_transforms_with_level["blur"]
     ]),
-    # Adjusts color properties to simulate different lighting conditions, followed by 
-    # adding motion blur to simulate camera movement.
-
     "color_jitter_sensor_noise": compose_transformations([
         individual_transforms_with_level["color_jitter"],
         individual_transforms_with_level["noise"]
     ]),
-    # Adjusts color properties to simulate different lighting conditions, followed by 
-    # adding sensor noise to simulate real-world sensor imperfections.
-
     "brightness_adjustment_shadow_effect": compose_transformations([
         individual_transforms_with_level["brightness"],
         individual_transforms_with_level["shadow"]
     ]),
-    # Adjusts brightness to handle varying lighting conditions, followed by adding shadows 
-    # to simulate real-world lighting effects.
-
     "brightness_adjustment_time_of_day_dusk": compose_transformations([
         individual_transforms_with_level["brightness"],
         individual_transforms_with_level["time_of_day_dusk"]
     ]),
-    # Adjusts brightness to handle varying lighting conditions, followed by adjusting colors 
-    # to simulate dusk lighting conditions.
-
     "brightness_adjustment_time_of_day_dawn": compose_transformations([
         individual_transforms_with_level["brightness"],
         individual_transforms_with_level["time_of_day_dawn"]
     ]),
-    # Adjusts brightness to handle varying lighting conditions, followed by adjusting colors 
-    # to simulate dawn lighting conditions.
-
+    "brightness_adjustment_lens_distortion": compose_transformations([
+        individual_transforms_with_level["brightness"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
     "brightness_adjustment_motion_blur": compose_transformations([
         individual_transforms_with_level["brightness"],
         individual_transforms_with_level["blur"]
     ]),
-    # Adjusts brightness to handle varying lighting conditions, followed by adding motion 
-    # blur to simulate camera movement.
-
     "shadow_effect_time_of_day_dawn": compose_transformations([
         individual_transforms_with_level["shadow"],
         individual_transforms_with_level["time_of_day_dawn"]
     ]),
-    # Adds shadows to simulate real-world lighting effects, followed by adjusting colors to 
-    # simulate dawn lighting conditions.
-
+    "shadow_effect_lens_distortion": compose_transformations([
+        individual_transforms_with_level["shadow"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
     "shadow_effect_motion_blur": compose_transformations([
         individual_transforms_with_level["shadow"],
         individual_transforms_with_level["blur"]
     ]),
-    # Adds shadows to simulate real-world lighting effects, followed by adding motion blur 
-    # to simulate camera movement.
-
     "shadow_effect_sensor_noise": compose_transformations([
         individual_transforms_with_level["shadow"],
         individual_transforms_with_level["noise"]
     ]),
-    # Adds shadows to simulate real-world lighting effects, followed by adding sensor noise 
-    # to simulate real-world sensor imperfections.
-
     "time_of_day_dusk_lens_distortion": compose_transformations([
         individual_transforms_with_level["time_of_day_dusk"],
         individual_transforms_with_level["lens_distortion"]
     ]),
-    # Adjusts colors to simulate dusk lighting conditions, followed by adding lens distortion 
-    # to handle different camera lenses.
-
     "time_of_day_dusk_motion_blur": compose_transformations([
         individual_transforms_with_level["time_of_day_dusk"],
         individual_transforms_with_level["blur"]
     ]),
-    # Adjusts colors to simulate dusk lighting conditions, followed by adding motion blur to 
-    # simulate camera movement.
-
     "time_of_day_dusk_sensor_noise": compose_transformations([
         individual_transforms_with_level["time_of_day_dusk"],
         individual_transforms_with_level["noise"]
     ]),
-    # Adjusts colors to simulate dusk lighting conditions, followed by adding sensor noise 
-    # to simulate real-world sensor imperfections.
-
-
+    "time_of_day_dawn_lens_distortion": compose_transformations([
+        individual_transforms_with_level["time_of_day_dawn"],
+        individual_transforms_with_level["lens_distortion"]
+    ]),
     "time_of_day_dawn_motion_blur": compose_transformations([
         individual_transforms_with_level["time_of_day_dawn"],
         individual_transforms_with_level["blur"]
     ]),
-    # Adjusts colors to simulate dawn lighting conditions, followed by adding motion blur to 
-    # simulate camera movement.
-
     "time_of_day_dawn_sensor_noise": compose_transformations([
         individual_transforms_with_level["time_of_day_dawn"],
         individual_transforms_with_level["noise"]
     ]),
-    # Adjusts colors to simulate dawn lighting conditions, followed by adding sensor noise 
-    # to simulate real-world sensor imperfections.
-
+    "lens_distortion_motion_blur": compose_transformations([
+        individual_transforms_with_level["lens_distortion"],
+        individual_transforms_with_level["blur"]
+    ]),
+    "lens_distortion_sensor_noise": compose_transformations([
+        individual_transforms_with_level["lens_distortion"],
+        individual_transforms_with_level["noise"]
+    ]),
     "motion_blur_sensor_noise": compose_transformations([
         individual_transforms_with_level["blur"],
         individual_transforms_with_level["noise"]
-    ]),
-    # Adds motion blur to simulate camera movement, followed by adding sensor noise to 
-    # simulate real-world sensor imperfections.
-
-    "horizontal_flip_motion_blur_elastic": compose_transformations([
-        individual_transformations_without_level["horizontal_flip"],
-        individual_transforms_with_level["blur"],
-        individual_transforms_with_level["elastic_transform"]
     ])
-    # Flips the image horizontally to augment the dataset, followed by adding motion blur to 
-    # simulate camera movement and applying elastic distortion to simulate realistic deformations.
 }
 
-
 all_transforms_dict = {**individual_transforms_with_level, **individual_transformations_without_level, **composed_transforms}
+
+
 def augment_and_save_image(args):
     """
     Applies a specified transformation to an image and saves the result.
@@ -513,27 +398,10 @@ def augment_and_save_image(args):
         # Update the CSV file row if the transformation is horizontal flip
         if 'horizontal_flip' in transform_name:
             row['angular_speed_z'] = -row['angular_speed_z']
-            if pd.notnull(row['lidar_ranges']):
-                # Split the 'lidar_ranges' string into a list of string values
-                lidar_ranges_str = row['lidar_ranges'].split()
-                
-                # Initialize an empty list to hold the float values
-                lidar_ranges = []
-                
-                # Convert each string value in the list to a float and append to the lidar_ranges list
-                for range_value in lidar_ranges_str:
-                    lidar_ranges.append(float(range_value))
-                
-                # Reverse the list to match the horizontal flip transformation
-                lidar_ranges.reverse()
-                
-                # Convert the list back to a space-separated string
-                row['lidar_ranges'] = ' '.join(map(str, lidar_ranges))
 
         # Save the new image path and row data to the CSV file
         row['image name'] = save_path.name
         return row
-        
     except Exception as e:
         # Print error message and traceback if an exception occurs
         print(f"Error processing {image_path}: {e}")
@@ -567,46 +435,51 @@ def process_collection_dir(collection_dir, img_filename_key="image name"):
     # Get paths to all images in the collection directory
     image_paths = [pp for pp in Path(collection_dir).iterdir() if pp.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"]]
     
-    # List to store tasks for multiprocessing
-    tasks = []
+    # Initialize deque for tasks
+    tasks = deque()
 
-    # Check if any transformation flags are set
-    transformations = []
-    if args.blur: transformations.append("blur")
-    if args.color_jitter: transformations.append("color_jitter")
-    if args.random_crop: transformations.append("random_crop")
-    if args.brightness: transformations.append("brightness")
-    if args.contrast: transformations.append("contrast")
-    if args.shadow: transformations.append("shadow")
-    if args.time_of_day_dusk: transformations.append("time_of_day_dusk")
-    if args.time_of_day_dawn: transformations.append("time_of_day_dawn")
-    if args.elastic_transform: transformations.append("elastic_transform")
-    if args.lens_distortion: transformations.append("lens_distortion")
-    if args.noise: transformations.append("noise")
-    if args.horizontal_flip: transformations.append("horizontal_flip")
 
-    # If no specific transformations are provided, use all transformations
-    if not transformations:
-        transformations = list(all_transforms_dict.keys())
-
+	#chatgpt
+    # Loop through each image path
     for pp in image_paths:
-        for level in range(args.step, args.max_level + args.step, args.step):
-            level_value = level / 100
-            output_dir = main_output_dir / '_'.join(transformations)
-            output_dir.mkdir(parents=True, exist_ok=True)  # Ensure the output directory exists
-            row = df[df[img_filename_key] == pp.name].iloc[0].copy()  # Get the corresponding row from the DataFrame
-            tasks.append((pp, output_dir, transformations, level_value, row))
+    
+        # Loop through the possible transformations
+        for transform_name in all_transforms_dict.keys():
+            # Define the maximum possible intensity
+            max_level = 80
+            
+            # For each image, create a new image where the intensity is increased by 5% per step
+            for level in range(5, max_level + 5, 5): 
+                level_value = level / 100
+                
+                # Create output directory for each transformation
+                output_dir = main_output_dir / transform_name
+                output_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Select the row for each image from the DataFrame
+                row = df[df[img_filename_key] == pp.name].iloc[0].copy()
+                
+                # Add the task tuple to the tasks deque
+                tasks.append((pp, output_dir, transform_name, level_value, row))
 
-    num_workers = args.num_workers
+    # Use multiprocessing Pool to process images in parallel
+    num_workers = cpu_count()
     start_time = time.time()
-
-    # Use multiprocessing to process the tasks in parallel
+    
+    # Create a pool of workers
     with Pool(num_workers) as pool:
-        results = [result for result in tqdm(pool.imap_unordered(augment_and_save_image, tasks), total=len(tasks)) if result is not None]
+        results = []
+        
+        # Process the tasks in parallel and collect the results
+        for result in tqdm(pool.imap_unordered(augment_and_save_image, tasks), total=len(tasks)):
+            # Append valid (non-null) results to the results list
+            if result is not None:
+                results.append(result)
 
+    # Record end time, write results to the new CSV file, and print the runtime
     end_time = time.time()
-    augmented_df = pd.DataFrame(results)  # Create a DataFrame from the results
-    augmented_df.to_csv(augmented_data_csv_path, index=False)  # Save the augmented data to a CSV file
+    augmented_df = pd.DataFrame(results)
+    augmented_df.to_csv(augmented_data_csv_path, index=False)
 
     elapsed_time = end_time - start_time
     print(f"Total processing time: {elapsed_time // 60:.0f} minutes {elapsed_time % 60:.2f} seconds")
@@ -637,5 +510,34 @@ def process_parent_dir(parentdir, level, img_filename_key="image name"):
         process_collection_dir(collection_dir, img_filename_key)
 
 if __name__ == '__main__':
-    process_parent_dir(args.parentdir, args.level, args.img_filename_key)
 
+	
+	# Parse command line args into 'args' variable
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--parentdir", type=str, default='/home/husarion/media/usb/rosbotxl_data')
+	parser.add_argument("--img_filename_key", type=str, default="image name")
+	parser.add_argument("--level", type=str, choices=['rosbotxl_data', 'collection'], default='rosbotxl_data',
+                    	help="Specify the directory level to process: 'rosbotxl_data' for the whole dataset or 'collection' for a single collection.")
+                    	
+	# Transformations that require an intensity level
+	parser.add_argument("-b", "--blur", type=float, default=0.0, help="Intensity level for blur effect, between 0.0 (no blur) and 1.0 (maximum blur).")
+	parser.add_argument("-j", "--color_jitter", type=float, default=0.0, help="Intensity level for color jitter effect, between 0.0 (no effect) and 1.0 (maximum effect).")
+	parser.add_argument("-c", "--random_crop", type=float, default=0.0, help="Intensity level for random crop, between 0.0 (no crop) and 1.0 (maximum crop size).")
+	parser.add_argument("-n", "--brightness", type=float, default=1.0, help="Intensity level for brightness adjustment, between 0.0 (dark) and 2.0 (bright).")
+	parser.add_argument("-t", "--contrast", type=float, default=1.0, help="Intensity level for contrast adjustment, between 0.0 (low contrast) and 2.0 (high contrast).")
+	parser.add_argument("-s", "--shadow", type=float, default=0.0, help="Intensity level for adding shadows, between 0.0 (no shadow) and 1.0 (maximum shadow).")
+	parser.add_argument("-d", "--time_of_day_dusk", type=float, default=0.0, help="Intensity level for dusk time of day effect, between 0.0 (day) and 1.0 (dusk).")
+	parser.add_argument("-a", "--time_of_day_dawn", type=float, default=0.0, help="Intensity level for dawn time of day effect, between 0.0 (night) and 1.0 (dawn).")
+	parser.add_argument("-e", "--elastic_transform", type=float, default=0.0, help="Intensity level for elastic transformation, between 0.0 (no distortion) and 1.0 (maximum distortion).")
+	parser.add_argument("-l", "--lens_distortion", type=float, default=0.0, help="Intensity level for lens distortion effect, between 0.0 (no distortion) and 1.0 (noticeable distortion).")
+	parser.add_argument("-o", "--noise", type=float, default=0.0, help="Intensity level for adding noise, between 0.0 (clean) and 1.0 (noisy).")
+	
+	# Transformations that do not require an intensity level
+	parser.add_argument("-f", "--horizontal_flip", action='store_true', help="Apply horizontal flip to the images.")
+	
+	
+	args = parser.parse_args()
+	print("args:" + str(args))
+
+	
+    process_parent_dir(args.parentdir, args.level, args.img_filename_key)
