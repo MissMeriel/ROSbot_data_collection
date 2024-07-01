@@ -25,7 +25,7 @@ def main():
     args = parse_args()
     composed_transforms = [ct.split(',') for ct in args.composed_transforms] if args.composed_transforms else None
     specified_images = args.specify if args.specify else None
-    process_parent_dir(args.parentdir, args.level, args.img_filename_key, composed_transforms, specified_images)
+    process_parent_dir(args.parentdir, args.level, args.img_filename_key, args.transformations, composed_transforms, specified_images)
 
 if __name__ == '__main__':
     main()
