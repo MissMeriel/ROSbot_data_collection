@@ -25,7 +25,6 @@ from data_augmentation.transformations import all_transforms_dict, compose_trans
 # import skimage
 
 def stripleftchars(s):
-    # print(f"{s=}")
     for i in range(len(s)):
         if s[i].isnumeric():
             return s[i:]
@@ -42,15 +41,12 @@ class DataSequence(data.Dataset):
         self.root = root
         self.transform = transform
 
-
-
         image_paths = []
         for p in Path(root).iterdir():
             if p.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"]:
                 image_paths.append(p)
         image_paths.sort(key=lambda p: int(stripleftchars(p.stem)))
         self.image_paths = image_paths
-        # print(f"{self.image_paths=}")
         self.df = pd.read_csv(f"{self.root}/data.csv")
         self.cache = {}
 
@@ -61,9 +57,9 @@ class DataSequence(data.Dataset):
         if idx in self.cache:
             return self.cache[idx]
         img_name = self.image_paths[idx]
-        #image = sio.imread(img_name)
-        #changed to use PIL for transformations
-        #transformations use PIL.Image
+        # image = sio.imread(img_name)
+        # changed to use PIL for transformations
+        # transformations use PIL.Image
         image = Image.open(img_name)
 
         print(type(image))
@@ -72,54 +68,42 @@ class DataSequence(data.Dataset):
         y_thro = self.df.loc[df_index, 'throttle_input'].array[0]
         y_steer = self.df.loc[df_index, 'steering_input'].array[0]
         y = [y_steer, y_thro]
-        # torch.stack(y, dim=1)
         y = torch.tensor(y_steer)
-
-        # plt.title(f"steering_input={y_steer.array[0]}")
-        # plt.imshow(image)
-        # plt.show()
-        # plt.pause(0.01)
 
         if self.transform:
             image = self.transform(image).float()
-        # print(f"{img_name.name=} {y_steer=}")
-        # print(f"{image=}")
-        # print(f"{type(image)=}")
-        # print(self.df)
-        # print(y_steer.array[0])
 
-        #apply all the transformations
+        # apply all the transformations
         for transform_name, transform_func in all_transforms_dict.items():
             for level in range(5, 85, 5):
                 level_value = level / 100
                 image = transform_func(image, level_value)
 
-        # sample = {"image": image, "steering_input": y_steer.array[0]}
         sample = {"image": image, "steering_input": y}
-
         self.cache[idx] = sample
         return sample
 
 class MultiDirectoryDataSequence(data.Dataset):
-    def __init__(self, root, image_size=(100,100), transform=None, robustification=False, noise_level=10):
+    def __init__(self, root, image_size=(100, 100), transform=None, robustification=False, noise_level=10, composed_transforms=None):
         """
         Args:
             root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
+            transform (callable, optional): Optional transform to be applied on a sample.
+            composed_transforms (list of lists, optional): List of composed transformations to apply.
         """
         self.root = root
         self.transform = transform
         self.size = 0
         self.image_size = image_size
+        self.composed_transforms = composed_transforms
         image_paths_hashmap = {}
         all_image_paths = []
         self.dfs_hashmap = {}
         self.dirs = []
         marker = "_YES"
         for p in Path(root).iterdir():
-            if p.is_dir() and marker in str(p): #"_NO" not in str(p) and "YQWHF3" not in str(p):
-                self.dirs.append("{}/{}".format(p.parent,p.stem.replace(marker, "")))
+            if p.is_dir() and marker in str(p):
+                self.dirs.append("{}/{}".format(p.parent, p.stem.replace(marker, "")))
                 image_paths = []
                 try:
                     self.dfs_hashmap[f"{p}"] = pd.read_csv(f"{p}/data.csv")
@@ -136,7 +120,6 @@ class MultiDirectoryDataSequence(data.Dataset):
         print("Finished intaking image paths!")
         self.image_paths_hashmap = image_paths_hashmap
         self.all_image_paths = all_image_paths
-        # self.df = pd.read_csv(f"{self.root}/data.csv")
         self.cache = {}
         self.robustification = robustification
         self.noise_level = noise_level
@@ -146,7 +129,7 @@ class MultiDirectoryDataSequence(data.Dataset):
 
     def get_directories(self):
         return self.dirs
-        
+
     def __len__(self):
         return len(self.all_image_paths)
 
@@ -157,12 +140,10 @@ class MultiDirectoryDataSequence(data.Dataset):
                 y_steer = sample["steering_input"]
                 image = copy.deepcopy(sample["image"])
                 if random.random() > 0.5:
-                    # flip image
                     image = torch.flip(image, (2,))
                     y_steer = -sample["steering_input"]
                 if random.random() > 0.5:
-                    # blur
-                    gauss = kornia.filters.GaussianBlur2d((3,3), (1.5, 1.5))
+                    gauss = kornia.filters.GaussianBlur2d((3, 3), (1.5, 1.5))
                     image = gauss(image[None])[0]
                 image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
                 return {"image": image, "steering_input": y_steer, "throttle_input": sample["throttle_input"], "all": torch.FloatTensor([y_steer, sample["throttle_input"]])}
@@ -171,9 +152,6 @@ class MultiDirectoryDataSequence(data.Dataset):
         img_name = self.all_image_paths[idx]
         image = Image.open(img_name)
         image = image.resize(self.image_size)
-        # image = cv2.imread(img_name.__str__())
-        # image = cv2.resize(image, self.image_size) / 255
-        # image = self.fisheye(image)
         orig_image = self.transform(image)
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
@@ -185,8 +163,9 @@ class MultiDirectoryDataSequence(data.Dataset):
         if self.transform:
             image = self.transform(image).float()
 
-        for transform_name, transform_func in all_transforms_dict
-            for level in range (5, 85, 5): # start at 5 till 85 in increments of 5
+        # Apply all the transformations
+        for transform_name, transform_func in all_transforms_dict.items():
+            for level in range(5, 85, 5):
                 level_value = level / 100
                 image = transform_func(image, level_value)
 
@@ -198,38 +177,18 @@ class MultiDirectoryDataSequence(data.Dataset):
                 composed_transform_func = compose_transformations(transformations)
                 image = composed_transform_func(image, level)
 
-
         if self.robustification:
             image = copy.deepcopy(orig_image)
             if random.random() > 0.5:
-                # flip image
                 image = torch.flip(image, (2,))
                 y_steer = -orig_y_steer
             if random.random() > 0.5:
-                # blur
                 gauss = kornia.filters.GaussianBlur2d((5, 5), (5.5, 5.5))
                 image = gauss(image[None])[0]
-                # image = kornia.filters.blur_pool2d(image[None], 3)[0]
-                # image = kornia.filters.max_blur_pool2d(image[None], 3, ceil_mode=True)[0]
-                # image = kornia.filters.median_blur(image, (3, 3))
-                # image = kornia.filters.median_blur(image, (10, 10))
-                # image = kornia.filters.box_blur(image, (3, 3))
-                # image = kornia.filters.box_blur(image, (5, 5))
-                # image = kornia.resize(image, image.shape[2:])
-                # plt.imshow(image.permute(1,2,0))
-                # plt.pause(0.01)
             image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
-
         else:
             t = Compose([ToTensor()])
             image = t(image).float()
-            # image = torch.from_numpy(image).permute(2,0,1) / 127.5 - 1
-
-        # vvvvvv uncomment below for value-image debugging vvvvvv
-        # plt.title(f"{img_name}\nsteering_input={y_steer.array[0]}", fontsize=7)
-        # plt.imshow(image)
-        # plt.show()
-        # plt.pause(0.01)
 
         sample = {"image": image, "steering_input": torch.FloatTensor([y_steer]), "throttle_input": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
         orig_sample = {"image": orig_image, "steering_input": torch.FloatTensor([orig_y_steer]), "throttle_input": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
@@ -241,9 +200,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         for key in self.dfs_hashmap.keys():
             df = self.dfs_hashmap[key]
             arr = df['steering_input'].to_numpy()
-            # print("len(arr)=", len(arr))
             all_outputs = np.concatenate((all_outputs, arr), axis=0)
-            # print(f"Retrieved dataframe {key=}")
         all_outputs = np.array(all_outputs)
         moments = self.get_distribution_moments(all_outputs)
         return moments
