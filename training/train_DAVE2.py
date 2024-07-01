@@ -34,6 +34,7 @@ def parse_arguments():
     parser.add_argument("--robustification", type=bool, default=True)
     parser.add_argument("--noisevar", type=int, default=15)
     parser.add_argument("--log_interval", type=int, default=50)
+    parser.add_argument("--composed_transforms", type=str, nargs='*', help="List of composed transformations separated by spaces, each specified as a comma-separated list of transformations (e.g., blur,shadow brightness,contrast)")
     args = parser.parse_args()
     return args
 
@@ -62,8 +63,17 @@ def main():
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
     print(args)
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]),\
-                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+
+    #chatgpt
+    # Parse composed transformations
+    composed_transforms = [ct.split(',') for ct in args.composed_transforms] if args.composed_transforms else None
+
+    dataset = MultiDirectoryDataSequence(args.dataset,
+                                         image_size=(model.input_shape[::-1]),
+                                         transform=Compose([ToTensor()]),
+                                         robustification=args.robustification,
+                                         noise_level=args.noisevar,
+                                         composed_transforms=composed_transforms) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
 
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
@@ -85,6 +95,7 @@ def main():
     logfreq = 20
     for epoch in range(args.epochs):
         running_loss = 0.0
+        num_images = 0
         for i, hashmap in enumerate(trainloader, 0):
             x = hashmap['image'].float().to(device)
             y = hashmap['steering_input'].float().to(device)
@@ -101,6 +112,7 @@ def main():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
+            num_images += x.size(0)
             if i % logfreq == logfreq-1:  # print every 2000 mini-batches
                 print('[%d, %5d] loss: %.7f' %
                       (epoch + 1, i + 1, running_loss / logfreq))

@@ -17,6 +17,10 @@ from matplotlib.pyplot import imshow
 import random
 
 from torchvision.transforms import Compose, ToTensor, PILToTensor, functional as transforms
+
+from data_augmentation.transformations import all_transforms_dict, compose_transformations
+
+
 # from io import BytesIO
 # import skimage
 
@@ -38,6 +42,8 @@ class DataSequence(data.Dataset):
         self.root = root
         self.transform = transform
 
+
+
         image_paths = []
         for p in Path(root).iterdir():
             if p.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"]:
@@ -55,7 +61,12 @@ class DataSequence(data.Dataset):
         if idx in self.cache:
             return self.cache[idx]
         img_name = self.image_paths[idx]
-        image = sio.imread(img_name)
+        #image = sio.imread(img_name)
+        #changed to use PIL for transformations
+        #transformations use PIL.Image
+        image = Image.open(img_name)
+
+        print(type(image))
 
         df_index = self.df.index[self.df['filename'] == img_name.name]
         y_thro = self.df.loc[df_index, 'throttle_input'].array[0]
@@ -76,6 +87,12 @@ class DataSequence(data.Dataset):
         # print(f"{type(image)=}")
         # print(self.df)
         # print(y_steer.array[0])
+
+        #apply all the transformations
+        for transform_name, transform_func in all_transforms_dict.items():
+            for level in range(5, 85, 5):
+                level_value = level / 100
+                image = transform_func(image, level_value)
 
         # sample = {"image": image, "steering_input": y_steer.array[0]}
         sample = {"image": image, "steering_input": y}
@@ -164,6 +181,24 @@ class MultiDirectoryDataSequence(data.Dataset):
         orig_y_steer = df.loc[df_index, 'steering_input'].item()
         y_throttle = df.loc[df_index, 'throttle_input'].item()
         y_steer = copy.deepcopy(orig_y_steer)
+
+        if self.transform:
+            image = self.transform(image).float()
+
+        for transform_name, transform_func in all_transforms_dict
+            for level in range (5, 85, 5): # start at 5 till 85 in increments of 5
+                level_value = level / 100
+                image = transform_func(image, level_value)
+
+        # Apply composed transformations if specified
+        if self.composed_transforms:
+            for composed_transform in self.composed_transforms:
+                level = random.uniform(0.05, 0.8)  # Random level between 5% and 80%
+                transformations = [all_transforms_dict[name] for name in composed_transform]
+                composed_transform_func = compose_transformations(transformations)
+                image = composed_transform_func(image, level)
+
+
         if self.robustification:
             image = copy.deepcopy(orig_image)
             if random.random() > 0.5:
