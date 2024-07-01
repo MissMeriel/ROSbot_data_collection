@@ -94,14 +94,16 @@ def augment_and_save_composed_image(args):
         traceback.print_exc()
     return None
 
-def process_collection_dir(collection_dir, img_filename_key="image name", composed_transforms=None):
+def process_collection_dir(collection_dir, img_filename_key="image name", transformations=None, composed_transforms=None, specified_images=None):
     """
     Processes a directory containing a collection of images, applying augmentations and saving the results.
 
     Args:
     - collection_dir (Path): Path to the directory containing the image collection.
     - img_filename_key (str): Key in the CSV file that corresponds to image filenames.
+    - transformations (list): List of individual transformations to apply.
     - composed_transforms (list): List of composed transformations to apply.
+    - specified_images (list): List of specific image paths to process.
 
     Returns:
     - None
@@ -117,24 +119,28 @@ def process_collection_dir(collection_dir, img_filename_key="image name", compos
     augmented_df = pd.DataFrame(columns=df.columns)
     # Get paths to all images in the collection directory
     image_paths = [pp for pp in Path(collection_dir).iterdir() if pp.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"]]
+    # If specific images are specified, use only those images
+    if specified_images:
+        image_paths = [Path(img) for img in specified_images]
     # Initialize deque for tasks
     tasks = deque()
     # Loop through each image path
     for pp in image_paths:
-        # Loop through the possible transformations
-        for transform_name in all_transforms_dict.keys():
-            # Define the maximum possible intensity
-            max_level = 80
-            # For each image, create a new image where the intensity is increased by 5% per step
-            for level in range(5, max_level + 5, 5):
-                level_value = level / 100
-                # Create output directory for each transformation
-                output_dir = main_output_dir / transform_name
-                output_dir.mkdir(parents=True, exist_ok=True)
-                # Select the row for each image from the DataFrame
-                row = df[df[img_filename_key] == pp.name].iloc[0].copy()
-                # Add the task tuple to the tasks deque
-                tasks.append((pp, output_dir, transform_name, level_value, row))
+        # Apply specified individual transformations
+        if transformations:
+            for transform_name in transformations:
+                # Define the maximum possible intensity
+                max_level = 80
+                # For each image, create a new image where the intensity is increased by 5% per step
+                for level in range(5, max_level + 5, 5):
+                    level_value = level / 100
+                    # Create output directory for each transformation
+                    output_dir = main_output_dir / transform_name
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    # Select the row for each image from the DataFrame
+                    row = df[df[img_filename_key] == pp.name].iloc[0].copy()
+                    # Add the task tuple to the tasks deque
+                    tasks.append((pp, output_dir, transform_name, level_value, row))
         # Apply composed transformations if specified
         if composed_transforms:
             for composed_transform in composed_transforms:
@@ -163,7 +169,7 @@ def process_collection_dir(collection_dir, img_filename_key="image name", compos
     elapsed_time = end_time - start_time
     print(f"Total processing time: {elapsed_time // 60:.0f} minutes {elapsed_time % 60:.2f} seconds")
 
-def process_parent_dir(parentdir, level, img_filename_key="image name", composed_transforms=None):
+def process_parent_dir(parentdir, level, img_filename_key="image name", transformations=None, composed_transforms=None, specified_images=None):
     """
     Processes the parent directory containing multiple collections of images.
 
@@ -171,7 +177,9 @@ def process_parent_dir(parentdir, level, img_filename_key="image name", composed
     - parentdir (str): Path to the parent directory.
     - level (str): The level of directory processing ('rosbotxl_data' or 'collection').
     - img_filename_key (str): Key in the CSV file that corresponds to image filenames.
+    - transformations (list): List of individual transformations to apply.
     - composed_transforms (list): List of composed transformations to apply.
+    - specified_images (list): List of specific image paths to process.
 
     Returns:
     - None
@@ -185,4 +193,4 @@ def process_parent_dir(parentdir, level, img_filename_key="image name", composed
         collection_dirs = [Path(parentdir)]
     # Process each collection directory
     for collection_dir in collection_dirs:
-        process_collection_dir(collection_dir, img_filename_key, composed_transforms)
+        process_collection_dir(collection_dir, img_filename_key, transformations, composed_transforms, specified_images)
