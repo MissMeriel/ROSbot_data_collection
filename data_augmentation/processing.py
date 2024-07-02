@@ -120,12 +120,13 @@ def process_collection_dir(collection_dir, img_filename_key="image name", transf
     if transformations_list:
         for pp in image_paths:
             for transform_name in transformations_list:
-                for level in range(5, 80, 5):  # 5% to 75% in 5% increments
-                    level_value = level / 100
-                    output_dir = main_output_dir / transform_name
-                    output_dir.mkdir(parents=True, exist_ok=True)
-                    row = df[df[img_filename_key] == pp.name].iloc[0].copy()
-                    tasks.append((pp, output_dir, transform_name, level_value, row))
+                if transform_name != 'horizontal_flip':  # Exclude horizontal_flip
+                    for level in range(5, 80, 5):  # 5% to 75% in 5% increments
+                        level_value = level / 100
+                        output_dir = main_output_dir / transform_name
+                        output_dir.mkdir(parents=True, exist_ok=True)
+                        row = df[df[img_filename_key] == pp.name].iloc[0].copy()
+                        tasks.append((pp, output_dir, transform_name, level_value, row))
 
     if composed_transformations_list:
         for pp in image_paths:
