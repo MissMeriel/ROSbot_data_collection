@@ -47,7 +47,10 @@ def augment_and_save_image(args):
         # Update the CSV file row if the transformation is horizontal flip
         if 'horizontal_flip' in transform_name:
             row['angular_speed_z'] = -row['angular_speed_z']
-            lidar_data = np.array([float(x) for x in row['lidar_ranges'].split()])
+            if isinstance(row['lidar_ranges'], str):
+                lidar_data = np.array([float(x) for x in row['lidar_ranges'].split()])
+            else:
+                lidar_data = np.array([float(row['lidar_ranges'])])
             flipped_lidar_data = np.flip(lidar_data).tolist()
             row['lidar_ranges'] = ' '.join(map(str, flipped_lidar_data))
         row['image name'] = save_path.name
@@ -127,6 +130,11 @@ def process_collection_dir(collection_dir, img_filename_key="image name", transf
                         output_dir.mkdir(parents=True, exist_ok=True)
                         row = df[df[img_filename_key] == pp.name].iloc[0].copy()
                         tasks.append((pp, output_dir, transform_name, level_value, row))
+                else:
+                    output_dir = main_output_dir / transform_name
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    row = df[df[img_filename_key] == pp.name].iloc[0].copy()
+                    tasks.append((pp, output_dir, transform_name, 2, row))
 
     if composed_transformations_list:
         for pp in image_paths:
