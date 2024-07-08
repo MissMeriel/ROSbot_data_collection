@@ -82,27 +82,35 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=args.lr) #, betas=(0.9, 0.999), eps=1e-08)
     lowest_loss = 1e5
     logfreq = 20
+
     for epoch in range(args.epochs):
         running_loss = 0.0
-        for i, hashmap in enumerate(trainloader, 0):
-            x = hashmap['image'].float().to(device)
-            y = hashmap['angular_speed_z'].float().to(device)
-            x = Variable(x, requires_grad=True)
-            y = Variable(y, requires_grad=False)
+        for i, batch in enumerate(trainloader, 0):
+            batch_images = []
+            batch_labels = []
+            for samples in batch:
+                for sample in samples:
+                    batch_images.append(sample['image'])
+                    batch_labels.append(sample['angular_speed_z'])
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+            # convert lists to tensors
+            batch_images = torch.stack(batch_images).float().to(device)  # convert image list to tensor and move to device
+            batch_labels = torch.stack(batch_labels).float().to(device)  # convert label list to tensor and move to device
 
-            # forward + backward + optimize
-            outputs = model(x)
-            # loss = F.mse_loss(outputs.flatten(), y)
-            loss = F.mse_loss(outputs, y)
-            loss.backward()
-            optimizer.step()
+            # wrap in variables for autograd
+            batch_images = Variable(batch_images, requires_grad=True)
+            batch_labels = Variable(batch_labels, requires_grad=False)
+
+            optimizer.zero_grad()  # zero the parameter gradients
+
+            # forward pass through the DNN
+            outputs = model(batch_images)  # pass the batch of images to the DNN
+            loss = F.mse_loss(outputs.flatten(), batch_labels)  # calculate the loss
+            loss.backward()  # backpropagate the loss
+            optimizer.step()  # update the model parameters
             running_loss += loss.item()
-            if i % logfreq == logfreq-1:  # print every 2000 mini-batches
-                print('[%d, %5d] loss: %.7f' %
-                      (epoch + 1, i + 1, running_loss / logfreq))
+            if i % logfreq == logfreq - 1:
+                print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq))
                 if (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! MSE loss: {running_loss / logfreq}")
                     model_name = f"./model-{iteration}-best.pt"
@@ -110,10 +118,10 @@ def main():
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
-        print(f"Finished {epoch=}")
-        model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
-        print(f"Saving model to {model_name}")
-        torch.save(model, model_name)
+    print(f"Finished {epoch=}")
+    model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
+    print(f"Saving model to {model_name}")
+    torch.save(model, model_name)
         # if loss < 0.002:
         #     print(f"Loss at {loss}; quitting training...")
         #     break

@@ -234,14 +234,19 @@ class MultiDirectoryDataSequence(data.Dataset):
                 all_transformed_images = transformed_images + composed_transformed_images
 
                 # Create the sample dictionary
-                sample = {
-                    "image": all_transformed_images[0],  # Using the first transformed image as an example
-                    "angular_speed_z": y_steer,
-                    "linear_speed_x": sample["linear_speed_x"],
-                    "lidar_ranges": sample['lidar_ranges'],
-                    "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])
-                }
-                return sample
+
+                # create a list of augmented samples
+                augmented_samples = []
+                for img in all_transformed_images:
+                    augmented_samples.append({
+                        "image": img,
+                        "angular_speed_z": y_steer,
+                        "linear_speed_x": sample["linear_speed_x"],
+                        "lidar_ranges": sample['lidar_ranges'],
+                        "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])
+                    })
+
+                return augmented_samples
             else:
                 return self.cache[idx]
 
@@ -301,14 +306,17 @@ class MultiDirectoryDataSequence(data.Dataset):
             plt.show()
             print(f"Processed {len(levels) * len(transform_funcs) + len(levels) * len(composed_transform_funcs)} transformations for image {idx}")
 
-        # Create the sample dictionary
-        sample = {
-            "image": all_transformed_images[0],  # Using the first transformed image as an example
-            "angular_speed_z": torch.FloatTensor([y_steer]),
-            "linear_speed_x": torch.FloatTensor([y_throttle]),
-            "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
-            "all": torch.FloatTensor([y_steer, y_throttle])
-        }
+        # create a list of augmented samples
+        augmented_samples = []
+        for img in all_transformed_images:
+            augmented_samples.append({
+                "image": img,
+                "angular_speed_z": torch.FloatTensor([y_steer]),
+                "linear_speed_x": torch.FloatTensor([y_throttle]),
+                "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
+                "all": torch.FloatTensor([y_steer, y_throttle])
+            })
+
         orig_sample = {
             "image": orig_image,
             "angular_speed_z": torch.FloatTensor([orig_y_steer]),
@@ -317,10 +325,9 @@ class MultiDirectoryDataSequence(data.Dataset):
             "all": torch.FloatTensor([orig_y_steer, y_throttle])
         }
 
-        # Cache the original sample
         self.cache[idx] = orig_sample
 
-        return sample
+        return augmented_samples
 
 
 
