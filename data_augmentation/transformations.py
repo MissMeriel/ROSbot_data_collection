@@ -84,33 +84,10 @@ def adjust_saturation_fn(img, level=0.5):
     enhancer = ImageEnhance.Color(img)
     return enhancer.enhance(level)
 
-def horizontal_flip(image, row, level=1.0):
-    """
-    Flip the image horizontally and update the corresponding metadata.
-
-    Args:
-    - image (PIL.Image.Image): The input image to be transformed.
-    - row (pd.Series): Row from the CSV file corresponding to the image.
-    - level (float): The level or intensity of the transformation. This argument is kept for consistency but not used here.
-
-    Returns:
-    - tuple: The transformed image and updated row.
-    """
+def horizontal_flip(image, level=1.0):
     # Flip the image horizontally
-    flipped_image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    return image.transpose(Image.FLIP_LEFT_RIGHT)
 
-    # Update the angular_speed_z to reflect the flip
-    row['angular_speed_z'] = -row['angular_speed_z']
-
-    # Flip the lidar data if present
-    if isinstance(row['lidar_ranges'], str):
-        lidar_data = np.array([float(x) for x in row['lidar_ranges'].split()])
-    else:
-        lidar_data = np.array([float(row['lidar_ranges'])])
-    flipped_lidar_data = np.flip(lidar_data).tolist()
-    row['lidar_ranges'] = ' '.join(map(str, flipped_lidar_data))
-
-    return flipped_image, row
 def random_crop(image, level=0.5):
     # Randomly crop the image
     level = min(max(level, 0.01), 1.0)
