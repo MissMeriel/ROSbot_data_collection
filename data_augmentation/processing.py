@@ -163,6 +163,13 @@ def process_collection_dir(collection_dir, img_filename_key="image name", transf
     elapsed_time = end_time - start_time
     print(f"Total processing time: {elapsed_time // 60:.0f} minutes {elapsed_time % 60:.2f} seconds")
 
+def custom_transform(image, transform_funcs, levels):
+    for level in levels:
+        for transform_func in transform_funcs:
+            image = transform_func(image, level)
+    return image
+
+
 def process_parent_dir(parentdir, level, img_filename_key="image name", transformations_list=None, composed_transformations_list=None, specified_images=None):
     if level == 'rosbotxl_data':
         collection_dirs = [p for p in Path(parentdir).iterdir() if p.is_dir()]

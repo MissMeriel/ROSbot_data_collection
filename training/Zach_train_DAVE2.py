@@ -10,12 +10,12 @@ import os
 # import PIL
 import matplotlib.pyplot as plt
 # import csv
-from Zach_DatasetGenerator import MultiDirectoryDataSequence
+from DatasetGenerator import MultiDirectoryDataSequence
 import time
 import sys
 sys.path.append("../models")
-from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
-import transformations
+from Zach_DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -57,27 +57,13 @@ def characterize_steering_distribution(y_steering, generator):
 
 
 def main():
-
     start_time = time.time()
     input_shape = (2560, 720)  # Example input shape: width x height
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
-
-
-    #convert each image to a PIL image then ad the transformations wanted
-    transform = Compose([  #transformation pipeline
-        ToPILImage(),  #Convert tensor to PIL image
-        transformations.add_shadow,  # Apply shadow augmentation
-        transformations.time_of_day_transform_dusk,  # Apply dusk augmentation
-        transformations.add_elastic_transform,  # Apply elastic transform
-        ToTensor()  # Convert PIL image back to tensor
-    ])
-
-
     print(args)
-
-    #initialize the dataset with transformations
-    dataset = MultiDirectoryDataSequence(args.dataset, transform = transform) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]), \
+                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
@@ -99,7 +85,7 @@ def main():
     for epoch in range(args.epochs):
         running_loss = 0.0
         for i, hashmap in enumerate(trainloader, 0):
-            x = hashmap['image name'].float().to(device)
+            x = hashmap['image'].float().to(device)
             y = hashmap['angular_speed_z'].float().to(device)
             x = Variable(x, requires_grad=True)
             y = Variable(y, requires_grad=False)

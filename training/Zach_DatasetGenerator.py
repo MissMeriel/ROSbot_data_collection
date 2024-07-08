@@ -15,7 +15,15 @@ import torch
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import imshow
 import random
-import transformations
+
+from data_augmentation.transformations import (
+    add_shadow, time_of_day_transform_dusk, add_elastic_transform,
+    add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+    adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
+    add_lens_distortion, add_noise
+)
+
+
 from torchvision.transforms import Compose, ToTensor, PILToTensor, functional as transforms
 # from io import BytesIO
 # import skimage
@@ -57,7 +65,7 @@ class DataSequence(data.Dataset):
         img_name = self.image_paths[idx]
         image = sio.imread(img_name)
 
-        df_index = self.df.index[self.df['image name'] == img_name.name]
+        df_index = self.df.index[self.df['image'] == img_name.name]
         y_thro = self.df.loc[df_index, 'linear_speed_x'].array[0]
         y_steer = self.df.loc[df_index, 'angular_speed_z'].array[0]
         y = [y_steer, y_thro]
@@ -78,7 +86,7 @@ class DataSequence(data.Dataset):
         # print(y_steer.array[0])
 
         # sample = {"image": image, "steering_input": y_steer.array[0]}
-        sample = {"image name": image, "angular_speed_z": y}
+        sample = {"image": image, "angular_speed_z": y}
 
         self.cache[idx] = sample
         return sample
@@ -141,72 +149,181 @@ class MultiDirectoryDataSequence(data.Dataset):
         return len(self.all_image_paths)
 
     def __getitem__(self, idx):
+        # Define a helper function to apply individual transformations to the image
+        # chatgpt - just showed my processing.py and told it to copy over the same architecture
+        def custom_transform(image, transform_funcs, levels):
+            augmented_images = []
+            for level in levels:
+                for transform_func in transform_funcs:
+                    # Apply each transformation individually with the specified level
+                    augmented_image = transform_func(image, level)
+                    augmented_images.append(augmented_image)
+            return augmented_images
+
+        # Define a helper function to apply composed transformations to the image
+        # chatgpt - just showed my processing.py and told it to copy over the same architecture
+        def apply_composed_transformations(image, composed_transform_funcs, levels):
+            augmented_images = []
+            for level in levels:
+                for transform_func_list in composed_transform_funcs:
+                    # Apply each composed transformation with the specified level
+                    augmented_image = image
+                    for transform_func in transform_func_list:
+                        augmented_image = transform_func(augmented_image, level)
+                    augmented_images.append(augmented_image)
+            return augmented_images
+
+        # Check if the sample is already in the cache
         if idx in self.cache:
+            # Apply robustification if enabled
             if self.robustification:
                 sample = self.cache[idx]
                 y_steer = sample["angular_speed_z"]
-                image = copy.deepcopy(sample["image name"])
-                if random.random() > 0.5:
-                    # flip image
-                    image = torch.flip(image, (2,))
-                    y_steer = -sample["angular_speed_z"]
-                if random.random() > 0.5:
-                    # blur
-                    gauss = kornia.filters.GaussianBlur2d((3,3), (1.5, 1.5))
-                    image = gauss(image[None])[0]
+                image = copy.deepcopy(sample["image"])
+
+                # Define the list of individual transformation functions
+                # chatgpt
+                transform_funcs = [
+                    add_shadow, time_of_day_transform_dusk, add_elastic_transform,
+                    add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+                    adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
+                    add_lens_distortion, add_noise
+                ]
+
+                # Define the list of composed transformation functions
+                # chatgpt
+                composed_transform_funcs = [
+                    [add_shadow, time_of_day_transform_dusk],
+                    [add_elastic_transform, add_blur_fn],
+                    [color_jitter_fn, random_crop],
+                    [adjust_brightness_fn, adjust_contrast_fn],
+                    [adjust_saturation_fn, horizontal_flip],
+                    [add_lens_distortion, add_noise]
+                ]
+
+                # Define the levels of intensity for the transformations
+                levels = [i / 100 for i in range(5, 85, 5)]
+
+                # Apply each transformation individually with a probability of 50%
+                flipped = False
+                for transform_func in transform_funcs:
+                    if random.random() > 0.5:
+                        # Apply the transformation with a random level between 0.01 and 1.0
+                        level = random.uniform(0.01, 1.0)
+                        if transform_func == horizontal_flip:
+                            flipped = True
+                            y_steer = -y_steer
+                            if isinstance(sample['lidar_ranges'], str):
+                                lidar_data = np.array([float(x) for x in sample['lidar_ranges'].split()])
+                            else:
+                                lidar_data = np.array([float(sample['lidar_ranges'])])
+                            flipped_lidar_data = np.flip(lidar_data).tolist()
+                            sample['lidar_ranges'] = ' '.join(map(str, flipped_lidar_data))
+                        image = transform_func(image, level)
+
+                # Add noise to the image and clamp the values to be within valid range
                 image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
-                return {"image name": image, "angular_speed_z": y_steer, "linear_speed_x": sample["linear_speed_x"], "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])}
+
+                # Apply custom transformations
+                transformed_images = custom_transform(image, transform_funcs, levels)
+
+                # Apply composed transformations
+                composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs, levels)
+
+                # Combine individual and composed transformations
+                all_transformed_images = transformed_images + composed_transformed_images
+
+                # Create the sample dictionary
+                sample = {
+                    "image": all_transformed_images[0],  # Using the first transformed image as an example
+                    "angular_speed_z": y_steer,
+                    "linear_speed_x": sample["linear_speed_x"],
+                    "lidar_ranges": sample['lidar_ranges'],
+                    "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])
+                }
+                return sample
             else:
                 return self.cache[idx]
+
+        # Load the image and resize it
         img_name = self.all_image_paths[idx]
         image = Image.open(img_name)
         image = image.resize(self.image_size)
-        # image = cv2.imread(img_name.__str__())
-        # image = cv2.resize(image, self.image_size) / 255
-        # image = self.fisheye(image)
+
+        # Apply the initial transformation
         orig_image = self.transform(image)
+
+        # Retrieve the corresponding steering and throttle values from the dataframe
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
-        df_index = df.index[df['image name'] == img_name.name]
+        df_index = df.index[df['image'] == img_name.name]
         orig_y_steer = df.loc[df_index, 'angular_speed_z'].item()
         y_throttle = df.loc[df_index, 'linear_speed_x'].item()
         y_steer = copy.deepcopy(orig_y_steer)
-        if self.robustification:
-            image = copy.deepcopy(orig_image)
-            if random.random() > 0.5:
-                # flip image
-                image = torch.flip(image, (2,))
-                y_steer = -orig_y_steer
-            if random.random() > 0.5:
-                # blur
-                gauss = kornia.filters.GaussianBlur2d((5, 5), (5.5, 5.5))
-                image = gauss(image[None])[0]
-                # image = kornia.filters.blur_pool2d(image[None], 3)[0]
-                # image = kornia.filters.max_blur_pool2d(image[None], 3, ceil_mode=True)[0]
-                # image = kornia.filters.median_blur(image, (3, 3))
-                # image = kornia.filters.median_blur(image, (10, 10))
-                # image = kornia.filters.box_blur(image, (3, 3))
-                # image = kornia.filters.box_blur(image, (5, 5))
-                # image = kornia.resize(image, image.shape[2:])
-                # plt.imshow(image.permute(1,2,0))
-                # plt.pause(0.01)
-            image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
 
-        else:
-            t = Compose([ToTensor()])
-            image = t(image).float()
-            # image = torch.from_numpy(image).permute(2,0,1) / 127.5 - 1
+        # Define the list of individual transformation functions
+        transform_funcs = [
+            add_shadow, time_of_day_transform_dusk, add_elastic_transform,
+            add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+            adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
+            add_lens_distortion, add_noise
+        ]
 
-        # vvvvvv uncomment below for value-image debugging vvvvvv
-        # plt.title(f"{img_name}\nsteering_input={y_steer.array[0]}", fontsize=7)
-        # plt.imshow(image)
-        # plt.show()
-        # plt.pause(0.01)
+        # Define the list of composed transformation functions
+        composed_transform_funcs = [
+            [add_shadow, time_of_day_transform_dusk],
+            [add_elastic_transform, add_blur_fn],
+            [color_jitter_fn, random_crop],
+            [adjust_brightness_fn, adjust_contrast_fn],
+            [adjust_saturation_fn, horizontal_flip],
+            [add_lens_distortion, add_noise]
+        ]
 
-        sample = {"image name": image, "angular_speed_z": torch.FloatTensor([y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
-        orig_sample = {"image name": orig_image, "angular_speed_z": torch.FloatTensor([orig_y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
+        # Define the levels of intensity for the transformations
+        levels = [i / 100 for i in range(5, 85, 5)]
+
+        # Apply custom transformations
+        transformed_images = custom_transform(orig_image, transform_funcs, levels)
+
+        # Apply composed transformations
+        composed_transformed_images = apply_composed_transformations(orig_image, composed_transform_funcs, levels)
+
+        # Combine individual and composed transformations
+        all_transformed_images = transformed_images + composed_transformed_images
+
+        # Visualize/logging to ensure appropriate transformations are applied
+        if idx % 100 == 0:  # Visualize every 100th image
+            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+            ax[0].imshow(orig_image.permute(1, 2, 0))  # Original image
+            ax[0].set_title(f'Original Image {idx}')
+            ax[1].imshow(all_transformed_images[0].permute(1, 2, 0))  # First transformed image
+            ax[1].set_title(f'Transformed Image {idx}')
+            plt.show()
+            print(f"Processed {len(levels) * len(transform_funcs) + len(levels) * len(composed_transform_funcs)} transformations for image {idx}")
+
+        # Create the sample dictionary
+        sample = {
+            "image": all_transformed_images[0],  # Using the first transformed image as an example
+            "angular_speed_z": torch.FloatTensor([y_steer]),
+            "linear_speed_x": torch.FloatTensor([y_throttle]),
+            "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
+            "all": torch.FloatTensor([y_steer, y_throttle])
+        }
+        orig_sample = {
+            "image": orig_image,
+            "angular_speed_z": torch.FloatTensor([orig_y_steer]),
+            "linear_speed_x": torch.FloatTensor([y_throttle]),
+            "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
+            "all": torch.FloatTensor([orig_y_steer, y_throttle])
+        }
+
+        # Cache the original sample
         self.cache[idx] = orig_sample
+
         return sample
+
+
+
 
     def get_outputs_distribution(self):
         all_outputs = np.array([])
