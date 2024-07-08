@@ -149,28 +149,36 @@ class MultiDirectoryDataSequence(data.Dataset):
         return len(self.all_image_paths)
 
     def __getitem__(self, idx):
-        # Define a helper function to apply individual transformations to the image
-        # chatgpt - just showed my processing.py and told it to copy over the same architecture
+        # helper function to apply individual transformations to the image
         def custom_transform(image, transform_funcs, levels):
             augmented_images = []
             for level in levels:
                 for transform_func in transform_funcs:
-                    # Apply each transformation individually with the specified level
-                    augmented_image = transform_func(image, level)
-                    augmented_images.append(augmented_image)
+                    try:
+                        # ensure image is in PIL format
+                        if isinstance(image, torch.Tensor):
+                            image = ToPILImage()(image)
+                        augmented_image = transform_func(image, level)
+                        augmented_images.append(ToTensor()(augmented_image))
+                    except Exception as e:
+                        print(f"Error applying {transform_func.__name__} with level {level}: {e}")
             return augmented_images
 
-        # Define a helper function to apply composed transformations to the image
-        # chatgpt - just showed my processing.py and told it to copy over the same architecture
+        # helper function to apply composed transformations to the image
         def apply_composed_transformations(image, composed_transform_funcs, levels):
             augmented_images = []
             for level in levels:
                 for transform_func_list in composed_transform_funcs:
-                    # Apply each composed transformation with the specified level
-                    augmented_image = image
-                    for transform_func in transform_func_list:
-                        augmented_image = transform_func(augmented_image, level)
-                    augmented_images.append(augmented_image)
+                    try:
+                        # ensure image is in PIL format
+                        if isinstance(image, torch.Tensor):
+                            image = ToPILImage()(image)
+                        augmented_image = image
+                        for transform_func in transform_func_list:
+                            augmented_image = transform_func(augmented_image, level)
+                        augmented_images.append(ToTensor()(augmented_image))
+                    except Exception as e:
+                        print(f"Error applying composed transformations {transform_func_list} with level {level}: {e}")
             return augmented_images
 
         # Check if the sample is already in the cache
