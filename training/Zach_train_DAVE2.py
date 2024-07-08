@@ -10,12 +10,12 @@ import os
 # import PIL
 import matplotlib.pyplot as plt
 # import csv
-from DatasetGenerator import MultiDirectoryDataSequence
+from Zach_DatasetGenerator import MultiDirectoryDataSequence
 import time
 import sys
 sys.path.append("../models")
 from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
-
+import transformations
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -34,7 +34,6 @@ def parse_arguments():
     parser.add_argument("--robustification", type=bool, default=True)
     parser.add_argument("--noisevar", type=int, default=15)
     parser.add_argument("--log_interval", type=int, default=50)
-    parser.add_argument("--composed_transforms", type=str, nargs='*', help="List of composed transformations separated by spaces, each specified as a comma-separated list of transformations (e.g., blur,shadow brightness,contrast)")
     args = parser.parse_args()
     return args
 
@@ -58,23 +57,27 @@ def characterize_steering_distribution(y_steering, generator):
 
 
 def main():
+
     start_time = time.time()
-    input_shape = (135, 240)
+    input_shape = (2560, 720)  # Example input shape: width x height
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
+
+
+    #convert each image to a PIL image then ad the transformations wanted
+    transform = Compose([  #transformation pipeline
+        ToPILImage(),  #Convert tensor to PIL image
+        transformations.add_shadow,  # Apply shadow augmentation
+        transformations.time_of_day_transform_dusk,  # Apply dusk augmentation
+        transformations.add_elastic_transform,  # Apply elastic transform
+        ToTensor()  # Convert PIL image back to tensor
+    ])
+
+
     print(args)
 
-    #chatgpt
-    # Parse composed transformations
-    composed_transforms = [ct.split(',') for ct in args.composed_transforms] if args.composed_transforms else None
-
-    dataset = MultiDirectoryDataSequence(args.dataset,
-                                         image_size=(model.input_shape[::-1]),
-                                         transform=Compose([ToTensor()]),
-                                         robustification=args.robustification,
-                                         noise_level=args.noisevar,
-                                         composed_transforms=composed_transforms) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
-
+    #initialize the dataset with transformations
+    dataset = MultiDirectoryDataSequence(args.dataset, transform = transform) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
@@ -95,10 +98,9 @@ def main():
     logfreq = 20
     for epoch in range(args.epochs):
         running_loss = 0.0
-        num_images = 0
         for i, hashmap in enumerate(trainloader, 0):
-            x = hashmap['image'].float().to(device)
-            y = hashmap['steering_input'].float().to(device)
+            x = hashmap['image name'].float().to(device)
+            y = hashmap['angular_speed_z'].float().to(device)
             x = Variable(x, requires_grad=True)
             y = Variable(y, requires_grad=False)
 
@@ -112,19 +114,18 @@ def main():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            num_images += x.size(0)
             if i % logfreq == logfreq-1:  # print every 2000 mini-batches
                 print('[%d, %5d] loss: %.7f' %
                       (epoch + 1, i + 1, running_loss / logfreq))
                 if (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! MSE loss: {running_loss / logfreq}")
-                    model_name = f"./model-fixnoise-{iteration}-best.pt"
+                    model_name = f"./model-{iteration}-best.pt"
                     print(f"Saving model to {model_name}")
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
         print(f"Finished {epoch=}")
-        model_name = f"H:/GitHub/DAVE2-Keras/model-fixnoise-{iteration}-epoch{epoch}.pt"
+        model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
         print(f"Saving model to {model_name}")
         torch.save(model, model_name)
         # if loss < 0.002:
@@ -134,19 +135,19 @@ def main():
 
     # save model
     # torch.save(model.state_dict(), f'H:/GitHub/DAVE2-Keras/test{iteration}-weights.pt')
-    model_name = f'H:/GitHub/DAVE2-Keras/model-{iteration}.pt'
-    torch.save(model, model_name)
+    model_name = f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}.pt'
+    torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
     print("Deleting models from previous epochs...")
     for epoch in range(args.epochs):
-        os.remove(f"H:/GitHub/DAVE2-Keras/model-{iteration}-epoch{epoch}.pt")
+        os.remove(f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt")
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
-    with open(f'H:/GitHub/DAVE2-Keras/model-{iteration}-metainfo.txt', "w") as f:
+    with open(f'/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
                 f"total_samples={dataset.get_total_samples()}\n"
                 f"{args.epochs=}\n"
