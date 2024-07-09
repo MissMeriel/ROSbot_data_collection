@@ -59,7 +59,7 @@ def characterize_steering_distribution(y_steering, generator):
 
 def main():
     start_time = time.time()
-    input_shape = (2560, 720)  # Example input shape: width x height
+    input_shape = (1344, 376)  # Example input shape: width x height
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
     print(args)
@@ -92,7 +92,7 @@ def main():
             #chatgpt
             # Changed: Access sample directly from batch
             for sample in batch:
-                batch_images.append(sample['image name '])  # Append image to batch_images list
+                batch_images.append(sample['image name'])  # Append image to batch_images list
                 batch_labels.append(sample['angular_speed_z'])  # Append angular speed to batch_labels list
 
             # Convert lists to tensors
