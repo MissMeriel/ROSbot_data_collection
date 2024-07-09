@@ -105,6 +105,8 @@ def main():
                 batch_labels.append(sample['angular_speed_z'])  # Append angular speed to batch_labels list
 
             # Convert lists to tensors
+            #batch size(64), channels (3), height(376), width (1344)
+            #RuntimeError: stack expects each tensor to be equal size, but got [64, 3, 376, 1344] at entry 0 and [64, 3, 188, 188] at entry 5
             batch_images = torch.stack(batch_images).float().to(device)  # Convert image list to tensor and move to device
             batch_labels = torch.stack(batch_labels).float().to(device)  # Convert label list to tensor and move to device
 
