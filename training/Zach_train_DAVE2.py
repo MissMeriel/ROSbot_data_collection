@@ -89,26 +89,27 @@ def main():
         for i, batch in enumerate(trainloader, 0):
             batch_images = []
             batch_labels = []
-            for samples in batch:
-                for sample in samples:
-                    batch_images.append(sample['image'])
-                    batch_labels.append(sample['angular_speed_z'])
+            #chatgpt
+            # Changed: Access sample directly from batch
+            for sample in batch:
+                batch_images.append(sample['image'])  # Append image to batch_images list
+                batch_labels.append(sample['angular_speed_z'])  # Append angular speed to batch_labels list
 
-            # convert lists to tensors
-            batch_images = torch.stack(batch_images).float().to(device)  # convert image list to tensor and move to device
-            batch_labels = torch.stack(batch_labels).float().to(device)  # convert label list to tensor and move to device
+            # Convert lists to tensors
+            batch_images = torch.stack(batch_images).float().to(device)  # Convert image list to tensor and move to device
+            batch_labels = torch.stack(batch_labels).float().to(device)  # Convert label list to tensor and move to device
 
-            # wrap in variables for autograd
+            # Wrap in variables for autograd
             batch_images = Variable(batch_images, requires_grad=True)
             batch_labels = Variable(batch_labels, requires_grad=False)
 
-            optimizer.zero_grad()  # zero the parameter gradients
+            optimizer.zero_grad()  # Zero the parameter gradients
 
-            # forward pass through the DNN
-            outputs = model(batch_images)  # pass the batch of images to the DNN
-            loss = F.mse_loss(outputs.flatten(), batch_labels)  # calculate the loss
-            loss.backward()  # backpropagate the loss
-            optimizer.step()  # update the model parameters
+            # Forward pass through the DNN
+            outputs = model(batch_images)  # Pass the batch of images to the DNN
+            loss = F.mse_loss(outputs.flatten(), batch_labels)  # Calculate the loss
+            loss.backward()  # Backpropagate the loss
+            optimizer.step()  # Update the model parameters
             running_loss += loss.item()
             if i % logfreq == logfreq - 1:
                 print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq))
@@ -119,6 +120,7 @@ def main():
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
+
     print(f"Finished {epoch=}")
     model_name = f"/u/<your-computing-id>/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
     print(f"Saving model to {model_name}")
