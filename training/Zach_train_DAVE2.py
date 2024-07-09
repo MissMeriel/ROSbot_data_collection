@@ -63,8 +63,17 @@ def main():
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
     print(args)
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]), \
-                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+    # Add Resize transformation to ensure all images are the same size
+    dataset = MultiDirectoryDataSequence(
+        args.dataset,
+        image_size=(model.input_shape[::-1]),  # Ensure this matches the expected input size of the model
+        transform=Compose([
+            Resize((model.input_shape[1], model.input_shape[0])),  # Resize to the model's input shape
+            ToTensor()
+        ]),
+        robustification=args.robustification,
+        noise_level=args.noisevar
+    ) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
