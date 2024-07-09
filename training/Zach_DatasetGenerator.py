@@ -246,9 +246,17 @@ class MultiDirectoryDataSequence(data.Dataset):
         df_index = df.index[df['image name'] == img_name.name]
         orig_y_steer = df.loc[df_index, 'angular_speed_z'].item()
         y_throttle = df.loc[df_index, 'linear_speed_x'].item()
-        y_steer = copy.deepcopy(orig_y_steer)
 
-        # Define the list of individual transformation functions
+        # Convert y_steer to float tensor if necessary
+        y_steer = torch.FloatTensor([orig_y_steer])
+        y_throttle = torch.FloatTensor([y_throttle])
+
+
+        # Convert lidar_ranges to list if it is a pandas Series
+        lidar_ranges = df.loc[df_index, 'lidar_ranges'].tolist() if isinstance(df.loc[df_index, 'lidar_ranges'], pd.Series) else df.loc[df_index, 'lidar_ranges']
+
+
+    # Define the list of individual transformation functions
         transform_funcs = [
             add_shadow, time_of_day_transform_dusk, add_elastic_transform,
             add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
@@ -286,13 +294,14 @@ class MultiDirectoryDataSequence(data.Dataset):
             print(f"Processed {len(transform_funcs) + len(composed_transform_funcs)} transformations for image {idx}")
 
         # create a list of augmented samples
+        # create a list of augmented samples
         augmented_samples = []
         for img in all_transformed_images:
             augmented_samples.append({
                 "image name": img,
-                "angular_speed_z": torch.FloatTensor([y_steer]),
-                "linear_speed_x": torch.FloatTensor([y_throttle]),
-                "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
+                "angular_speed_z": y_steer,
+                "linear_speed_x": y_throttle,
+                "lidar_ranges": lidar_ranges,
                 "all": torch.FloatTensor([y_steer, y_throttle])
             })
 
@@ -300,7 +309,7 @@ class MultiDirectoryDataSequence(data.Dataset):
             "image name": orig_image,
             "angular_speed_z": torch.FloatTensor([orig_y_steer]),
             "linear_speed_x": torch.FloatTensor([y_throttle]),
-            "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
+            "lidar_ranges": lidar_ranges,
             "all": torch.FloatTensor([orig_y_steer, y_throttle])
         }
 
