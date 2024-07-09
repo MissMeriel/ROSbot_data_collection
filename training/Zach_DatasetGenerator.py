@@ -3,7 +3,7 @@ import os, cv2, csv
 # from DAVE2 import DAVE2Model
 # from DAVE2pytorch import DAVE2PytorchModel
 import kornia
-
+from torchvision.transforms import ToPILImage
 from PIL import Image
 import copy
 from scipy import stats
@@ -65,7 +65,7 @@ class DataSequence(data.Dataset):
         img_name = self.image_paths[idx]
         image = sio.imread(img_name)
 
-        df_index = self.df.index[self.df['image'] == img_name.name]
+        df_index = self.df.index[self.df['image name'] == img_name.name]
         y_thro = self.df.loc[df_index, 'linear_speed_x'].array[0]
         y_steer = self.df.loc[df_index, 'angular_speed_z'].array[0]
         y = [y_steer, y_thro]
@@ -86,7 +86,7 @@ class DataSequence(data.Dataset):
         # print(y_steer.array[0])
 
         # sample = {"image": image, "steering_input": y_steer.array[0]}
-        sample = {"image": image, "angular_speed_z": y}
+        sample = {"image name": image, "angular_speed_z": y}
 
         self.cache[idx] = sample
         return sample
@@ -187,7 +187,7 @@ class MultiDirectoryDataSequence(data.Dataset):
             if self.robustification:
                 sample = self.cache[idx]
                 y_steer = sample["angular_speed_z"]
-                image = copy.deepcopy(sample["image"])
+                image = copy.deepcopy(sample["image name"])
 
                 # Define the list of individual transformation functions
                 # chatgpt
@@ -247,7 +247,7 @@ class MultiDirectoryDataSequence(data.Dataset):
                 augmented_samples = []
                 for img in all_transformed_images:
                     augmented_samples.append({
-                        "image": img,
+                        "image name": img,
                         "angular_speed_z": y_steer,
                         "linear_speed_x": sample["linear_speed_x"],
                         "lidar_ranges": sample['lidar_ranges'],
@@ -269,7 +269,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         # Retrieve the corresponding steering and throttle values from the dataframe
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
-        df_index = df.index[df['image'] == img_name.name]
+        df_index = df.index[df['image name'] == img_name.name]
         orig_y_steer = df.loc[df_index, 'angular_speed_z'].item()
         y_throttle = df.loc[df_index, 'linear_speed_x'].item()
         y_steer = copy.deepcopy(orig_y_steer)
@@ -318,7 +318,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         augmented_samples = []
         for img in all_transformed_images:
             augmented_samples.append({
-                "image": img,
+                "image name": img,
                 "angular_speed_z": torch.FloatTensor([y_steer]),
                 "linear_speed_x": torch.FloatTensor([y_throttle]),
                 "lidar_ranges": df.loc[df_index, 'lidar_ranges'],
@@ -326,7 +326,7 @@ class MultiDirectoryDataSequence(data.Dataset):
             })
 
         orig_sample = {
-            "image": orig_image,
+            "image name": orig_image,
             "angular_speed_z": torch.FloatTensor([orig_y_steer]),
             "linear_speed_x": torch.FloatTensor([y_throttle]),
             "lidar_ranges": df.loc[df_index, 'lidar_ranges'],

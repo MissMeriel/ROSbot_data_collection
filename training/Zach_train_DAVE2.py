@@ -3,6 +3,7 @@ import argparse
 import pandas as pd
 import matplotlib.image as mpimg
 from torch.autograd import Variable
+from torchvision.transforms import ToPILImage
 
 # import h5py
 import os
@@ -10,7 +11,7 @@ import os
 # import PIL
 import matplotlib.pyplot as plt
 # import csv
-from DatasetGenerator import MultiDirectoryDataSequence
+from Zach_DatasetGenerator import MultiDirectoryDataSequence
 import time
 import sys
 sys.path.append("../models")
