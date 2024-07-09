@@ -150,35 +150,33 @@ class MultiDirectoryDataSequence(data.Dataset):
 
     def __getitem__(self, idx):
         # helper function to apply individual transformations to the image
-        def custom_transform(image, transform_funcs, levels):
+        def custom_transform(image, transform_funcs):
             augmented_images = []
-            for level in levels:
-                for transform_func in transform_funcs:
-                    try:
-                        # ensure image is in PIL format
-                        if isinstance(image, torch.Tensor):
-                            image = ToPILImage()(image)
-                        augmented_image = transform_func(image, level)
-                        augmented_images.append(ToTensor()(augmented_image))
-                    except Exception as e:
-                        print(f"Error applying {transform_func.__name__} with level {level}: {e}")
+            for transform_func in transform_funcs:
+                try:
+                    # ensure image is in PIL format
+                    if isinstance(image, torch.Tensor):
+                        image = ToPILImage()(image)
+                    augmented_image = transform_func(image, 0.5)  # Apply with 50% intensity
+                    augmented_images.append(ToTensor()(augmented_image))
+                except Exception as e:
+                    print(f"Error applying {transform_func.__name__}: {e}")
             return augmented_images
 
         # helper function to apply composed transformations to the image
-        def apply_composed_transformations(image, composed_transform_funcs, levels):
+        def apply_composed_transformations(image, composed_transform_funcs):
             augmented_images = []
-            for level in levels:
-                for transform_func_list in composed_transform_funcs:
-                    try:
-                        # ensure image is in PIL format
-                        if isinstance(image, torch.Tensor):
-                            image = ToPILImage()(image)
-                        augmented_image = image
-                        for transform_func in transform_func_list:
-                            augmented_image = transform_func(augmented_image, level)
-                        augmented_images.append(ToTensor()(augmented_image))
-                    except Exception as e:
-                        print(f"Error applying composed transformations {transform_func_list} with level {level}: {e}")
+            for transform_func_list in composed_transform_funcs:
+                try:
+                    # ensure image is in PIL format
+                    if isinstance(image, torch.Tensor):
+                        image = ToPILImage()(image)
+                    augmented_image = image
+                    for transform_func in transform_func_list:
+                        augmented_image = transform_func(augmented_image, 0.5)  # Apply with 50% intensity
+                    augmented_images.append(ToTensor()(augmented_image))
+                except Exception as e:
+                    print(f"Error applying composed transformations {transform_func_list}: {e}")
             return augmented_images
 
         # Check if the sample is already in the cache
@@ -209,40 +207,16 @@ class MultiDirectoryDataSequence(data.Dataset):
                     [add_lens_distortion, add_noise]
                 ]
 
-                # Define the levels of intensity for the transformations
-                levels = [i / 100 for i in range(5, 85, 5)]
-
-                # Apply each transformation individually with a probability of 50%
-                flipped = False
-                for transform_func in transform_funcs:
-                    if random.random() > 0.5:
-                        # Apply the transformation with a random level between 0.01 and 1.0
-                        level = random.uniform(0.01, 1.0)
-                        if transform_func == horizontal_flip:
-                            flipped = True
-                            y_steer = -y_steer
-                            if isinstance(sample['lidar_ranges'], str):
-                                lidar_data = np.array([float(x) for x in sample['lidar_ranges'].split()])
-                            else:
-                                lidar_data = np.array([float(sample['lidar_ranges'])])
-                            flipped_lidar_data = np.flip(lidar_data).tolist()
-                            sample['lidar_ranges'] = ' '.join(map(str, flipped_lidar_data))
-                        image = transform_func(image, level)
-
-                # Add noise to the image and clamp the values to be within valid range
-                image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
-
                 # Apply custom transformations
-                transformed_images = custom_transform(image, transform_funcs, levels)
+                transformed_images = custom_transform(image, transform_funcs)
 
                 # Apply composed transformations
-                composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs, levels)
+                composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs)
 
                 # Combine individual and composed transformations
                 all_transformed_images = transformed_images + composed_transformed_images
 
                 # Create the sample dictionary
-
                 # create a list of augmented samples
                 augmented_samples = []
                 for img in all_transformed_images:
@@ -292,14 +266,11 @@ class MultiDirectoryDataSequence(data.Dataset):
             [add_lens_distortion, add_noise]
         ]
 
-        # Define the levels of intensity for the transformations
-        levels = [i / 100 for i in range(5, 85, 5)]
-
         # Apply custom transformations
-        transformed_images = custom_transform(orig_image, transform_funcs, levels)
+        transformed_images = custom_transform(orig_image, transform_funcs)
 
         # Apply composed transformations
-        composed_transformed_images = apply_composed_transformations(orig_image, composed_transform_funcs, levels)
+        composed_transformed_images = apply_composed_transformations(orig_image, composed_transform_funcs)
 
         # Combine individual and composed transformations
         all_transformed_images = transformed_images + composed_transformed_images
@@ -312,7 +283,7 @@ class MultiDirectoryDataSequence(data.Dataset):
             ax[1].imshow(all_transformed_images[0].permute(1, 2, 0))  # First transformed image
             ax[1].set_title(f'Transformed Image {idx}')
             plt.show()
-            print(f"Processed {len(levels) * len(transform_funcs) + len(levels) * len(composed_transform_funcs)} transformations for image {idx}")
+            print(f"Processed {len(transform_funcs) + len(composed_transform_funcs)} transformations for image {idx}")
 
         # create a list of augmented samples
         augmented_samples = []
@@ -336,6 +307,8 @@ class MultiDirectoryDataSequence(data.Dataset):
         self.cache[idx] = orig_sample
 
         return augmented_samples
+
+
 
 
 
