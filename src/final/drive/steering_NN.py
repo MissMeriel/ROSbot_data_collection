@@ -31,6 +31,10 @@ class Steering_NN(Node):
         # self.model = torch.load('/home/husarion/ros2_ws/src/final/final/model-DAVE2v3-135x240-lr0.001-50epoch-64batch-lossMSE-7Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-best.pt')
         self.model.eval()
 
+        # For incomplete Modesls
+        # themodel = '/PathToYourModel'
+        # self.model = torch.load(themodel, map_location=torch.device('cpu'))
+
         self.publisher_vel = self.create_publisher(Twist, '/cmd_vel', 1)
         self.image_subscription = self.create_subscription(sensor_msgs.msg.Image, '/image_raw', self.image_callback, 10)
         print("lidar was subscribed to")
