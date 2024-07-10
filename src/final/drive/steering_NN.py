@@ -25,7 +25,7 @@ class Steering_NN(Node):
         super().__init__('steering_NN')
 
         # Load model weights & bias
-        self.input_shape = (2560, 720) # Change this value to match your input shape. Example: (width x height) for image input
+        self.input_shape = (2560, 720)# Change this value to match your input shape. Example: (width x height) for image input
         self.model = DAVE2v3(input_shape=self.input_shape)
         self.model.load_state_dict(torch.load(
             '/home/husarion/ros2_ws/src/final/models/Trained_Models/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-8Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur.pt',
