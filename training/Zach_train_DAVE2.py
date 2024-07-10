@@ -59,12 +59,15 @@ def characterize_steering_distribution(y_steering, generator):
 
 def main():
     start_time = time.time()
-    input_shape = (2560, 720)  # Example input shape: width x height
+    input_shape = (360, 180)  # Example input shape: width x height
     model = DAVE2v3(input_shape=input_shape)
     args = parse_arguments()
     print(args)
     # Add Resize transformation to ensure all images are the same size
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]), \
+    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([
+        Resize((180, 360)),  # New resolution
+        ToTensor()
+    ]),
                                          robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
 
     print("Retrieving output distribution....")
@@ -110,7 +113,7 @@ def main():
 
 
             # -1 means automatically determine the size of this dimension, 3 color channels, 720 height, 2560 wide
-            batch_images = batch_images.view(-1, 3, 720, 2560)  # Correct the shape to [batch_size, channels, height, width]
+            batch_images = batch_images.view(-1, 3, 180, 360)  # New resolution: channels, height, width
 
             optimizer.zero_grad()  # Zero the parameter gradients
 
