@@ -64,16 +64,9 @@ def main():
     args = parse_arguments()
     print(args)
     # Add Resize transformation to ensure all images are the same size
-    dataset = MultiDirectoryDataSequence(
-        args.dataset,
-        image_size=(720, 2560),  # Ensure this matches the expected input size of the model
-        transform=Compose([
-            Resize((720, 2560)),  # Resize to the model's input shape
-            ToTensor()
-        ]),
-        robustification=args.robustification,
-        noise_level=args.noisevar
-    ) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=Compose([ToTensor()]), \
+                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
