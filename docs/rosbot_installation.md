@@ -15,10 +15,10 @@ N.B. READ THE INSTRUCTIONS ALL THE WAY THROUGH AND SKIM THE TROUBLESHOOTING SECT
 This will make setup a lot faster as you can make sure you have everything you need ready to go (keyboard, mouse, bluetooth dongle, wifi connection...).
 
 1. Plug the USB drive into a computer and format the USB drive as Fat32 (see Troubleshooting). Reformat the drive if needed. Be sure to retain a copy of the data on your local computer if reformatting is required. 
-2. Copy `start_rosbot.sh` file and `src` directory to your USB drive. Plug the USB drive into your ROSbot.
+2. Copy `start_rosbotxl.sh` file and `src` directory to your USB drive. Plug the USB drive into your ROSbot.
 3. Connect to your ROSbot (ssh, plug in a monitor and mouse/keyboard, etc.).
-4. Copy `start_rosbot.sh` to  `/home/husarion`.  In linux this directory has a shortcut, `~` and is always in location `/home/$USER` like /home/husarion. This is the script that will allow drivers and data collection scripts to start on boot. 
-5. Give `start_rosbot.sh` executable permissions by running `chmod +x start_rosbot.sh`.
+4. Copy `start_rosbotxl.sh` to  `/home/husarion`.  In linux this directory has a shortcut, `~` and is always in location `/home/$USER` like /home/husarion. This is the script that will allow drivers and data collection scripts to start on boot. 
+5. Give `start_rosbotxl.sh` executable permissions by running `chmod +x start_rosbotxl.sh`.
 6. Copy the `datacoll` package inside `src` to `~/husarion_ws/src`.
 7. Add executable permissions to all `.py` scripts in the `datacoll` package: `cd ~/husarion_ws/src/datacoll/src; chmod +x *.py`
 8. `cd ~/husarion_ws; source devel/setup.bash`
@@ -45,8 +45,8 @@ This will make setup a lot faster as you can make sure you have everything you n
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
 Refer to the "First time connecting your controller to the ROSbot" section if this is your first time connecting. 
 Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
-13. Try running the startup script: `./start_rosbot.sh`. If you experience errors, refer to troubleshooting.
-14. If steps #11-12 run smoothly, add `./start_rosbot.sh` to your startup routine. For more detailed instructions and screenshots, see section below on adding scripts to your startup routine.
+13. Try running the startup script: `./start_rosbotxl.sh`. If you experience errors, refer to troubleshooting.
+14. If steps #11-12 run smoothly, add `./start_rosbotxl.sh` to your startup routine. For more detailed instructions and screenshots, see section below on adding scripts to your startup routine.
     1. In the terminal enter the command: `chmod +x $HOME/start_rosbotxl.sh`
     2. In the terminal enter the command: `crontab -e`
     3. At the end of the crontab file, add `@reboot $HOME/start_rosbotxl.sh`
@@ -61,7 +61,7 @@ Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
 ![](figures/session-and-startup.png)
 3. Hit the "Add" icon to add a new routine to startup.
 ![](figures/session-and-startup-add.png)
-4. Write a name and description. In the "Command" field, type `/bin/bash -c "sleep 10 & /home/husarion/start_rosbot.sh"`.
+4. Write a name and description. In the "Command" field, type `/bin/bash -c "sleep 10 & /home/husarion/start_rosbotxl.sh"`.
 ![](figures/session-and-startup-add-complete.png)
 
 ## First time connecting your controller to the ROSbot
