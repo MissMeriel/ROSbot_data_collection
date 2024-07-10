@@ -78,6 +78,10 @@ class DataSequence(data.Dataset):
 
         if self.transform:
             image = self.transform(image).float()
+
+        #debug statement
+        print(f"Image index {idx} size after transformation: {image.size if isinstance(image, Image.Image) else image.shape}")
+
         # print(f"{img_name.name=} {y_steer=}")
         # print(f"{image=}")
         # print(f"{type(image)=}")
