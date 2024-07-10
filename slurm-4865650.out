@@ -1,0 +1,30 @@
+INFO:albumentations.check_version:A new version of Albumentations is available: 1.4.11 (you have 1.4.10). Upgrade using: pip install --upgrade albumentations
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3464: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/_methods.py:192: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3747: RuntimeWarning: Degrees of freedom <= 0 for slice
+  return _methods._var(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/_methods.py:226: RuntimeWarning: invalid value encountered in divide
+  arrmean = um.true_divide(arrmean, div, out=arrmean,
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/_methods.py:261: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/scipy/stats/_stats_py.py:1304: RuntimeWarning: Mean of empty slice.
+  mean = a.mean(axis, keepdims=True)
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/numpy/core/_methods.py:184: RuntimeWarning: invalid value encountered in divide
+  ret = um.true_divide(
+/u/ezj2hu/ROSbot_data_collection/.venv/lib/python3.8/site-packages/scipy/stats/_stats_py.py:1417: RuntimeWarning: Mean of empty slice.
+  mean = a.mean(axis, keepdims=True)
+Namespace(batch=64, dataset='datasets/rosbotxl_data', epochs=100, log_interval=50, lr=0.0001, noisevar=15, robustification=True)
+Finished intaking image paths!
+Retrieving output distribution....
+Traceback (most recent call last):
+  File "training/Zach_train_DAVE2.py", line 175, in <module>
+    main()
+  File "training/Zach_train_DAVE2.py", line 74, in main
+    print("Moments of distribution:", dataset.get_outputs_distribution())
+  File "/u/ezj2hu/ROSbot_data_collection/training/Zach_DatasetGenerator.py", line 330, in get_outputs_distribution
+    moments = self.get_distribution_moments(all_outputs)
+  File "/u/ezj2hu/ROSbot_data_collection/training/Zach_DatasetGenerator.py", line 346, in get_distribution_moments
+    moments['max'] = max(arr)
+ValueError: max() arg is an empty sequence

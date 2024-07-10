@@ -12,4 +12,5 @@ __pycache__/
 # Ignore other common directories
 node_modules/
 build/
-
+models/
+datasets/
