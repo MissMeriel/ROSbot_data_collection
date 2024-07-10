@@ -115,6 +115,10 @@ def main():
             batch_images = Variable(batch_images, requires_grad=True)
             batch_labels = Variable(batch_labels, requires_grad=False)
 
+
+            # -1 means automatically determine the size of this dimension, 3 color channels, 720 height, 2560 wide
+            batch_images = batch_images.view(-1, 3, 720, 2560)  # Correct the shape to [batch_size, channels, height, width]
+
             optimizer.zero_grad()  # Zero the parameter gradients
 
             # Forward pass through the DNN
