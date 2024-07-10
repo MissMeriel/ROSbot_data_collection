@@ -39,7 +39,7 @@ This will make setup a lot faster as you can make sure you have everything you n
                    "wahoo": 
                       hidden: true
            ```
-        6. To configure netplan, save the `01-network-manager-all.yaml` file, then run `sudo netplan -d apply`.
+        5. To configure netplan, save the `01-network-manager-all.yaml` file, then run `sudo netplan -d apply`.
 10. Install the `joy_node` package: `sudo apt install ros-<distro>-joy`. Refer to the Installing Packages section of troubleshooting for determining your distro and updating your ros repo and authentication.
 11. Install `bluez` and its command line interface, `bluetoothctl` by running: ` sudo apt install bluez`. It may have been installed by a previous user.
 12. Run `sudo service bluetooth start; bluetoothctl scan on`. Try connecting your Xbox controller to the bluetooth. 
@@ -70,11 +70,14 @@ You should have your Xbox controller's MAC address before you begin. The easiest
 
 1. You should also have `bluez` already installed on your ROSbot. Find out by running `bluetoothctl`. If not, run `sudo apt install bluetoothctl`.
 2. Run `sudo service bluetooth restart; bluetoothctl`. This will take you into the bluetoothctl prompt.
-3. Within the bluetoothctl prompt, run `devices`. For each device, run `remove <device-MAC>`
-4. Within the bluetoothctl prompt, run `scan on`
-4. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`
-5. You should see output similar to `Connection successful` and the prompt should change to
+3. Within the bluetoothctl prompt, run `devices` to list all Bluetooth devices that have been paired/currently connected to your ROSbot 
+4. Within the bluetoothctl prompt, run `remove <listed-device-MAC>` if there are devices shown from last step
+5. Within the bluetoothctl prompt, run `scan on` and set your Xbox controller in pairing mode. The Xbox controller with its MAC address will show up as `Xbox Wireless Controller` in your terminator.  
+6. Within the bluetoothctl prompt, run `connect <your-controller-MAC>`
+7. You should see output similar to `Connection successful` and the prompt should change to
 `[Xbox Wireless Controller]#`. The light on the Xbox controller should shine steadily. If not, or if the prompt shows the controller disconnecting and reconnecting, refer to Troubleshooting.
+
+To exit the bluetoothctl prompt, type `quit` or `exit`.
 
 ## Troubleshooting
 
@@ -137,13 +140,11 @@ Extra docs from Ubuntu to install `bluez`: [link](https://ubuntu.com/core/docs/b
 
 
 ### Camera calibration
-Basics of ROS camera calibration: [ros wiki](http://wiki.ros.org/camera_calibration)
+Basics of ROS camera calibration: [ros Index](https://index.ros.org/p/camera_calibration/n)
 
 
 ### Hardware diagrams and teardown
-Husarion guide: [link](https://husarion.com/manuals/rosbot/)
-
-Hackaday guide: [link](https://cdn.hackaday.io/files/21885936327840/ROSbot_assembly_instruction.pdf)
+Husarion manual: [link](https://husarion.com/manuals/rosbot-xl/)
 
 RK-370CA-22170 motor datasheet (DC 6.0V 181129): [link](https://datasheetspdf.com/pdf/1017717/MABUCHI/RK-370CA/1)
 
