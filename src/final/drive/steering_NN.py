@@ -27,14 +27,17 @@ class Steering_NN(Node):
         super().__init__('steering_NN')
 
         # Load model weights & bias
-        self.input_shape = (2560, 720)
-        self.model = torch.load(
-            '/home/husarion/ros2_ws/src/final/models/Trained_Models/Dave2-Keras-off-4-plus-corner/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-11Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-epoch56.pt',
-            map_location=torch.device('cpu'))
-        # self.model = DAVE2v3(input_shape=self.input_shape)
-        # self.model.load_state_dict(torch.load('/home/husarion/ros2_ws/src/final/models/Trained_Models/Dave2-Keras-off-4-plus-corner/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-11Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-epoch56.pt', map_location=torch.device('cpu')))
-        # self.model = torch.load('/home/husarion/ros2_ws/src/final/final/model-DAVE2v3-135x240-lr0.001-50epoch-64batch-lossMSE-7Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-best.pt')
-        self.model.eval()
+        self.input_shape = (2560, 720) # Change this value to match your input shape. Example: (width x height) for image input
+        model_path = '/home/husarion/ros2_ws/src/final/models/Trained_Models/Dave2-Keras-off-4-plus-corner/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-11Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-epoch56.pt' # Change the path to match where you saved the model
+        try:
+            self.model = DAVE2v3(input_shape=self.input_shape)
+            self.model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        except TypeError as e:
+            try:
+                self.model = torch.load(model_path, map_location=torch.device('cpu'))
+            except TypeError as e:
+                print(e)
+
 
         self.publisher_vel = self.create_publisher(Twist, '/cmd_vel', 1)
         self.image_subscription = self.create_subscription(sensor_msgs.msg.Image, '/image_raw', self.image_callback, 10)
