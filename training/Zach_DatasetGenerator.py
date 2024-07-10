@@ -18,7 +18,7 @@ import random
 
 from data_augmentation.transformations import (
     add_shadow, time_of_day_transform_dusk, add_elastic_transform,
-    add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+    add_blur_fn, color_jitter_fn, adjust_brightness_fn,
     adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
     add_lens_distortion, add_noise
 )
@@ -194,7 +194,7 @@ class MultiDirectoryDataSequence(data.Dataset):
                 # chatgpt
                 transform_funcs = [
                     add_shadow, time_of_day_transform_dusk, add_elastic_transform,
-                    add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+                    add_blur_fn, color_jitter_fn, adjust_brightness_fn,
                     adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
                     add_lens_distortion, add_noise
                 ]
@@ -204,7 +204,6 @@ class MultiDirectoryDataSequence(data.Dataset):
                 composed_transform_funcs = [
                     [add_shadow, time_of_day_transform_dusk],
                     [add_elastic_transform, add_blur_fn],
-                    [color_jitter_fn, random_crop],
                     [adjust_brightness_fn, adjust_contrast_fn],
                     [adjust_saturation_fn, horizontal_flip],
                     [add_lens_distortion, add_noise]
@@ -268,7 +267,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         # Define the list of individual transformation functions
         transform_funcs = [
             add_shadow, time_of_day_transform_dusk, add_elastic_transform,
-            add_blur_fn, color_jitter_fn, random_crop, adjust_brightness_fn,
+            add_blur_fn, color_jitter_fn, adjust_brightness_fn,
             adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
             add_lens_distortion, add_noise
         ]
@@ -277,7 +276,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         composed_transform_funcs = [
             [add_shadow, time_of_day_transform_dusk],
             [add_elastic_transform, add_blur_fn],
-            [color_jitter_fn, random_crop],
+
             [adjust_brightness_fn, adjust_contrast_fn],
             [adjust_saturation_fn, horizontal_flip],
             [add_lens_distortion, add_noise]
