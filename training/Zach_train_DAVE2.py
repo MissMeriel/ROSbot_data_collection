@@ -66,9 +66,9 @@ def main():
     # Add Resize transformation to ensure all images are the same size
     dataset = MultiDirectoryDataSequence(
         args.dataset,
-        image_size=(model.input_shape[::-1]),  # Ensure this matches the expected input size of the model
+        image_size=(720, 2560),  # Ensure this matches the expected input size of the model
         transform=Compose([
-            Resize((model.input_shape[1], model.input_shape[0])),  # Resize to the model's input shape
+            Resize((720, 2560)),  # Resize to the model's input shape
             ToTensor()
         ]),
         robustification=args.robustification,
@@ -101,6 +101,7 @@ def main():
             #chatgpt
             # Changed: Access sample directly from batch
             for sample in batch:
+                print(sample['image'].shape)
                 batch_images.append(sample['image name '])  # Append image to batch_images list
                 batch_labels.append(sample['angular_speed_z'])  # Append angular speed to batch_labels list
 
