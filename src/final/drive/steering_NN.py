@@ -29,7 +29,7 @@ class Steering_NN(Node):
         self.model = DAVE2v3(input_shape=self.input_shape)
         self.model.load_state_dict(torch.load(
             '/home/husarion/ros2_ws/src/final/models/Trained_Models/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-8Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur.pt',
-            map_location=torch.device('cpu')))
+            map_location=torch.device('cpu'))) # Change the path to match where you saved the model
         # self.model = torch.load('/home/husarion/ros2_ws/src/final/final/model-DAVE2v3-135x240-lr0.001-50epoch-64batch-lossMSE-7Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur-best.pt')
         self.model.eval()
 
