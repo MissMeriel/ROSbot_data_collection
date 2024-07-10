@@ -219,7 +219,11 @@ class MultiDirectoryDataSequence(data.Dataset):
                 # Combine individual and composed transformations
                 all_transformed_images = transformed_images + composed_transformed_images
 
-                # Create the sample dictionary
+
+                for img in all_transformed_images:
+                    print(f"Image size after transformation: {img.size if isinstance(img, Image.Image) else img.shape}")
+
+            # Create the sample dictionary
                 # create a list of augmented samples
                 augmented_samples = []
                 for img in all_transformed_images:
@@ -239,13 +243,13 @@ class MultiDirectoryDataSequence(data.Dataset):
         img_name = self.all_image_paths[idx]
         image = Image.open(img_name).convert('RGB')
         image = image.resize(self.image_size)
+        print(f"Image size after initial resize: {image.size}")
 
         # Apply the initial transformation
         if self.transform:
             image = self.transform(image)
 
-        # Debug print to verify image dimensions after transformation
-        print(f"Image size after transformation: {image.size if isinstance(image, Image.Image) else image.shape}")
+        print(f"Image size after applying self.transform: {image.size if isinstance(image, Image.Image) else image.shape}")
 
         # Retrieve the corresponding steering and throttle values from the dataframe
         pathobj = Path(img_name)
