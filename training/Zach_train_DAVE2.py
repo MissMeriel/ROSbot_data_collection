@@ -29,7 +29,7 @@ from torchvision.transforms import Compose, ToPILImage, ToTensor, Resize, Lambda
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', type=str, help='parent directory of training dataset')
-    parser.add_argument("--batch", type=int, default=64)
+    parser.add_argument("--batch", type=int, default=16)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--robustification", type=bool, default=True)
@@ -89,6 +89,8 @@ def main():
     lowest_loss = 1e5
     logfreq = 20
 
+    gradientStart = 4
+
     for epoch in range(args.epochs):
         running_loss = 0.0
         for i, batch in enumerate(trainloader, 0):
@@ -114,13 +116,15 @@ def main():
             # -1 means automatically determine the size of this dimension, 3 color channels, 720 height, 2560 wide
             batch_images = batch_images.view(-1, 3, 376, 1344)  # New resolution: channels, height, width
 
-            optimizer.zero_grad()  # Zero the parameter gradients
 
             # Forward pass through the DNN
             outputs = model(batch_images)  # Pass the batch of images to the DNN
             loss = F.mse_loss(outputs.flatten(), batch_labels)  # Calculate the loss
             loss.backward()  # Backpropagate the loss
-            optimizer.step()  # Update the model parameters
+
+            if (i + 1) % gradientStart == 0:
+                optimizer.step()
+                optimizer.zero_grad()
             running_loss += loss.item()
             if i % logfreq == logfreq - 1:
                 print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq))
