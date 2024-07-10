@@ -101,7 +101,7 @@ def main():
             #chatgpt
             # Changed: Access sample directly from batch
             for sample in batch:
-                print(sample['image'].shape)
+                print(sample['image name'].shape)
                 batch_images.append(sample['image name '])  # Append image to batch_images list
                 batch_labels.append(sample['angular_speed_z'])  # Append angular speed to batch_labels list
 
