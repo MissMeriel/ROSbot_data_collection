@@ -72,3 +72,9 @@ Defines the individual and composed transformations that can be applied to image
 - Ensure that the paths specified in the command-line arguments exist and are accessible.
 - The transformations will be saved in an `augmented_data` directory within each collection directory.
 - The CSV file corresponding to each collection will be updated with the new image paths.
+
+## Example Transformations
+
+- For examples of all transformations, please refer to the [augmented_data](./augmented_data) directory.
+- The ending number indicates the intensity applied to each transformation.
+
