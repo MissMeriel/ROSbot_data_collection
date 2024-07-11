@@ -75,6 +75,6 @@ Defines the individual and composed transformations that can be applied to image
 
 ## Example Transformations
 
-- For examples of all transformations, please refer to the [augmented_data](./augmented_data) directory.
+- For examples of all transformations, please refer to the [augmented_data](./augmented_data/augmented_data) directory.
 - The ending number indicates the intensity applied to each transformation.
 
