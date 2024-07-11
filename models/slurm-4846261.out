@@ -1,5 +1,0 @@
-/var/spool/slurmd/job4846261/slurm_script: line 2: .venv/bin/activate: No such file or directory
-Current working directory: /u/ezj2hu/ROSbot_data_collection/models
-total 1
-drwxr-xr-x+ 4 ezj2hu csugrad 5 Jun 28 14:26 rosbotxl_data
-python3: can't open file '/u/ezj2hu/ROSbot_data_collection/models/train_DAVE2.py': [Errno 2] No such file or directory
