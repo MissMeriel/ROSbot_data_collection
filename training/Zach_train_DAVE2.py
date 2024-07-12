@@ -135,11 +135,9 @@ def main():
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
-
-    print(f"Finished {epoch=}")
-    model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
-    print(f"Saving model to {model_name}")
-    torch.save(model, model_name)
+        print(f"Finished {epoch=}")
+        model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
+        torch.save(model, model_name)
         # if loss < 0.002:
         #     print(f"Loss at {loss}; quitting training...")
         #     break
