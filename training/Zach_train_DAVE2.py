@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.image as mpimg
 from torch.autograd import Variable
 from torchvision.transforms import ToPILImage
+import pickle
 
 # import h5py
 import os
@@ -70,6 +71,8 @@ def main():
     ]),
                                          robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
 
+    loss_history = []
+
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
@@ -127,18 +130,24 @@ def main():
                 optimizer.zero_grad()
             running_loss += loss.item()
             if i % logfreq == logfreq - 1:
-                print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq))
+                loss_value = running_loss / logfreq
+                loss_history.append(loss_value)
+                print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq), flush=True)
                 if (running_loss / logfreq) < lowest_loss:
-                    print(f"New best model! MSE loss: {running_loss / logfreq}")
+                    print(f"New best model! MSE loss: {running_loss / logfreq}", flush=True)
                     model_name = f"./model-{iteration}-best.pt"
-                    print(f"Saving model to {model_name}")
+                    print(f"Saving model to {model_name}", flush=True)
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
-        print(f"Finished {epoch=}")
+        print(f"Finished {epoch=}", flush=True)
         model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
         torch.save(model, model_name)
-        # if loss < 0.002:
+        with open(f'loss_history_{iteration}.pkl', 'wb') as f:
+            pickle.dump(loss_history, f)
+
+
+    # if loss < 0.002:
         #     print(f"Loss at {loss}; quitting training...")
         #     break
     print('Finished Training')
