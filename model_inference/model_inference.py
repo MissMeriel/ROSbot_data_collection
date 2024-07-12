@@ -130,6 +130,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             plt.figure(figsize=(15, 5))
             plt.plot(plot_image_names, actual_values, label='Actual')
             plt.gca().axes.xaxis.set_ticklabels([])
+            plt.tick_params(bottom=False)
             plt.plot(plot_image_names, predicted_values, label='Predicted')
             plt.xlabel('Image Index')
             plt.ylabel('Angular Speed Z')
