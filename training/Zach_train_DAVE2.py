@@ -135,13 +135,13 @@ def main():
                 print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq), flush=True)
                 if (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! MSE loss: {running_loss / logfreq}", flush=True)
-                    model_name = f"./model-{iteration}-best.pt"
+                    model_name = f"./model-{iteration}-{time.time()}-best.pt"
                     print(f"Saving model to {model_name}", flush=True)
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
         print(f"Finished {epoch=}", flush=True)
-        model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}.pt"
+        model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}-{time.time()}.pt"
         torch.save(model, model_name)
         with open(f'loss_history_{iteration}.pkl', 'wb') as f:
             pickle.dump(loss_history, f)
