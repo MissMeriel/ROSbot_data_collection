@@ -82,7 +82,7 @@ def main():
     trainloader = DataLoader(dataset, batch_size=args.batch, shuffle=True, worker_init_fn=worker_init_fn)
     print("time to load dataset: {}".format(time.time() - start_time))
 
-    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-lr{args.lr}-{args.epochs}epoch-{args.batch}batch-lossMSE-{int(dataset.get_total_samples()/1000)}Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur'
+    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-lr{args.lr}-{args.epochs}epoch-{args.batch}batch-lossMSE-{int(dataset.get_total_samples()/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"{device=}")
@@ -141,8 +141,10 @@ def main():
                     lowest_loss = running_loss / logfreq
                 running_loss = 0.0
         print(f"Finished {epoch=}", flush=True)
-        model_name = f"/u/ezj2hu/ROSbot_data_collection/models/Dave2-Keras/model-{iteration}-epoch{epoch}-{time.time()}.pt"
+        model_name = f"./model-{iteration}-epoch{epoch}-{time.time()}.pt"
         torch.save(model, model_name)
+        current_directory = os.getcwd()
+        print(f"Saving file to directory: {current_directory}", flush = True)
         with open(f'loss_history_{iteration}.pkl', 'wb') as f:
             pickle.dump(loss_history, f)
 
