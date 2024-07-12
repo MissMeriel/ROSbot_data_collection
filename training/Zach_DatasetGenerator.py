@@ -270,7 +270,6 @@ class MultiDirectoryDataSequence(data.Dataset):
         composed_transform_funcs = [
             [add_shadow, time_of_day_transform_dusk],
             [add_elastic_transform, add_blur_fn],
-
             [adjust_brightness_fn, adjust_contrast_fn],
             [adjust_saturation_fn, horizontal_flip],
             [add_lens_distortion, add_noise]
