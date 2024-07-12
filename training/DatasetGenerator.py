@@ -99,7 +99,6 @@ class MultiDirectoryDataSequence(data.Dataset):
         all_image_paths = []
         self.dfs_hashmap = {}
         self.dirs = []
-        # marker = "_YES"
         marker = "collection"
         for p in Path(root).iterdir():
             if p.is_dir() and marker in str(p): #"_NO" not in str(p) and "YQWHF3" not in str(p):
@@ -130,13 +129,14 @@ class MultiDirectoryDataSequence(data.Dataset):
         self.cache = {}
         self.robustification = robustification
         self.noise_level = noise_level
+        # random.seed(123)
 
     def get_total_samples(self):
         return self.size
 
     def get_directories(self):
         return self.dirs
-        
+
     def __len__(self):
         return len(self.all_image_paths)
 
@@ -168,6 +168,13 @@ class MultiDirectoryDataSequence(data.Dataset):
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
         df_index = df.index[df['image name'] == img_name.name]
+
+        # Check if df_index is empty or has more than one entry
+        if len(df_index) != 1:
+            # Print all items in df_index
+            print(f"All items in Error df_index: {df_index.tolist()}")
+            raise ValueError(f"Expected exactly one row for {img_name.name}, found {len(df_index)} rows (df_index) in directory: {self.root}. df is {df}. pathobj is {pathobj}")
+
         orig_y_steer = df.loc[df_index, 'angular_speed_z'].item()
         y_throttle = df.loc[df_index, 'linear_speed_x'].item()
         y_steer = copy.deepcopy(orig_y_steer)
@@ -203,9 +210,9 @@ class MultiDirectoryDataSequence(data.Dataset):
         # plt.show()
         # plt.pause(0.01)
 
-        sample = {"image name": image, "angular_speed_z": torch.FloatTensor([y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
+        sample = {"image": img_name.name, "image name": image, "angular_speed_z": torch.FloatTensor([y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
         orig_sample = {"image name": orig_image, "angular_speed_z": torch.FloatTensor([orig_y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
-        self.cache[idx] = orig_sample
+        #self.cache[idx] = orig_sample
         return sample
 
     def get_outputs_distribution(self):
