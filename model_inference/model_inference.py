@@ -1,9 +1,8 @@
 import sys
 import os
+import time
 import torch
 import matplotlib.pyplot as plt
-sys.path.append("../training")
-from DatasetGenerator import MultiDirectoryDataSequence
 from torchvision.transforms import Compose, ToTensor
 import pandas as pd
 from PIL import Image
@@ -11,6 +10,8 @@ from torch.autograd import Variable
 import csv
 import re
 
+sys.path.append("../training")
+from DatasetGenerator import MultiDirectoryDataSequence
 sys.path.append("../models")
 from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
 
@@ -21,8 +22,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate dataset and plot predictions vs actual")
     parser.add_argument('--dataset_dir', type=str, help='Directory of the dataset')
     parser.add_argument('--models_dir', type=str, help='Directory containing .pt model files')
-    parser.add_argument('--output_dir', type=str, default='./inference_testgpu', help='Directory to save the plots')
-    parser.add_argument('--image_size', type=tuple, default=(2560, 720), help='Image size for the dataset')
+    parser.add_argument('--output_dir', type=str, default='./test715full', help='Directory to save the plots')
+    parser.add_argument('--image_width', type=str, default="2560", help='Image width for the dataset')
+    parser.add_argument('--image_height', type=str, default="720", help='Image height for the dataset')
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size for DataLoader')
     args = parser.parse_args()
     return args
@@ -57,7 +59,7 @@ def generate_dataset(dataset_dir, image_size, batch_size):
 
 # Plot the predictions vs actual values and save to CSV
 def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict):
-    global model
+    # global model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if not os.path.exists(output_dir):
@@ -67,6 +69,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
         if model_file.endswith('.pt'):
             model_path = os.path.join(models_dir, model_file)
             try:
+                # model = DAVE2v3(input_shape=(1280, 360))
                 model = DAVE2v3(input_shape=image_size)
                 model.load_state_dict(torch.load(model_path, map_location=device))
             except TypeError as e:
@@ -156,6 +159,11 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
 
 if __name__ == '__main__':
     args = parse_arguments()
+    image_size= f"{args.image_width}, {args.image_height}"
+    image_size = eval(image_size)
+    print(f"image_size:{image_size}")
     image_dict = preload_image_names(args.dataset_dir)
-    data_loader = generate_dataset(args.dataset_dir, args.image_size, args.batch_size)
-    plot_predictions(args.models_dir, data_loader, args.output_dir, args.image_size, image_dict)
+    data_loader = generate_dataset(args.dataset_dir, image_size, args.batch_size)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    plot_predictions(args.models_dir, data_loader, args.output_dir, image_size, image_dict)
+    print("All done :)")
