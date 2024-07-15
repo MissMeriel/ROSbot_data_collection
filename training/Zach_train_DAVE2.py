@@ -144,8 +144,8 @@ def main():
         model_name = f"./model-{iteration}-epoch{epoch}-{time.time()}.pt"
         torch.save(model, model_name)
         current_directory = os.getcwd()
-        print(f"Saving file to directory: {current_directory}", flush = True)
-        with open(f'loss_history_{iteration}.pkl', 'wb') as f:
+        print(f"Saving file to directory: models/{current_directory}", flush = True)
+        with open(f'models/loss_history_{epoch}_{iteration}-{time.time()}.pkl', 'wb') as f:
             pickle.dump(loss_history, f)
 
 

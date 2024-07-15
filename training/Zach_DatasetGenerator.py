@@ -165,7 +165,7 @@ class MultiDirectoryDataSequence(data.Dataset):
             return augmented_images
 
         # helper function to apply composed transformations to the image
-        def apply_composed_transformations(image, composed_transform_funcs):
+        def apply_composed_transformations(image, composed_transform_funcs, idx):
             augmented_images = []
             for transform_func_list in composed_transform_funcs:
                 try:
@@ -176,6 +176,13 @@ class MultiDirectoryDataSequence(data.Dataset):
                     for transform_func in transform_func_list:
                         augmented_image = transform_func(augmented_image, 0.5)  # Apply with 50% intensity
                     augmented_images.append(ToTensor()(augmented_image))
+
+                    # Save every 1000th composed augmented image
+                    if idx % 1000 == 0:
+                        save_dir = 'composed_augmented_images'
+                        os.makedirs(save_dir, exist_ok=True)
+                        augmented_image.save(os.path.join(save_dir, f'composed_augmented_{idx}.png'))
+
                 except Exception as e:
                     print(f"Error applying composed transformations {transform_func_list}: {e}")
             return augmented_images
@@ -211,7 +218,7 @@ class MultiDirectoryDataSequence(data.Dataset):
                 transformed_images = custom_transform(image, transform_funcs)
 
                 # Apply composed transformations
-                composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs)
+                composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs, idx)
 
                 # Combine individual and composed transformations
                 all_transformed_images = transformed_images + composed_transformed_images
@@ -260,39 +267,23 @@ class MultiDirectoryDataSequence(data.Dataset):
 
         # Define the list of individual transformation functions
         transform_funcs = [
-            add_shadow, time_of_day_transform_dusk, add_elastic_transform,
-            add_blur_fn, color_jitter_fn, adjust_brightness_fn,
-            adjust_contrast_fn, adjust_saturation_fn, horizontal_flip,
-            add_lens_distortion, add_noise
+
         ]
 
         # Define the list of composed transformation functions
         composed_transform_funcs = [
-            [add_shadow, time_of_day_transform_dusk],
-            [add_elastic_transform, add_blur_fn],
-            [adjust_brightness_fn, adjust_contrast_fn],
-            [adjust_saturation_fn, horizontal_flip],
-            [add_lens_distortion, add_noise]
+
         ]
 
         # Apply custom transformations
         transformed_images = custom_transform(image, transform_funcs)
 
         # Apply composed transformations
-        composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs)
+        composed_transformed_images = apply_composed_transformations(image, composed_transform_funcs, idx)
 
         # Combine individual and composed transformations
         all_transformed_images = transformed_images + composed_transformed_images
 
-        # Visualize/logging to ensure appropriate transformations are applied
-        if idx % 100 == 0:  # Visualize every 100th image
-            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-            ax[0].imshow(image.permute(1, 2, 0))  # Original image
-            ax[0].set_title(f'Original Image {idx}')
-            ax[1].imshow(all_transformed_images[0].permute(1, 2, 0))  # First transformed image
-            ax[1].set_title(f'Transformed Image {idx}')
-            plt.show()
-            print(f"Processed {len(transform_funcs) + len(composed_transform_funcs)} transformations for image {idx}")
 
         # create a list of augmented samples
         augmented_samples = []
