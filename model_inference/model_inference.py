@@ -162,7 +162,7 @@ def get_metainfo(start_time, output_dir):
     time_to_train = time.time() - start_time
     print("Time to train: {}".format(time_to_train), flush=True)
     # save metainformation about inference
-    txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt', flush=True)
+    txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt')
     with open(txt_file_path, "w") as file:
         print(f"metainfo txt file save to {txt_file_path}", flush=True)
         file.write(f"{output_dir=}\n"
