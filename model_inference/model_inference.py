@@ -70,7 +70,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             model_path = os.path.join(models_dir, model_file)
             try:
                 # model = DAVE2v3(input_shape=(1280, 360))
-                model = DAVE2v3(input_shape=image_size)
+                model = DAVE2v3(input_shape=image_size).to(device)
                 model.load_state_dict(torch.load(model_path, map_location=device))
             except TypeError as e:
                 try:
@@ -157,7 +157,28 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             print(f"Finished saving CSV for {model_file}")
 
 
+
+def get_metainfo(start_time, output_dir):
+    time_to_train = time.time() - start_time
+    print("Time to train: {}".format(time_to_train))
+    # save metainformation about inference
+    txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt')
+    with open(txt_file_path, "w") as file:
+        file.write(f"{output_dir=}\n"
+                # f"total_samples={data_loader.size}\n"
+                f"{args.dataset_dir=}\n"
+                f"{args.models_dir=}\n"
+                f"{args.batch_size=}\n"
+                f"{image_size=}\n"
+                # f"final_loss={running_loss / logfreq}\n"
+                f"{device=}\n"
+                # f"dataset_moments={data_loader.get_outputs_distribution()}\n"
+                f"{time_to_train=}\n")
+                # f"dirs={data_loader.get_directories()}")
+
+
 if __name__ == '__main__':
+    start_time = time.time()
     args = parse_arguments()
     image_size= f"{args.image_width}, {args.image_height}"
     image_size = eval(image_size)
@@ -167,3 +188,4 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     plot_predictions(args.models_dir, data_loader, args.output_dir, image_size, image_dict)
     print("All done :)")
+    get_metainfo(start_time, args.output_dir)
