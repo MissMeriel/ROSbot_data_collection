@@ -1,9 +1,8 @@
 import sys
 import os
+import time
 import torch
 import matplotlib.pyplot as plt
-sys.path.append("../training")
-from DatasetGenerator import MultiDirectoryDataSequence
 from torchvision.transforms import Compose, ToTensor
 import pandas as pd
 from PIL import Image
@@ -11,6 +10,8 @@ from torch.autograd import Variable
 import csv
 import re
 
+sys.path.append("../training")
+from DatasetGenerator import MultiDirectoryDataSequence
 sys.path.append("../models")
 from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
 
@@ -21,8 +22,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate dataset and plot predictions vs actual")
     parser.add_argument('--dataset_dir', type=str, help='Directory of the dataset')
     parser.add_argument('--models_dir', type=str, help='Directory containing .pt model files')
-    parser.add_argument('--output_dir', type=str, default='./inference_testgpu', help='Directory to save the plots')
-    parser.add_argument('--image_size', type=tuple, default=(2560, 720), help='Image size for the dataset')
+    parser.add_argument('--output_dir', type=str, default='./inference', help='Directory to save the plots')
+    parser.add_argument('--image_width', type=str, default="2560", help='Image width for the dataset')
+    parser.add_argument('--image_height', type=str, default="720", help='Image height for the dataset')
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size for DataLoader')
     args = parser.parse_args()
     return args
@@ -57,29 +59,34 @@ def generate_dataset(dataset_dir, image_size, batch_size):
 
 # Plot the predictions vs actual values and save to CSV
 def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict):
-    global model
+    # global model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    model_inference_times = []
+
     for model_file in os.listdir(models_dir):
         if model_file.endswith('.pt'):
             model_path = os.path.join(models_dir, model_file)
             try:
-                model = DAVE2v3(input_shape=image_size)
+                # model = DAVE2v3(input_shape=(1280, 360))
+                model = DAVE2v3(input_shape=image_size).to(device)
                 model.load_state_dict(torch.load(model_path, map_location=device))
-            except TypeError as e:
+            except TypeError:
                 try:
                     model = torch.load(model_path, map_location=device)
                 except TypeError as e:
                     print(e)
 
             model.eval()
-            print(f"Finished setting the model in evaluation mode for {model_file}")
+            print(f"Finished setting the model in evaluation mode for {model_file}", flush=True)
             actual_values = []
             predicted_values = []
             image_file_names = []
+
+            start_model_time = time.time()
 
             with torch.no_grad():
                 # Ensure data_loader produces correct format
@@ -98,8 +105,8 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                         })
 
                 sorted_image_dict = sorted(flat_data_loader, key=lambda x: get_image_number(x['image']))
-                # print(f"data_loader: {data_loader}")
-                # print(f"sorted_image_dict: {sorted_image_dict}")
+                # print(f"data_loader: {data_loader}", flush=True)
+                # print(f"sorted_image_dict: {sorted_image_dict}", flush=True)
 
                 for hashmap in sorted_image_dict:
                     images = hashmap['image name'].float().to(device)
@@ -118,7 +125,11 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                     if str(image_name) in image_dict:
                         image_file_names.append((str(image_name), image_dict[str(image_name)]))
                     else:
-                        print(f"Warning: {str(image_name)} not found in image_dict")
+                        print(f"Warning: {str(image_name)} not found in image_dict", flush=True)
+            end_model_time = time.time()
+            model_time = end_model_time - start_model_time
+            print(f"{model_time} is the time takes for {model_file}", flush=True)
+            model_inference_times.append((model_file, model_time))
 
             # Clear memory
             del images, actual_angular_speed_z, outputs
@@ -141,7 +152,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             plot_path = os.path.join(output_dir, f'{model_file}_plot.png')
             plt.savefig(plot_path)
             plt.close()
-            print(f"Finished plotting for {model_file}")
+            print(f"Finished plotting for {model_file}", flush=True)
 
             # Save results to CSV
             csv_file_path = os.path.join(output_dir, f'{model_file}_results.csv')
@@ -151,11 +162,45 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                 for (img_name, dir_path), actual_speed, predicted_speed in zip(image_file_names, actual_values,
                                                                                predicted_values):
                     writer.writerow([img_name, dir_path, actual_speed, predicted_speed])
-            print(f"Finished saving CSV for {model_file}")
+            print(f"Finished saving CSV for {model_file}", flush=True)
+
+    with open(os.path.join(output_dir, 'model_inference_time.csv'), mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Model File', 'Inference Time'])
+        writer.writerows(model_inference_times)
+    print(f"Saved model_inference_time.csv in {output_dir}", flush=True)
+
+
+
+def get_metainfo(start_time, output_dir):
+    time_total = time.time() - start_time
+    print("Total time for inference: {}".format(time_total), flush=True)
+    # save metainformation about inference
+    txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt')
+    with open(txt_file_path, "w") as file:
+        print(f"metainfo txt file is saving to {output_dir}", flush=True)
+        file.write(f"{output_dir=}\n"
+                # f"total_samples={data_loader.size}\n"
+                f"{args.dataset_dir=}\n"
+                f"{args.models_dir=}\n"
+                f"{args.batch_size=}\n"
+                f"{image_size=}\n"
+                # f"final_loss={running_loss / logfreq}\n"
+                f"{device=}\n"
+                # f"dataset_moments={data_loader.get_outputs_distribution()}\n"
+                f"{time_total=}\n")
+                # f"dirs={data_loader.get_directories()}")
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     args = parse_arguments()
+    image_size= f"{args.image_width}, {args.image_height}"
+    image_size = eval(image_size)
+    print(f"image_size:{image_size}", flush=True)
     image_dict = preload_image_names(args.dataset_dir)
-    data_loader = generate_dataset(args.dataset_dir, args.image_size, args.batch_size)
-    plot_predictions(args.models_dir, data_loader, args.output_dir, args.image_size, image_dict)
+    data_loader = generate_dataset(args.dataset_dir, image_size, args.batch_size)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    plot_predictions(args.models_dir, data_loader, args.output_dir, image_size, image_dict)
+    print("All done :)", flush=True)
+    get_metainfo(start_time, args.output_dir)

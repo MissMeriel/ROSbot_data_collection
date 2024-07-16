@@ -19,7 +19,7 @@ class DAVE2PytorchModel(nn.Module):
         self.conv5 = nn.Conv2d(64, 64, 3, stride=1)
         self.dropout = nn.Dropout()
 
-        size = np.product(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
+        size = np.prod(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
             torch.zeros(1, 3, *self.input_shape)).shape)
 
         # self.flatten = nn.Flatten()
@@ -93,7 +93,7 @@ class DAVE2v1(nn.Module):
         self.conv4 = nn.Conv2d(48, 64, 3, stride=1)
         self.conv5 = nn.Conv2d(64, 64, 3, stride=1)
 
-        size = np.product(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
+        size = np.prod(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
             torch.zeros(1, 3, *self.input_shape)).shape)
 
         self.lin1 = nn.Linear(in_features=size, out_features=100, bias=True)
@@ -155,7 +155,7 @@ class DAVE2v2(nn.Module):
         self.conv4 = nn.Conv2d(48, 64, 3, stride=1)
         self.conv5 = nn.Conv2d(64, 64, 3, stride=1)
 
-        size = np.product(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
+        size = np.prod(nn.Sequential(self.conv1, self.conv2, self.conv3, self.conv4, self.conv5)(
             torch.zeros(1, 3, *self.input_shape)).shape)
 
         self.lin1 = nn.Linear(in_features=size, out_features=100, bias=True)
@@ -222,7 +222,7 @@ class DAVE2v3(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, 3, stride=3)
         self.pool3 = nn.MaxPool2d(kernel_size=(2, 2), padding=1)
 
-        size = np.product(nn.Sequential(self.conv1, self.pool1, self.conv2, self.pool2, self.conv3, self.pool3)(
+        size = np.prod(nn.Sequential(self.conv1, self.pool1, self.conv2, self.pool2, self.conv3, self.pool3)(
             torch.zeros(1, 3, *self.input_shape)).shape)
 
         self.lin1 = nn.Linear(in_features=size, out_features=500, bias=True)
@@ -282,7 +282,7 @@ class Epoch(nn.Module):
         self.dropout1 = nn.Dropout(p=0.25)
         self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 
-        size = np.product(nn.Sequential(self.conv1, self.maxpool1, self.conv2, self.maxpool1, self.conv3, self.maxpool1 )(
+        size = np.prod(nn.Sequential(self.conv1, self.maxpool1, self.conv2, self.maxpool1, self.conv3, self.maxpool1 )(
             torch.zeros(1, 3, *self.input_shape)).shape)
 
         self.lin1 = nn.Linear(in_features=size, out_features=1024, bias=True)
