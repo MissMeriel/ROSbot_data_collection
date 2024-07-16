@@ -1,0 +1,15 @@
+# Ignore virtual environment
+venv/
+.venv/
+datasets/rosbotxl_data
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Python bytecodes
+__pycache__/
+*.pyc
+
+# Ignore other common directories
+node_modules/
+build/
+datasets/

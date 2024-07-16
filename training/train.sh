@@ -2,4 +2,6 @@
 
 . .venv/bin/activate
 
-python train_DAVE2.py ../datasets/<dataset-parentdir>
+export PYTHONPATH=$(pwd):$(pwd)/models
+
+python3 training/Zach_train_DAVE2.py datasets/rosbotxl_data
