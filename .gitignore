@@ -1,0 +1,4 @@
+datasets/
+training/__pycache__/
+training/.venv
+models/__pycache__/
