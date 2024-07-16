@@ -65,6 +65,8 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    model_inference_times = []
+
     for model_file in os.listdir(models_dir):
         if model_file.endswith('.pt'):
             model_path = os.path.join(models_dir, model_file)
@@ -72,7 +74,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                 # model = DAVE2v3(input_shape=(1280, 360))
                 model = DAVE2v3(input_shape=image_size).to(device)
                 model.load_state_dict(torch.load(model_path, map_location=device))
-            except TypeError as e:
+            except TypeError:
                 try:
                     model = torch.load(model_path, map_location=device)
                 except TypeError as e:
@@ -83,6 +85,8 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             actual_values = []
             predicted_values = []
             image_file_names = []
+
+            start_model_time = time.time()
 
             with torch.no_grad():
                 # Ensure data_loader produces correct format
@@ -122,6 +126,10 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                         image_file_names.append((str(image_name), image_dict[str(image_name)]))
                     else:
                         print(f"Warning: {str(image_name)} not found in image_dict", flush=True)
+            end_model_time = time.time()
+            model_time = end_model_time - start_model_time
+            print(f"{model_time} is the time takes for {model_file}", flush=True)
+            model_inference_times.append((model_file, model_time))
 
             # Clear memory
             del images, actual_angular_speed_z, outputs
@@ -156,15 +164,21 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                     writer.writerow([img_name, dir_path, actual_speed, predicted_speed])
             print(f"Finished saving CSV for {model_file}", flush=True)
 
+    with open(os.path.join(output_dir, 'model_inference_time.csv'), mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Model File', 'Inference Time'])
+        writer.writerows(model_inference_times)
+    print(f"Saved model_inference_time.csv in {output_dir}", flush=True)
+
 
 
 def get_metainfo(start_time, output_dir):
-    time_to_train = time.time() - start_time
-    print("Time to train: {}".format(time_to_train), flush=True)
+    time_total = time.time() - start_time
+    print("Total time for inference: {}".format(time_total), flush=True)
     # save metainformation about inference
     txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt')
     with open(txt_file_path, "w") as file:
-        print(f"metainfo txt file save to {txt_file_path}", flush=True)
+        print(f"metainfo txt file is saving to {output_dir}", flush=True)
         file.write(f"{output_dir=}\n"
                 # f"total_samples={data_loader.size}\n"
                 f"{args.dataset_dir=}\n"
@@ -174,7 +188,7 @@ def get_metainfo(start_time, output_dir):
                 # f"final_loss={running_loss / logfreq}\n"
                 f"{device=}\n"
                 # f"dataset_moments={data_loader.get_outputs_distribution()}\n"
-                f"{time_to_train=}\n")
+                f"{time_total=}\n")
                 # f"dirs={data_loader.get_directories()}")
 
 
