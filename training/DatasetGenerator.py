@@ -160,9 +160,9 @@ class MultiDirectoryDataSequence(data.Dataset):
         orig_image = self.transform(image)
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
-        df_index = df.index[df['filename'] == img_name.name]
-        orig_y_steer = df.loc[df_index, 'steering_input'].item()
-        y_throttle = df.loc[df_index, 'throttle_input'].item()
+        df_index = df.index[df['IMAGE'] == img_name.name]
+        orig_y_steer = df.loc[df_index, 'CMD_VEL_LAT'].item()
+        y_throttle = df.loc[df_index, 'CMD_VEL_LONG'].item()
         y_steer = copy.deepcopy(orig_y_steer)
         if self.robustification:
             image = copy.deepcopy(orig_image)
@@ -190,15 +190,14 @@ class MultiDirectoryDataSequence(data.Dataset):
             image = t(image).float()
             # image = torch.from_numpy(image).permute(2,0,1) / 127.5 - 1
 
-        # vvvvvv uncomment below for value-image debugging vvvvvv
-        # plt.title(f"{img_name}\nsteering_input={y_steer.array[0]}", fontsize=7)
-        # plt.imshow(image)
-        # plt.show()
-        # plt.pause(0.01)
-
         sample = {"image": image, "steering_input": torch.FloatTensor([y_steer]), "throttle_input": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
         orig_sample = {"image": orig_image, "steering_input": torch.FloatTensor([orig_y_steer]), "throttle_input": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
-        self.cache[idx] = orig_sample
+
+        # lynx04 max cache keys len 43691, max size of cache 2621536 bytes
+        if sys.getsizeof(self.cache) < 2. * 1e6: # 8 * 1.0e10:
+            self.cache[idx] = orig_sample
+        else:
+            print(f"{len(self.cache.keys())=}")
         return sample
 
     def get_outputs_distribution(self):
