@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import torch
+import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from torchvision.transforms import Compose, ToTensor
 import pandas as pd
@@ -66,8 +67,9 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
         os.makedirs(output_dir)
 
     model_inference_times = []
+    model_losses = []
 
-    for model_file in os.listdir(models_dir):
+    for model_file in sorted(os.listdir(models_dir), key=lambda x: int(re.findall(r'epoch(\d+)', x)[0]) if re.findall(r'epoch(\d+)', x) else float('inf')):
         if model_file.endswith('.pt'):
             model_path = os.path.join(models_dir, model_file)
             try:
@@ -89,12 +91,10 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             start_model_time = time.time()
 
             with torch.no_grad():
-                # Ensure data_loader produces correct format
                 def get_image_number(image_path):
                     match = re.findall(r'\d+', str(image_path))
                     return int(match[0]) if match else float('inf')
 
-                # Flatten the data_loader entries and sort by image number
                 flat_data_loader = []
                 for hashmap in data_loader:
                     for i in range(len(hashmap['image'])):
@@ -105,13 +105,12 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                         })
 
                 sorted_image_dict = sorted(flat_data_loader, key=lambda x: get_image_number(x['image']))
-                # print(f"data_loader: {data_loader}", flush=True)
+                # print(f"flat_data_loader: {flat_data_loader}", flush=True)
                 # print(f"sorted_image_dict: {sorted_image_dict}", flush=True)
 
                 for hashmap in sorted_image_dict:
                     images = hashmap['image name'].float().to(device)
-                    images = torch.nn.functional.interpolate(images.unsqueeze(0), size=image_size, mode='bilinear',
-                                                             align_corners=False).squeeze(0)
+                    images = torch.nn.functional.interpolate(images.unsqueeze(0), size=image_size, mode='bilinear', align_corners=False).squeeze(0)
                     image_name = hashmap['image']
                     actual_angular_speed_z = hashmap['angular_speed_z'].float().to(device)
 
@@ -126,10 +125,15 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
                         image_file_names.append((str(image_name), image_dict[str(image_name)]))
                     else:
                         print(f"Warning: {str(image_name)} not found in image_dict", flush=True)
+
             end_model_time = time.time()
             model_time = end_model_time - start_model_time
-            print(f"{model_time} is the time takes for {model_file}", flush=True)
+            print(f"Time: {model_time} is the time it takes for {model_file}", flush=True)
             model_inference_times.append((model_file, model_time))
+
+            mse_loss = F.mse_loss(torch.tensor(predicted_values), torch.tensor(actual_values)).item()
+            print(f"Loss: {mse_loss} is the MSE loss for {model_file}", flush=True)
+            model_losses.append((model_file, mse_loss))
 
             # Clear memory
             del images, actual_angular_speed_z, outputs
@@ -138,6 +142,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             # Convert image file names to simple strings for plotting
             plot_image_names = [str(img_name) for img_name, _ in image_file_names]
 
+            # Plot results and save as png
             plt.figure(figsize=(15, 5))
             plt.plot(plot_image_names, actual_values, label='Actual')
             plt.gca().axes.xaxis.set_ticklabels([])
@@ -159,45 +164,47 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
             with open(csv_file_path, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(['Image Name', 'Directory Path', 'Actual Angular Speed', 'Predicted Angular Speed'])
-                for (img_name, dir_path), actual_speed, predicted_speed in zip(image_file_names, actual_values,
-                                                                               predicted_values):
+                for (img_name, dir_path), actual_speed, predicted_speed in zip(image_file_names, actual_values, predicted_values):
                     writer.writerow([img_name, dir_path, actual_speed, predicted_speed])
             print(f"Finished saving CSV for {model_file}", flush=True)
 
+    # Record the time each model takes in csv file
     with open(os.path.join(output_dir, 'model_inference_time.csv'), mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Model File', 'Inference Time'])
         writer.writerows(model_inference_times)
     print(f"Saved model_inference_time.csv in {output_dir}", flush=True)
 
+    # Record the loss for each model in csv file
+    with open(os.path.join(output_dir, 'model_loss.csv'), mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Model File', 'MSE Loss'])
+        writer.writerows(model_losses)
+    print(f"Saved model_loss.csv in {output_dir}", flush=True)
 
 
 def get_metainfo(start_time, output_dir):
     time_total = time.time() - start_time
-    print("Total time for inference: {}".format(time_total), flush=True)
-    # save metainformation about inference
+    print(f"Total time for inference: {time_total}", flush=True)
+    # save the meta information about inference
     txt_file_path = os.path.join(output_dir, f'{output_dir}-metainfo.txt')
     with open(txt_file_path, "w") as file:
-        print(f"metainfo txt file is saving to {output_dir}", flush=True)
+        print(f"Metainfo txt file is saving to {output_dir}", flush=True)
         file.write(f"{output_dir=}\n"
-                # f"total_samples={data_loader.size}\n"
-                f"{args.dataset_dir=}\n"
-                f"{args.models_dir=}\n"
-                f"{args.batch_size=}\n"
-                f"{image_size=}\n"
-                # f"final_loss={running_loss / logfreq}\n"
-                f"{device=}\n"
-                # f"dataset_moments={data_loader.get_outputs_distribution()}\n"
-                f"{time_total=}\n")
-                # f"dirs={data_loader.get_directories()}")
+                   f"{args.dataset_dir=}\n"
+                   f"{args.models_dir=}\n"
+                   f"{args.batch_size=}\n"
+                   f"{image_size=}\n"
+                   f"{device=}\n"
+                   f"{time_total=}\n")
 
 
 if __name__ == '__main__':
     start_time = time.time()
     args = parse_arguments()
-    image_size= f"{args.image_width}, {args.image_height}"
+    image_size = f"{args.image_width}, {args.image_height}"
     image_size = eval(image_size)
-    print(f"image_size:{image_size}", flush=True)
+    print(f"image_size: {image_size}", flush=True)
     image_dict = preload_image_names(args.dataset_dir)
     data_loader = generate_dataset(args.dataset_dir, image_size, args.batch_size)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
