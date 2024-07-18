@@ -58,6 +58,23 @@ def generate_dataset(dataset_dir, image_size, batch_size):
     return data_loader
 
 
+# Calculate memory size and sample size
+def calculate_memory_and_sample_size(image_dict):
+    total_memory_size = 0
+    total_sample_size = len(image_dict)
+    print(f"total_sample_size= {total_sample_size}", flush=True)
+    for path in image_dict.keys():
+        # print(f"path= {path}", flush=True)
+        image_dir_path = os.path.join(str(image_dict[path]), str(path))
+        # print(f"image_dir_path= {image_dir_path}", flush=True)
+        image = Image.open(image_dir_path)
+        image_memory = (image.size[0] * image.size[1] * len(image.getbands())) # width x height x channel
+        total_memory_size += image_memory
+    #     print(f"image_memory= {image_memory} for {image_dir_path}", flush=True)
+    print(f"total_memory_size= {total_memory_size}", flush=True)
+    return total_sample_size, total_memory_size
+
+
 # Plot the predictions vs actual values and save to CSV
 def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict):
     # global model
@@ -183,7 +200,7 @@ def plot_predictions(models_dir, data_loader, output_dir, image_size, image_dict
     print(f"Saved model_loss.csv in {output_dir}", flush=True)
 
 
-def get_metainfo(start_time, output_dir):
+def get_metainfo(start_time, output_dir, sample_size, total_memory_size):
     time_total = time.time() - start_time
     print(f"Total time for inference: {time_total}", flush=True)
     # save the meta information about inference
@@ -196,7 +213,9 @@ def get_metainfo(start_time, output_dir):
                    f"{args.batch_size=}\n"
                    f"{image_size=}\n"
                    f"{device=}\n"
-                   f"{time_total=}\n")
+                   f"{time_total=}\n"
+                   f"sample_size={sample_size}\n"
+                   f"total_memory_size={total_memory_size}\n")
 
 
 if __name__ == '__main__':
@@ -207,7 +226,8 @@ if __name__ == '__main__':
     print(f"image_size: {image_size}", flush=True)
     image_dict = preload_image_names(args.dataset_dir)
     data_loader = generate_dataset(args.dataset_dir, image_size, args.batch_size)
+    sample_size, total_memory_size = calculate_memory_and_sample_size(image_dict)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     plot_predictions(args.models_dir, data_loader, args.output_dir, image_size, image_dict)
     print("All done :)", flush=True)
-    get_metainfo(start_time, args.output_dir)
+    get_metainfo(start_time, args.output_dir, sample_size, total_memory_size)
