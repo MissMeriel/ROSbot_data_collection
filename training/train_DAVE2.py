@@ -31,7 +31,7 @@ def parse_arguments():
     parser.add_argument("--batch", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--robustification", type=bool, default=True)
+    parser.add_argument("--robustification", action='store_true')
     parser.add_argument("--noisevar", type=int, default=15)
     parser.add_argument("--log_interval", type=int, default=50)
     args = parser.parse_args()
