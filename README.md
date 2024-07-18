@@ -1,7 +1,7 @@
 # ROSbot Dataset Collection
 
 <p float="middle">
-  <img src="figures/IMG_8418.jpg" width="250" />
+  <img src="figures/IMG_9067.jpg" width="250" />
   <img src="figures/dataset.png" width="250" /> 
 </p>
 <!-- | ![](figures/IMG_8418.jpg)  |  ![](figures/dataset.jpg) | -->
