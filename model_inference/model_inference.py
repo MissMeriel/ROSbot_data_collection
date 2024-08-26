@@ -230,4 +230,8 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     plot_predictions(args.models_dir, data_loader, args.output_dir, image_size, image_dict)
     print("All done :)", flush=True)
+<<<<<<< HEAD
     get_metainfo(start_time, args.output_dir, sample_size, total_memory_size)
+=======
+    get_metainfo(start_time, args.output_dir, sample_size, total_memory_size)
+>>>>>>> 31a53f04599a94803e38ac5e9403b4ae38e2ac7d
