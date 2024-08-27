@@ -52,6 +52,4 @@ if __name__ == '__main__':
     backbone.backbone.heads = head
     print(backbone)
     out = backbone(torch.rand((1, 3, 224, 224)))
-    print(out.shape)
-    # out = head(out)
-    print(out)
+    print(f"{out.shape=}, {out=}")
