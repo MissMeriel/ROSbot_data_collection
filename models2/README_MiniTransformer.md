@@ -12,6 +12,12 @@ Key Points:
 
 <br><br>
 
+We provide a variety of ViT models in different GCS buckets. The models can be downloaded with e.g.:
+
+```wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz```
+
+Find links to other trained weights here: https://github.com/google-research/vision_transformer
+
 ## Run commands (also available in <a href="scripts.sh">scripts.sh</a>): <br>
 
 <table>
