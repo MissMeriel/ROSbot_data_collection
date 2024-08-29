@@ -98,12 +98,12 @@ def train():
             optimizer.step()
 
             running_loss += loss.item()
-            sampled_loss = np.roll(sampled_loss, 1)
-            sampled_loss[0] = loss.item()
             # print(f"{np.var(sampled_loss)}    {sampled_loss=}")
             if i % logfreq == logfreq-1:  # print every 2000 mini-batches
                 print('[%d, %5d] loss: %.7f' %
                       (epoch + 1, i + 1, running_loss / logfreq))
+                sampled_loss = np.roll(sampled_loss, 1)
+                sampled_loss[0] = running_loss / logfreq
                 if (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! MSE loss: {running_loss / logfreq}")
                     model_name = f"./{newpath}/model-{iteration}-best.pt"
