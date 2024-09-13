@@ -148,7 +148,3 @@ def vit_init_weights(m):
     elif isinstance(m, EmbedLayer):
         nn.init.trunc_normal_(m.cls_token, mean=0.0, std=0.02)
         nn.init.trunc_normal_(m.pos_embedding, mean=0.0, std=0.02)
-
-from torchvision import model
-def main():
-
