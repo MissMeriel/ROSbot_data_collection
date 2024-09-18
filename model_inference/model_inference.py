@@ -10,6 +10,7 @@ from PIL import Image
 from torch.autograd import Variable
 import csv
 import re
+import argparse
 
 sys.path.append("../training")
 from DatasetGenerator import MultiDirectoryDataSequence
@@ -19,7 +20,6 @@ from DAVE2pytorch import DAVE2PytorchModel, DAVE2v1, DAVE2v2, DAVE2v3, Epoch
 
 # Parse arguments
 def parse_arguments():
-    import argparse
     parser = argparse.ArgumentParser(description="Generate dataset and plot predictions vs actual")
     parser.add_argument('--dataset_dir', type=str, help='Directory of the dataset')
     parser.add_argument('--models_dir', type=str, help='Directory containing .pt model files')
