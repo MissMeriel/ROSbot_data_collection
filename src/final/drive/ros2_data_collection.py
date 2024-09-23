@@ -10,7 +10,7 @@ import numpy as np
 import os
 from rclpy.parameter import Parameter
 import os
-
+import time
 
 class DataCollectionNode(Node):
     def __init__(self):
@@ -50,7 +50,7 @@ class DataCollectionNode(Node):
 
         # write csv header
         with open(self.dataset_path, 'a') as f:
-            f.write("{},{},{},{},{},{}\n".format("image name", "linear_speed_x", "angular_speed_z", "is_turning", "is_manually_off_course", "lidar_ranges"))
+            f.write("{},{},{},{},{},{},{}\n".format("timestamp, image_name", "linear_speed_x", "angular_speed_z", "is_turning", "is_manually_off_course", "lidar_ranges"))
 
         #timer callback to save the image and publish the velocities at that moment
         self.timer = self.create_timer(0.2, self.timer_callback)
@@ -70,7 +70,7 @@ class DataCollectionNode(Node):
             else:
                 stringified_lidar_ranges = None
                 
-            f.write("{},{},{},{},{},{}\n".format(image_filename, self.linear_speed_x, self.angular_speed_z, self.is_turning, self.is_manually_off_course, stringified_lidar_ranges))
+            f.write("{},{},{},{},{},{},{}\n".format(time.time(), image_filename, self.linear_speed_x, self.angular_speed_z, self.is_turning, self.is_manually_off_course, stringified_lidar_ranges))
 
         self.image_num += 1 #will need to diff image numbers if we are doing left and right cameras
 
