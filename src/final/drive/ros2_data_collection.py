@@ -9,7 +9,6 @@ import cv2
 import numpy as np
 import os
 from rclpy.parameter import Parameter
-import os
 import time
 
 class DataCollectionNode(Node):
