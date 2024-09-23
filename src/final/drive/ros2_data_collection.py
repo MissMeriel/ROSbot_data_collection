@@ -50,7 +50,7 @@ class DataCollectionNode(Node):
 
         # write csv header
         with open(self.dataset_path, 'a') as f:
-            f.write("{},{},{},{},{},{},{}\n".format("timestamp, image_name", "linear_speed_x", "angular_speed_z", "is_turning", "is_manually_off_course", "lidar_ranges"))
+            f.write("{},{},{},{},{},{},{}\n".format("timestamp", "image_name", "linear_speed_x", "angular_speed_z", "is_turning", "is_manually_off_course", "lidar_ranges"))
 
         #timer callback to save the image and publish the velocities at that moment
         self.timer = self.create_timer(0.2, self.timer_callback)
