@@ -1,8 +1,13 @@
 # Ignore virtual environment
 venv/
 .venv/
+.venv-rb/
 datasets/rosbotxl_data
 models2/test_transformer/ViT-B_16.npz
+*/slurm-*.out
+data/
+*/*training-output*/
+
 # Ignore macOS system files
 .DS_Store
 
