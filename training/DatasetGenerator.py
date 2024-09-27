@@ -3,7 +3,8 @@ import os, cv2, csv
 # from DAVE2 import DAVE2Model
 # from DAVE2pytorch import DAVE2PytorchModel
 import kornia
-
+import torchvision
+from torchvision.transforms import Compose, ToTensor, PILToTensor, functional as transforms
 from PIL import Image
 import copy
 from scipy import stats
@@ -16,9 +17,6 @@ from matplotlib import pyplot as plt
 from matplotlib.pyplot import imshow
 import random
 
-from torchvision.transforms import Compose, ToTensor, PILToTensor, functional as transforms
-# from io import BytesIO
-# import skimage
 
 def stripleftchars(s):
     # print(f"{s=}")
@@ -101,7 +99,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         self.dirs = []
         marker = "collection"
         for p in Path(root).iterdir():
-            if p.is_dir() and marker in str(p): #"_NO" not in str(p) and "YQWHF3" not in str(p):
+            if p.is_dir() and marker in str(p):
                 self.dirs.append("{}/{}".format(p.parent,p.stem.replace(marker, "")))
                 image_paths = []
                 # print(f"testing testing testing!")
@@ -140,30 +138,52 @@ class MultiDirectoryDataSequence(data.Dataset):
     def __len__(self):
         return len(self.all_image_paths)
 
+    def robustify(self, y_steer, image):
+        if random.random() > 0.5:
+            # flip image
+            image = torch.flip(image, (2,))
+            y_steer = -y_steer
+        if random.random() > 0.5:
+            # blur
+            gauss = kornia.filters.GaussianBlur2d((3,3), (1.5, 1.5))
+            # gauss = kornia.filters.GaussianBlur2d((5, 5), (5.5, 5.5))
+            # image = gauss(image[None])[0]
+            # image = kornia.filters.blur_pool2d(image[None], 3)[0]
+            # image = kornia.filters.max_blur_pool2d(image[None], 3, ceil_mode=True)[0]
+            # image = kornia.filters.median_blur(image, (3, 3))
+            # image = kornia.filters.median_blur(image, (10, 10))
+            # image = kornia.filters.box_blur(image, (3, 3))
+            # image = kornia.filters.box_blur(image, (5, 5))
+            # image = kornia.resize(image, image.shape[2:])
+            # plt.imshow(image.permute(1,2,0))
+            # plt.pause(0.01)
+            image = gauss(image[None])[0]
+        if random.random() > 0.5:
+            # darkness
+            contrast_factor = torch.rand(1).item() * 10 + 0.1
+            image = torchvision.transforms.functional.adjust_brightness(image, contrast_factor)
+        if random.random() > 0.5:
+            # contrast
+            # 0 gives a solid gray image, 1 gives the original image while 2 increases the contrast by a factor of 2.
+            contrast_factor = torch.rand(1).item() * 10 + 0.1
+            image = torchvision.transforms.functional.adjust_contrast(image, contrast_factor)
+        # noise
+        image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
+        return y_steer, image
+
     def __getitem__(self, idx):
         if idx in self.cache:
             if self.robustification:
                 sample = self.cache[idx]
                 y_steer = sample["angular_speed_z"]
                 image = copy.deepcopy(sample["image name"])
-                if random.random() > 0.5:
-                    # flip image
-                    image = torch.flip(image, (2,))
-                    y_steer = -sample["angular_speed_z"]
-                if random.random() > 0.5:
-                    # blur
-                    gauss = kornia.filters.GaussianBlur2d((3,3), (1.5, 1.5))
-                    image = gauss(image[None])[0]
-                image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
+                y_steer, image = self.robustify(y_steer, image)
                 return {"image name": image, "angular_speed_z": y_steer, "linear_speed_x": sample["linear_speed_x"], "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])}
             else:
                 return self.cache[idx]
         img_name = self.all_image_paths[idx]
         image = Image.open(img_name)
         image = image.resize(self.image_size)
-        # image = cv2.imread(img_name.__str__())
-        # image = cv2.resize(image, self.image_size) / 255
-        # image = self.fisheye(image)
         orig_image = self.transform(image)
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
@@ -180,25 +200,7 @@ class MultiDirectoryDataSequence(data.Dataset):
         y_steer = copy.deepcopy(orig_y_steer)
         if self.robustification:
             image = copy.deepcopy(orig_image)
-            if random.random() > 0.5:
-                # flip image
-                image = torch.flip(image, (2,))
-                y_steer = -orig_y_steer
-            if random.random() > 0.5:
-                # blur
-                gauss = kornia.filters.GaussianBlur2d((5, 5), (5.5, 5.5))
-                image = gauss(image[None])[0]
-                # image = kornia.filters.blur_pool2d(image[None], 3)[0]
-                # image = kornia.filters.max_blur_pool2d(image[None], 3, ceil_mode=True)[0]
-                # image = kornia.filters.median_blur(image, (3, 3))
-                # image = kornia.filters.median_blur(image, (10, 10))
-                # image = kornia.filters.box_blur(image, (3, 3))
-                # image = kornia.filters.box_blur(image, (5, 5))
-                # image = kornia.resize(image, image.shape[2:])
-                # plt.imshow(image.permute(1,2,0))
-                # plt.pause(0.01)
-            image = torch.clamp(image + (torch.randn(*image.shape) / self.noise_level), 0, 1)
-
+            y_steer, image = self.robustify(y_steer, image)
         else:
             t = Compose([ToTensor()])
             image = t(image).float()
