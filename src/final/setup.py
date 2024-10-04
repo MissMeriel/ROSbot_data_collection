@@ -25,7 +25,8 @@ setup(
         'console_scripts': [
             'drive = final.drive:main', 
             'ros2_data_collection = final.ros2_data_collection:main', 
-            'steering_NN = final.steering_NN:main'
+            'steering_NN = final.steering_NN:main',
+            'onnx_steering_NN_transformer = final.onnx_steering_NN_transformer:main'
         ],
     },
 )
