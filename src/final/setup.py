@@ -26,7 +26,11 @@ setup(
             'drive = final.drive:main', 
             'ros2_data_collection = final.ros2_data_collection:main', 
             'steering_NN = final.steering_NN:main',
-            'onnx_steering_NN_transformer = final.onnx_steering_NN_transformer:main'
+            'steering_NN_transformer = final.steering_NN_transformer:main',
+            'onnx_steering_NN_transformer = final.onnx_steering_NN_transformer:main',
+            'onnx_steering_NN_DAVE2v3 = final.onnx_steering_NN_DAVE2v3:main',
+            'DAVE2v3Norm_steering_NN = final.DAVE2v3Norm_steering_NN:main',
+            'DAVE2v1_steering_NN = final.DAVE2v1_steering_NN:main'
         ],
     },
 )
