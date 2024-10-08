@@ -11,4 +11,4 @@
 export 'PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512'
 # test dataset in /p/rosbot/datasets1/rosbotxl_data/ is 1600 samples
 # /p/rosbot/rosbotxl/data-yili/cleaned/mecanum_wheels/rosbotxl_off_4 is about 11K samples
-python3 train_transformer_head2.py /p/rosbot/rosbotxl/data-yili/cleaned/mecanum_wheels/rosbotxl_off_4  --batch 16 --robustification
+python3 train_transformer_head2.py /p/rosbot/rosbotxl/data-yili/cleaned/mecanum_wheels/rosbotxl_off_4  --batch 16 --robustification --convergence --slurmid $SLURM_JOB_ID

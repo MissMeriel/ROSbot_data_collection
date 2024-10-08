@@ -1,7 +1,7 @@
 import sys, os
 sys.path.append("../models/")
 
-
+import shutil
 from vit import vit_b_16, ViT_B_16_Weights
 from test_backbone import *
 import argparse
@@ -54,8 +54,9 @@ def train():
     newpath = f"./transformer-training-output/transformer-head-{timestr()}-{randstr()}/"
     if not os.path.exists(newpath):
         os.makedirs(newpath)
+        shutil.copy(__file__, newpath+"/"+Path(__file__).name)
     dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=Compose([ToTensor()]),\
-                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
+                                         robustification=args.robustification, noise_level=args.noisevar)
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples(), flush=True)

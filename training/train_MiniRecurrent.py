@@ -80,7 +80,7 @@ def main():
     print(f"Time to load dataset: {(time.time() - start_time):.1f}s", flush=True)
     outdir = f"./training-output/{model._get_name()}-NOSHUFFLE-{randstr()}-{timestr()}-{args.slurmid}/"
     os.makedirs(outdir, exist_ok=True)
-    iteration = f'{model._get_name()}-NOSHUFFLE-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.get_total_samples()/1000)}Ksamples'
+    iteration = f'{model._get_name()}-NOSHUFFLE-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.get_total_samples()/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"{device=}")
@@ -148,15 +148,15 @@ def main():
     torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
-    # print("Deleting models from previous epochs...")
-    # for epoch in range(args.epochs):
-    #     os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
+    print("Deleting models from previous epochs...")
+    for epoch in range(args.epochs):
+        os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
-    with open(f'./model-{iteration}-metainfo.txt', "w") as f:
+    with open(f'./{outdir}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
                 f"total_samples={dataset.get_total_samples()}\n"
                 f"{args.epochs=}\n"

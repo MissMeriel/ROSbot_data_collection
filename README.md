@@ -14,12 +14,6 @@ It also contains training scripts for a DAVE2 steering model and pytorch implmen
 .
 ├── README.md
 ├── RosbotXL.md
-├── data_augmentation
-│   ├── Readme.md
-│   ├── birdImage.jpg
-│   ├── main.py
-│   ├── processing.py
-│   └── transformations.py
 ├── data_cleaning
 │   ├── clean_rosbot_data.py
 │   └── data_cleaning.md
@@ -46,9 +40,14 @@ It also contains training scripts for a DAVE2 steering model and pytorch implmen
 │   └── model_inference.py
 ├── models
 │   ├── DAVE2pytorch.py
-│   ├── README.md
+│   ├── Chauffeur.py
+│   ├── DroNet.py
+│   ├── MiniRecurrent.py
+│   ├── MiniTransformer.py
 │   ├── ResNet.py
-│   └── VAE.py
+│   ├── onnx_tester.py
+│   ├── utils.py
+│   └── vit.py
 ├── rosbot_datasets
 │   ├── # parent directories of each collection run
 ├── src

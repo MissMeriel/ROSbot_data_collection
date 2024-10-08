@@ -3,19 +3,16 @@ import argparse
 import pandas as pd
 import matplotlib.image as mpimg
 from torch.autograd import Variable
-
-# import h5py
+import shutil
+from pathlib import Path
 import os
-# from PIL import Image
-# import PIL
 import matplotlib.pyplot as plt
-# import csv
 from DatasetGenerator import MultiDirectoryDataSequence
 import time
 import sys
 sys.path.append("../models")
 from DAVE2pytorch import *
-
+import traceback
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -93,6 +90,7 @@ def main():
     print(f"Time to load dataset: {(time.time() - start_time):.1f}s", flush=True)
     outdir = f"./training-output/{model._get_name()}-{randstr()}-{timestr()}-{args.slurmid}/"
     os.makedirs(outdir, exist_ok=True)
+    shutil.copy(__file__, outdir+"/"+Path(__file__).name)
     iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.get_total_samples()/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
@@ -108,9 +106,11 @@ def main():
     else:
         criterion = nn.MSELoss()
     sampled_loss = np.ones(10)
+    
     for epoch in range(args.epochs):
         epoch_start_time = time.time() # Record start time for the epoch
         running_loss = 0.0
+        epoch_loss = 0.0
         for i, hashmap in enumerate(trainloader, 0):
             x = hashmap['image name'].float().to(device)
             y = hashmap['angular_speed_z'].float().to(device)
@@ -127,12 +127,13 @@ def main():
             optimizer.step()
 
             running_loss += loss.item()
+            epoch_loss += loss.item()
             if i % logfreq == logfreq-1:  # print every 2000 mini-batches
                 print('[%d, %5d] loss: %.7f' %
                       (epoch + 1, i + 1, running_loss / logfreq))
-                sampled_loss = np.roll(sampled_loss, 1)
-                sampled_loss[0] = running_loss / logfreq
-                if (running_loss / logfreq) < lowest_loss:
+                # sampled_loss = np.roll(sampled_loss, 1)
+                # sampled_loss[0] = running_loss / logfreq
+                if epoch > 9 and (running_loss / logfreq) < lowest_loss:
                     print(f"New best model! {args.lossfxn} Loss: {running_loss / logfreq}", flush=True)
                     model_name = f"{outdir}/model-{iteration}-best.pt"
                     print(f"Saving model to {model_name}", flush=True)
@@ -141,31 +142,37 @@ def main():
                 running_loss = 0.0
         epoch_end_time = time.time()  # Record end time for the epoch
         epoch_duration = epoch_end_time - epoch_start_time # Record total time for the epoch
+        sampled_loss = np.roll(sampled_loss, 1)
+        sampled_loss[0] = epoch_loss
         model_name = f"{outdir}/model-{iteration}-epoch{epoch}.pt"
-        print(f"Finished Epoch {epoch + 1}\nEpoch Duration: {epoch_duration:.1f}s\nSaving model to {model_name}", flush=True)
+        print(f"Finished Epoch {epoch + 1}\nEpoch Duration: {epoch_duration:.1f}s\nEpoch Loss: {epoch_loss:.5f}\nSaving model to {model_name}", flush=True)
         sys.stdout.flush()
         torch.save(model, model_name)
         print(f"{np.var(sampled_loss)=}", flush=True)
-        if args.convergence and np.var(sampled_loss) < 0.0001:
+        if args.convergence and np.var(sampled_loss) < 0.001:
             print(f"Loss converged at {loss} (variance {np.var(sampled_loss):.4f}); quitting training...", flush=True)
             break
     print('Finished Training')
 
     # save model
-    # torch.save(model.state_dict(), f'H:/GitHub/DAVE2-Keras/test{iteration}-weights.pt')
     model_name = f'{outdir}/model-{iteration}.pt'
     torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
-    # print("Deleting models from previous epochs...")
-    # for epoch in range(args.epochs):
-    #     os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
+    print("Deleting models from previous epochs...")
+    for epoch in range(args.epochs):
+        try:
+            os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
+        except FileNotFoundError as ex:
+            pass
+            # print(f"No file exists {outdir}/model-{iteration}-epoch{epoch}.pt")
+            # traceback.print_exc() 
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
-    with open(f'./model-{iteration}-metainfo.txt', "w") as f:
+    with open(f'./{outdir}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
                 f"total_samples={dataset.get_total_samples()}\n"
                 f"{args.epochs=}\n"

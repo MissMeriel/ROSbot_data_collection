@@ -1,7 +1,7 @@
 import sys, os
 sys.path.append("../models")
 import argparse
-
+import shutil
 # from train_DAVE2
 import numpy as np
 import argparse
@@ -21,6 +21,8 @@ from torchvision.transforms import Compose, ToPILImage, ToTensor, Resize, Lambda
 import random #, string
 from torchvision.models.vision_transformer import *
 from utils import *
+from pathlib import Path
+import shutil
 
 # other ViTs check:
 # https://huggingface.co/spaces/Hila/RobustViT/blob/main/ViT/ViT_new.py
@@ -29,11 +31,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', type=str, help='parent directory of training dataset')
     parser.add_argument("--backbone-id", type=str, default="")
+    parser.add_argument("--lossfxn", type=str, default="MSE")
     parser.add_argument("--batch", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--robustification", action='store_true')
     parser.add_argument("--convergence", action='store_true')
+    parser.add_argument("--normalize", action='store_true')
+    parser.add_argument("--slurmid", type=int, default=0)
     parser.add_argument("--noisevar", type=int, default=15)
     parser.add_argument("--log_interval", type=int, default=50)
     args = parser.parse_args()
@@ -61,7 +66,12 @@ def train():
     newpath = f"./transformer-training-output/transformer-head-{timestr()}-{randstr()}/"
     if not os.path.exists(newpath):
         os.makedirs(newpath)
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=Compose([ToTensor()]),\
+        shutil.copy(__file__, newpath+"/"+Path(__file__).name)
+    if args.normalize:
+        transform = Compose([ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+    else:
+        transform = Compose([ToTensor()])
+    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=transform,\
                                          robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples())
@@ -80,6 +90,10 @@ def train():
     optimizer = optim.Adam(model.parameters(), lr=args.lr) #, betas=(0.9, 0.999), eps=1e-08)
     lowest_loss = 1e5
     logfreq = 20
+    if args.lossfxn == "L1":
+        criterion = nn.L1Loss()
+    else:
+        criterion = nn.MSELoss()
     sampled_loss = np.ones(10)
     for epoch in range(args.epochs):
         epoch_start_time = time.time() # Record start time for the epoch
@@ -95,7 +109,7 @@ def train():
             # forward + backward + optimize
             outputs = model(x)
             # loss = F.mse_loss(outputs.flatten(), y)
-            loss = F.mse_loss(outputs, y)
+            loss = criterion(outputs, y)
             loss.backward()
             optimizer.step()
 
@@ -107,7 +121,7 @@ def train():
                 sampled_loss = np.roll(sampled_loss, 1)
                 sampled_loss[0] = running_loss / logfreq
                 if (running_loss / logfreq) < lowest_loss:
-                    model_name = f"./{newpath}/model-{iteration}-best.pt"
+                    model_name = f"{newpath}/model-{iteration}-best.pt"
                     print(f"New best model! MSE loss: {running_loss / logfreq}\nSaving model to {model_name}", flush=True)
                     torch.save(model, model_name)
                     lowest_loss = running_loss / logfreq
@@ -115,7 +129,7 @@ def train():
 
         epoch_end_time = time.time()  # Record end time for the epoch
         epoch_duration = epoch_end_time - epoch_start_time # Record total time for the epoch
-        model_name = f"./{newpath}/model-{iteration}-epoch{epoch}.pt"
+        model_name = f"{newpath}/model-{iteration}-epoch{epoch}.pt"
         print(f"Finished Epoch {epoch+1}\nEpoch Duration: {epoch_duration:.1f}s\nSaving model to {model_name}", flush=True)
         sys.stdout.flush()
         torch.save(model, model_name)
@@ -130,9 +144,9 @@ def train():
     torch.save(model.state_dict(), model_name)
 
     # delete models from previous epochs
-    # print("Deleting models from previous epochs...")
-    # for epoch in range(args.epochs):
-    #     os.remove(f"./{newpath}/model-{iteration}-epoch{epoch}.pt")
+    print("Deleting models from previous epochs...")
+    for epoch in range(args.epochs):
+        os.remove(f"{newpath}/model-{iteration}-epoch{epoch}.pt")
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
