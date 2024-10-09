@@ -10,6 +10,16 @@ This repository contains instructions and source code for using the ROSbot to co
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
 It also contains training scripts for a DAVE2 steering model and pytorch implmentations of other architectures.
 
+
+## Links
+Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
+
+Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
+
+Supplemental video: TODO: YOUTUBE LINK
+
+
+## Directory structure
 ```python
 .
 ├── README.md
