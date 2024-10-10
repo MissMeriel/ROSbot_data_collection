@@ -16,6 +16,8 @@ Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E
 
 Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
 
+Failure catalog: https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing
+
 Supplemental video: TODO: YOUTUBE LINK
 
 
