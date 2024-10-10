@@ -6,7 +6,7 @@
 </p>
 <!-- | ![](figures/IMG_8418.jpg)  |  ![](figures/dataset.jpg) | -->
 
-This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot 2.0.
+This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot XL.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
 It also contains training scripts for a DAVE2 steering model and pytorch implmentations of other architectures.
 
@@ -30,8 +30,6 @@ Supplemental video: TODO: YOUTUBE LINK
 ├── data_graphing
 │   ├── get_angular_speeds_pub.py
 │   └── make_histogram_pub.m
-├── deployment
-│   └── init_self_driving.py
 ├── docs
 │   ├── ROSbot-applications.txt
 │   ├── ROSbot-pub-topics.txt
@@ -94,7 +92,8 @@ Supplemental video: TODO: YOUTUBE LINK
 │   └── sllidar_ros2
 │       └── # sllidar source goes here
 ├── start_rosbotxl.sh
-├── training
+├── test_rosbotxl.sh
+└── training
     ├── DatasetGenerator.py
     ├── README.md
     ├── README_train_DAVE2.md
