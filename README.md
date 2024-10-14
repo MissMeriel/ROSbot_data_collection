@@ -18,7 +18,7 @@ Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0
 
 Failure catalog: https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing
 
-Supplemental video: TODO: YOUTUBE LINK
+Supplemental video: [via youtube](https://youtu.be/rBOJS2SR85Q)
 
 
 ## Directory structure
