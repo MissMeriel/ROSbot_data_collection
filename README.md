@@ -16,9 +16,9 @@ Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E
 
 Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
 
-Failure Catalog Data: TODO: GOOGLE DRIVE LINK
+Failure catalog: https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing
 
-Supplemental video: TODO: YOUTUBE LINK
+Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 
 
 ## Directory structure
