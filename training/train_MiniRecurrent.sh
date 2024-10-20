@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#SBATCH --mem=24G
+#SBATCH --mem=64G
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --mail-type=end          # send email when job ends

@@ -66,7 +66,10 @@ class Steering_NN(Node):
                 self.model = torch.load(model_path, map_location=torch.device('cpu'))
             except TypeError as e:
                 print(e)
+                exit(0)
 
+
+        self.model.eval()
         self.publisher_vel = self.create_publisher(Twist, '/cmd_vel', 1)
         
         self.lidar_subscription = self.create_subscription(sensor_msgs.msg.LaserScan, '/scan', self.lidar_callback, 10)

@@ -39,7 +39,7 @@ class Steering_NN(Node):
             except TypeError as e:
                 print(e)
 
-
+        self.model.eval()
         self.publisher_vel = self.create_publisher(Twist, '/cmd_vel', 1)
         self.image_subscription = self.create_subscription(sensor_msgs.msg.Image, '/image_raw', self.image_callback, 10)
         self.joy_subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)

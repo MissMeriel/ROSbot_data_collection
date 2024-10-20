@@ -83,6 +83,7 @@ def main():
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
     print("Total samples:", dataset.get_total_samples(), flush=True)
+
     def worker_init_fn(worker_id):
         np.random.seed(np.random.get_state()[1][0] + worker_id)
 

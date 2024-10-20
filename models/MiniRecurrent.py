@@ -34,7 +34,7 @@ class MiniRNN(nn.Module):
             torch.nn.init.zeros_(m.bias)
 
     def forward(self, x, h):
-        x = self.bn1(x)
+        # x = self.bn1(x)
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)

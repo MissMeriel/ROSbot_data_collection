@@ -33,18 +33,18 @@ class Steering_NN(Node):
         #model_path = '/home/husarion/ros2_ws/src/final/models/Trained_Models/Dave2-Keras-off-4-plus-corner/model-DAVE2v3-2560x720-lr0.0001-100epoch-64batch-lossMSE-11Ksamples-INDUSTRIALandHIROCHIandUTAH-noiseflipblur.pt' # M1
         #model_path = '/home/husarion/ros2_ws/src/final/models/DAVE2v1-M27FH8-9_26-11_0-319264/model-DAVE2v1-2560x720-lossMSE-augFalse-normFalse-100epoch-32batch-11Ksamples.pt'
         # model_path = '/home/husarion/ros2_ws/src/final/models/DAVE2v3Norm-AVEFMZ-9_26-11_5-319266/model-DAVE2v3Norm-2560x720-lossMSE-augFalse-normFalse-100epoch-32batch-11Ksamples.pt'
-        model_path = '/home/husarion/ros2_ws/src/final/models/'
+        model_path = '/home/husarion/ros2_ws/src/final/models/model-MiniRNN-NOSHUFFLE-2560x720-lossMSE-augTrue-convergeTrue-normFalse-100epoch-1batch-11Ksamples-best.pt'
         try:
             self.model = MiniRNN(input_shape=input_shape, rnn_hidden_size=4, nlayers=1, dropout=0.5, tie_weights=False)
             self.model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-            self.model.eval()
         except TypeError as e:
             try:
                 self.model = torch.load(model_path, map_location=torch.device('cpu'))
-                self.model.eval()
             except TypeError as e:
                 print(e)
+                exit(0)
 
+        self.model.eval()
         self.rec_vec = np.zeros(4)
         self.transform = Compose([ToTensor()])
         self.publisher_vel = self.create_publisher(Twist, '/cmd_vel', 1)

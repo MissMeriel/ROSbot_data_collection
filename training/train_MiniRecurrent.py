@@ -112,7 +112,7 @@ def main():
 
             # forward + backward + optimize
             outputs, rvec = model(x, current_rvec)
-            loss = lossfxn(outputs, y) #+ lossfxn(current_rvec, rvec)
+            loss = lossfxn(outputs, y) + lossfxn(current_rvec, rvec)
             loss.backward()
             optimizer.step()
 
