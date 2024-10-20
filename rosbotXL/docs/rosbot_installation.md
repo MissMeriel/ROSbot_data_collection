@@ -56,13 +56,13 @@ Refer to troubleshooting if your bluetooth is disconnecting and reconnecting.
 
 ## Adding scripts to your startup routine on HusarionOS
 1. Go to Dash and type "Start" into the search bar. On HusarionOS, this is the magnifying glass icon at the bottom of the screen.
-![husarion OS home screen](rosbotXL/docs/image/husarionOS-homescreen.png)
+![husarion OS home screen](image/husarionOS-homescreen.png)
 2. Double click to open "Session and Startup".
-![](rosbotXL/docs/image/session-and-startup.png)
+![](image/session-and-startup.png)
 3. Hit the "Add" icon to add a new routine to startup.
-![](rosbotXL/docs/image/session-and-startup-add.png)
+![](image/session-and-startup-add.png)
 4. Write a name and description. In the "Command" field, type `/bin/bash -c "sleep 10 & /home/husarion/start_rosbotxl.sh"`.
-![](rosbotXL/docs/image/session-and-startup-add-complete.png)
+![](image/session-and-startup-add-complete.png)
 
 ## First time connecting your controller to the ROSbot
 
