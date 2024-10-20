@@ -21,7 +21,7 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 
 ## Directory structure
 
-```python
+```bash
 .
 ├── install.sh
 ├── README.md
