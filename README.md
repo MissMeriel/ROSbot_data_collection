@@ -14,7 +14,7 @@ It also contains training scripts for a DAVE2 steering model and pytorch implmen
 
 Model Archs and training scripts: [navigation_models/](navigation_models/)
 
-ROSbot XL data collection and deployment code: [rosbotXL/src](rosbotXL/src)
+ROSbot XL documentation, data collection code, and deployment code: [rosbotXL](rosbotXL)
 
 Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
 
