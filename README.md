@@ -25,12 +25,6 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 .
 ├── install.sh
 ├── navigation_models
-│   ├── data_augmentation
-│   │   ├── birdImage.jpg
-│   │   ├── main.py
-│   │   ├── processing.py
-│   │   ├── Readme.md
-│   │   └── transformations.py
 │   ├── data_cleaning
 │   │   ├── clean_rosbot_data.py
 │   │   └── data_cleaning.md
@@ -55,19 +49,7 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 │   │   ├── README_MiniTransformer.md
 │   │   ├── README_ResNet.md
 │   │   ├── ResNet.py
-│   │   ├── testscripts
-│   │   │   ├── my_image_classifier.onnx
-│   │   │   ├── test_backbone.py
-│   │   │   ├── test_recurrence.py
-│   │   │   ├── test-recurrence-regression-airline-passengers.csv
-│   │   │   ├── test_recurrence_regression-KITTI.py
-│   │   │   ├── test_recurrence_regression.py
-│   │   │   ├── test-recurrence-trained-lstm-airline-passengers.jpg
-│   │   │   ├── test_transformers.py
-│   │   │   └── Ti_16-i21k-300ep-lr_0.001-aug_none-wd_0.03-do_0.0-sd_0.0.npz
-│   │   ├── transformer.onnx
 │   │   ├── utils.py
-│   │   ├── ViT-B_16.npz
 │   │   └── vit.py
 │   └── training
 │       ├── copier.py
@@ -138,7 +120,7 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
     │   │   └── test
     │   │       └── # test scripts
     │   └── sllidar_ros2
-    │       └── # install package from source, see todo.txt
+    │       └── # install package from source, see todo.txt for instructions
     ├── start_rosbotxl.sh
     └── test_rosbotxl.sh
 ```
