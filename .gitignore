@@ -2,17 +2,27 @@
 venv/
 .venv/
 .venv-rb/
-datasets/rosbotxl_data
 models2/test_transformer/ViT-B_16.npz
 */slurm-*.out
 data/
 */*training-output*/
+navigation_models/training/.venv/
+navigation_models/training/training-output/
+navigation_models/training/transformer-training-output/
+navigation_models/training/*.out
+navigation_models/models/*.onnx
+navigation_models/models/*.out
+navigation_models/models/*.npz
+navigation_models/models/testscripts/
+rosbotXL/src/final/models/*.pt
 
 # Ignore macOS system files
 .DS_Store
 
 # Ignore Python bytecodes
 __pycache__/
+*/__pycache__/
+*/*/__pycache__
 *.pyc
 
 # Ignore other common directories
