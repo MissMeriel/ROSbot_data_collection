@@ -10,7 +10,12 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 It also contains training scripts for a DAVE2 steering model and pytorch implmentations of other architectures.
 
 
-## Links
+## Quick Links
+
+Model Archs and training scripts: [navigation_models/](navigation_models/)
+
+ROSbot XL data collection and deployment code: [rosbotXL/src](rosbotXL/src)
+
 Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
 
 Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
@@ -23,7 +28,7 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 
 ```bash
 .
-├── install.sh
+├── install.sh # setup project environment
 ├── README.md
 ├── requirements.txt
 ├── navigation_models
