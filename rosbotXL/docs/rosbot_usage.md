@@ -12,16 +12,16 @@ These directions assume that you are starting with your ROSbot turned off, charg
 4. You're ready to drive :)
 5. When you're ready to stop, simply toggle the on/off switch on the ROSbot. See figure below to locate the on/off switch.
 
-![rosbot rear panel](figures/rosbot-rear-panel.png)
+![rosbot rear panel](rosbotXL/docs/image/rosbot-rear-panel.png)
 
 ROSbot rear panel guide.
 
-![xbox pairing buttons](figures/xbox-pairing-buttons.jpeg)
+![xbox pairing buttons](rosbotXL/docs/image/xbox-pairing-buttons.jpeg)
 
 XBox controller pairing buttons (press and hold down simultaneously).
 
 ## Driving your ROSbot
-![controller-mapping](figures/xbox-controller-mapping.png)
+![controller-mapping](rosbotXL/docs/image/xbox-controller-mapping.png)
 Upon startup, the ROSbot immediately begins collecting datapoints at a rate of 10Hz.
 Each image is 480x640 RGB and ~110KB. It collects 1GB of data approximately every 15 minutes.
 Data collection can be paused by pressing A and resumed by pressing B.

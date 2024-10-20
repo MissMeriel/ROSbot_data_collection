@@ -1,10 +1,9 @@
 # ROSbot Dataset Collection
 
 <p float="middle">
-  <img src="figures/IMG_9067.jpg" width="250" />
-  <img src="figures/dataset.png" width="250" /> 
+  <img src="rosbotXL/docs/image/IMG_9067.jpg" width="250" />
+  <img src="rosbotXL/docs/image/dataset.png" width="250" /> 
 </p>
-<!-- | ![](figures/IMG_8418.jpg)  |  ![](figures/dataset.jpg) | -->
 
 This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot XL.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
@@ -24,20 +23,6 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 
 ```python
 .
-├── figures
-│   ├── dataset.jpg
-│   ├── dataset.png
-│   ├── husarionOS-homescreen.png
-│   ├── IMG_8418.jpg
-│   ├── IMG_9067.jpg
-│   ├── rosbot-rear-panel.png
-│   ├── rosgraph.png
-│   ├── search-start.png
-│   ├── session-and-startup-add-complete.png
-│   ├── session-and-startup-add.png
-│   ├── session-and-startup.png
-│   ├── xbox-controller-mapping.png
-│   └── xbox-pairing-buttons.jpeg
 ├── install.sh
 ├── navigation_models
 │   ├── data_augmentation
@@ -179,8 +164,6 @@ Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
 │   ├── rosbot_equipment_setup.md
 │   ├── rosbot_installation.md
 │   └── rosbot_usage.md
-├── figures
-│   └── # README visual aids go here
 ├── model_inference
 │   ├── README.md
 │   ├── inference.sh
