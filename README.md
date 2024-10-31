@@ -12,17 +12,19 @@ It also contains training scripts for a DAVE2 steering model and pytorch implmen
 
 ## Quick Links
 
-Model Archs and training scripts: [navigation_models/](navigation_models/)
-
-ROSbot XL documentation, data collection code, and deployment code: [rosbotXL](rosbotXL)
-
-Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
-
-Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
-
 Failure catalog: https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing
 
 Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
+
+Extended failure tables: [extended-tables-models-1-through-6.pdf](./extended-tables-models-1-through-6.pdf)
+
+Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
+
+Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
+
+Model Archs and training scripts: [navigation_models/](navigation_models/)
+
+ROSbot XL documentation, data collection code, and deployment code: [rosbotXL](rosbotXL)
 
 ## Directory structure
 
