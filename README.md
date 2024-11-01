@@ -12,19 +12,28 @@ It also contains training scripts for a DAVE2 steering model and pytorch implmen
 
 ## Quick Links
 
-Failure catalog: https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing
+**Failure catalog:** https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing\
+Failures are organized by pretrained model id (M\#, see Table 1 of [extended-tables-models-1-through-6.pdf](./extended-tables-models-1-through-6.pdf)). Each model has multiple failures, and each failure has a set of images and a csv file with timestamp, stereo and depth images, LiDAR reading, velocity, DNN prediction, and IMU data.
+The name of each failure corr
 
-Supplemental video available [via youtube](https://youtu.be/qgvO_J_3u14)
+**Supplemental video available** [via youtube](https://youtu.be/qgvO_J_3u14)\
+as part of ICSE'25 Demo Track submission
 
-Extended failure tables: [extended-tables-models-1-through-6.pdf](./extended-tables-models-1-through-6.pdf)
+**Extended failure tables:** [extended-tables-models-1-through-6.pdf](./extended-tables-models-1-through-6.pdf)\
+This .pdf includes a table of pretrained models for which failures have been collected, and a table for each one of unique failures with a description, small sample trace, and image of the failure circumstances.
 
-Dataset: https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing
+**Pretrained models:** https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing\
+This project includes a set of pretrained models for ROSbot navigation that can be deployed on the ROSbot XL. It is a superset of all the models for which failures have already been collected.
 
-Pretrained models: https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing
+**Dataset:** https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A?usp=sharing\
+The training dataset for all the pretrained models on the 4th floor of Rice Hall at Univrsity of Virginia collected by 4 different drivers under various lighting and hallway configurations and pedestrian traffic conditions.
 
-Model Archs and training scripts: [navigation_models/](navigation_models/)
+**Model Archs and training scripts:** [navigation_models/](navigation_models/)\
+The code for training these models can be found in the ``navigation_models`` directory.
 
-ROSbot XL documentation, data collection code, and deployment code: [rosbotXL](rosbotXL)
+**ROSbot XL documentation, data collection code, and deployment code:** [rosbotXL](rosbotXL)\
+The code, documentation, and troubleshooting guide for ROSbot XL setup, data collection, and deployment of pretrained models can be found in the ``rosbotXL`` directory.
+
 
 ## Directory structure
 
