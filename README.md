@@ -25,7 +25,7 @@ This .pdf includes a table of pretrained models for which failures have been col
 **Pretrained models:** https://drive.google.com/drive/folders/1lTqEC30yBuqN6IobSV73E97OaOnCGqDg?usp=sharing\
 This project includes a set of pretrained models for ROSbot navigation that can be deployed on the ROSbot XL. It is a superset of all the models for which failures have already been collected.
 
-**All pretrained models:** [all-trained-models.pdf](./all-trained-models.pdf)
+**All pretrained models:** [all-trained-models.pdf](./all-trained-models.pdf)\
 This pdf lists all pretrained models trained using the existing ROSbot navigation dataset. Models 1-6 have been deployed and failures have been collected for the catalogue.
 
 
