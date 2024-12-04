@@ -133,12 +133,12 @@ def main():
                       (epoch + 1, i + 1, running_loss / logfreq))
                 # sampled_loss = np.roll(sampled_loss, 1)
                 # sampled_loss[0] = running_loss / logfreq
-                if epoch > 9 and (running_loss / logfreq) < lowest_loss:
+                if epoch > 9 and abs(running_loss / logfreq) < lowest_loss:
                     print(f"New best model! {args.lossfxn} Loss: {running_loss / logfreq}", flush=True)
                     model_name = f"{outdir}/model-{iteration}-best.pt"
                     print(f"Saving model to {model_name}", flush=True)
                     torch.save(model, model_name)
-                    lowest_loss = running_loss / logfreq
+                    lowest_loss = abs(running_loss / logfreq)
                 running_loss = 0.0
         epoch_end_time = time.time()  # Record end time for the epoch
         epoch_duration = epoch_end_time - epoch_start_time # Record total time for the epoch
