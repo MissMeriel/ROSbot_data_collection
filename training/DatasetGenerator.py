@@ -43,7 +43,11 @@ class DataSequence(data.Dataset):
         image_paths.sort(key=lambda p: int(stripleftchars(p.stem)))
         self.image_paths = image_paths
         # print(f"{self.image_paths=}")
-        self.df = pd.read_csv(f"{self.root}/data_cleaned.csv")
+        try:
+            self.df = pd.read_csv(f"{self.root}/data_cleaned.csv")
+        except  FileNotFoundError as e:
+            self.df = pd.read_csv(f"{self.root}/data.csv")
+        print(self.df.columns)
         self.cache = {}
 
     def __len__(self):
@@ -55,7 +59,10 @@ class DataSequence(data.Dataset):
         img_name = self.image_paths[idx]
         image = sio.imread(img_name)
 
-        df_index = self.df.index[self.df['image name'] == img_name.name]
+        try:
+            df_index = self.df.index[self.df['image_name'] == img_name.name]
+        except KeyError as e:
+            df_index = self.df.index[self.df['image name'] == img_name.name]
         y_thro = self.df.loc[df_index, 'linear_speed_x'].array[0]
         y_steer = self.df.loc[df_index, 'angular_speed_z'].array[0]
         y = [y_steer, y_thro]
@@ -76,7 +83,7 @@ class DataSequence(data.Dataset):
         # print(y_steer.array[0])
 
         # sample = {"image": image, "steering_input": y_steer.array[0]}
-        sample = {"image name": image, "angular_speed_z": y}
+        sample = {"image": image, "image_name": img_name.name, "angular_speed_z": y}
 
         self.cache[idx] = sample
         return sample

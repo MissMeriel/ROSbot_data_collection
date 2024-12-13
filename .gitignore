@@ -7,6 +7,8 @@ models2/test_transformer/ViT-B_16.npz
 */slurm-*.out
 data/
 */*training-output*/
+data_graphing/results-xrai-comparison/
+data_graphing/results-xrai/
 
 # Ignore macOS system files
 .DS_Store

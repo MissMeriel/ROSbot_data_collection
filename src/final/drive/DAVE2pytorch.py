@@ -232,6 +232,7 @@ class DAVE2v3(nn.Module):
         self.lin3 = nn.Linear(in_features=100, out_features=20, bias=True)
         self.lin4 = nn.Linear(in_features=20, out_features=1, bias=True)
         self.apply(self.init_weights)
+        self.features = nn.Sequential(self.conv1, nn.ReLU(), self.pool1, self.conv2, nn.ReLU(), self.pool2, self.conv3, nn.ReLU(), self.pool3)
 
     def init_weights(self, m):
         if isinstance(m, (nn.Linear, nn.Conv2d)):
