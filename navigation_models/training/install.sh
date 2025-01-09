@@ -1,30 +1,30 @@
 #!/bin/bash
-
-module load python-3.8.0
-
-# Specify the path to the Python 3.8 executable
-PYTHON_EXEC="sw/ubuntu-22.04/python-3.8.0/bin/python3"
+. ../../.venv-rb/bin/activate
+PYTHON_EXEC="$(readlink -f $(which python3))"
 
 # Check if the specified Python version is correct
 pythonversion="$($PYTHON_EXEC --version 2>&1)"
-if echo "$pythonversion" | grep -qE "Python 3\.8|Python 3\.9"; then
+if echo "$pythonversion" | grep -qE "Python 3\.9|Python 3\.10"; then
   echo "Using Python version $pythonversion"
 else
-  echo "Python version $pythonversion is not compatible. Use Python 3.8 or 3.9"
+  echo "Python version $pythonversion is not compatible. Use Python 3.9 or 3.10"
   exit 1
 fi
 
-# Create virtual environment
-$PYTHON_EXEC -m venv .venv
-. .venv/bin/activate
-
 # Upgrade pip and install dependencies
-pip install --upgrade pip
-pip install torch torchvision numpy black mypy scipy scikit-image pandas opencv-python matplotlib kornia
+python3 -m pip install --upgrade pip
+python3 -m pip install torch torchvision numpy black mypy scipy scikit-image pandas opencv-python matplotlib kornia
 
 # Create datasets directory and download dataset
-mkdir -p ../datasets
-wget -O ../datasets/dataset.zip "https://virginia.box.com/shared/static/fb9lj05cg6twkq92gh7el3q9jdu5wd1n"
-unzip ../datasets/dataset.zip -d ../datasets
-
+ls ../../dataset/
+if [ ! -d ../../dataset/ ]; then
+  echo "did not find training dataset in parent directory, downloading to ../../dataset"
+  gdown --folder  https://drive.google.com/drive/folders/1Zn7ZNDpPpw7ffnotwR8Jb-DGITRNZy0A -O ../../
+  for file in ../../dataset/*; do
+     if (file $file | grep -q compression ) ; then
+       echo "found $file, unzipping to ${file%.*}"
+       unzip $file -d ../../dataset/
+     fi
+  done
+fi
 echo "Setup complete"
