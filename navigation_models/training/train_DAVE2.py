@@ -36,6 +36,7 @@ def parse_arguments():
     parser.add_argument("--slurmid", type=int, default=0)
     parser.add_argument("--archid", type=str, default="DAVE2v3")
     parser.add_argument("--lossfxn", type=str, default="MSE")
+    parser.add_argument("--resize", type=str, default=None)
     args = parser.parse_args()
     return args
 
@@ -62,7 +63,11 @@ def main():
     args = parse_arguments()
     print(args)
     start_time = time.time()
-    input_shape = (2560, 720)  # Example input shape: width x height
+    if args.resize is not None:
+        dims = [int(i) for i in args.resize.split("x")]
+        input_shape = tuple(dims)
+    else:
+        input_shape = (2560, 720)  # Example input shape: width x height
     if args.archid == "DAVE2v1":
         model = DAVE2v1(input_shape=input_shape)
     elif args.archid == "DAVE2v2":
@@ -112,7 +117,7 @@ def main():
         running_loss = 0.0
         epoch_loss = 0.0
         for i, hashmap in enumerate(trainloader, 0):
-            x = hashmap['image name'].float().to(device)
+            x = hashmap['image_name'].float().to(device)
             y = hashmap['angular_speed_z'].float().to(device)
             x = Variable(x, requires_grad=True)
             y = Variable(y, requires_grad=False)

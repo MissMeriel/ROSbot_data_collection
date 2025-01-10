@@ -108,8 +108,12 @@ class MultiDirectoryDataSequence(data.Dataset):
                     # add to debug
                     print(f"Found data_cleaned.csv in {p.parent}/{p.stem.replace(marker, '')}")
                 except FileNotFoundError as e:
-                    print(f"{e} \nNo data_cleaned.csv in directory {p.parent}/{p.stem.replace(marker, '')}")
-                    continue
+                    try:
+                        self.dfs_hashmap[f"{p}"] = pd.read_csv(f"{p}/data.csv")
+                        print(f"Found data.csv in {p.parent}/{p.stem.replace(marker, '')}")
+                    except FileNotFoundError as e:
+                        print(f"{e} \nNo data.csv or data_cleaned.csv in directory {p.parent}/{p.stem.replace(marker, '')}")
+                        continue
                 for pp in Path(p).iterdir():
                     if pp.suffix.lower() in [".jpg", ".png", ".jpeg", ".bmp"] and "collection_trajectory" not in pp.name:
                         image_paths.append(pp)
@@ -176,9 +180,9 @@ class MultiDirectoryDataSequence(data.Dataset):
             if self.robustification:
                 sample = self.cache[idx]
                 y_steer = sample["angular_speed_z"]
-                image = copy.deepcopy(sample["image name"])
+                image = copy.deepcopy(sample["image_name"])
                 y_steer, image = self.robustify(y_steer, image)
-                return {"image name": image, "angular_speed_z": y_steer, "linear_speed_x": sample["linear_speed_x"], "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])}
+                return {"image_name": image, "angular_speed_z": y_steer, "linear_speed_x": sample["linear_speed_x"], "all": torch.FloatTensor([y_steer, sample["linear_speed_x"]])}
             else:
                 return self.cache[idx]
         img_name = self.all_image_paths[idx]
@@ -187,7 +191,10 @@ class MultiDirectoryDataSequence(data.Dataset):
         orig_image = self.transform(image)
         pathobj = Path(img_name)
         df = self.dfs_hashmap[f"{pathobj.parent}"]
-        df_index = df.index[df['image name'] == img_name.name]
+        try:
+            df_index = df.index[df['image_name'] == img_name.name]
+        except KeyError as e:
+            df_index = df.index[df['image name'] == img_name.name]
 
         # Check if df_index is empty or has more than one entry
         if len(df_index) != 1:
@@ -212,9 +219,15 @@ class MultiDirectoryDataSequence(data.Dataset):
         # plt.show()
         # plt.pause(0.01)
 
-        sample = {"image": img_name.name, "image name": image, "angular_speed_z": torch.FloatTensor([y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
-        orig_sample = {"image name": orig_image, "angular_speed_z": torch.FloatTensor([orig_y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
-        #self.cache[idx] = orig_sample
+        sample = {"image": img_name.name, "image_name": image, "angular_speed_z": torch.FloatTensor([y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([y_steer, y_throttle])}
+        orig_sample = {"image_name": orig_image, "angular_speed_z": torch.FloatTensor([orig_y_steer]), "linear_speed_x": torch.FloatTensor([y_throttle]), "all": torch.FloatTensor([orig_y_steer, y_throttle])}
+        # total_memory = torch.cuda.get_device_properties(0).total_memory
+        reserved_memory = torch.cuda.memory_reserved(0)
+        allocated_memory = torch.cuda.memory_allocated(0)
+        free_memory = reserved_memory - allocated_memory
+        # print(f"{total_memory=}\n{reserved_memory=}\n{allocated_memory=}\n{free_memory=}\n{len(self.cache.keys())=}", flush=True)
+        if (free_memory - 3 * 1e9) > 0:
+            self.cache[idx] = orig_sample
         return sample
 
     def get_outputs_distribution(self):
