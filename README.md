@@ -3,6 +3,7 @@
 <p float="middle">
   <img src="rosbotXL/docs/image/IMG_9067.jpg" width="250" />
   <img src="rosbotXL/docs/image/dataset.png" width="250" /> 
+  <img src="rosbotXL/docs/image/rosbot-heroimage-new.jpg" width="250" /> 
 </p>
 
 
