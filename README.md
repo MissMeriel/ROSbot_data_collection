@@ -17,6 +17,18 @@ This repository contains instructions and source code for using the ROSbot to co
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
 It also contains training scripts for pytorch implmentations of navigation neural network architectures.
 
+## Catalog Summary
+
+| Model ID | Architecture     | Data Aug. \& Balancing | Inputs  | Dataset Size | Normalization | Epochs       | Loss Function  | Failures |
+| -------- | ---------------- | ---------------------- | ------- | ------------ | ------------- | ------------ | -------------- | -------- |
+| M1       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | Row 1    |
+| M2       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | L1             | Row 1    |
+| M3       | DAVE2            | :x:                    | 1       | 11.4K        | ImageNet Norm | 100          | MSE            | Row 1    |
+| M4       | DAVE2            | :x:                    | 1       | 11.4K        | BatchNorm     | 100          | MSE            | Row 1    |
+| M5       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | L1             | Row 1    |
+| M6       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | Row 1    |
+| M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            | Row 1    |
+| M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            | Row 1    |
 
 ## Quick Links
 
