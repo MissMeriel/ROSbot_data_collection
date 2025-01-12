@@ -13,20 +13,20 @@ By curating a diverse set of failure cases, Defects4DeepNav will serve as a crit
 The repository will facilitate the development of diagnostic tools and runtime monitoring tools for robot software, driving forward the state of the art in safe and reliable robotic navigation.
 
 
-This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot XL.
+This repository contains automated installation of the Defects4DeepNav catalog and analysis tools to inspect the failures, as well as training scripts for common pytorch implmentations of navigation neural network architectures and options to use common .
+It also contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot XL.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
-It also contains training scripts for pytorch implmentations of navigation neural network architectures.
 
 ## Catalog Summary
 
 | Model ID | Architecture     | Data Aug. \& Balancing | Inputs  | Dataset Size | Normalization | Epochs       | Loss Function  | Failures |
 | -------- | ---------------- | ---------------------- | ------- | ------------ | ------------- | ------------ | -------------- | -------- |
-| M1       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | Row 1    |
-| M2       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | L1             | Row 1    |
-| M3       | DAVE2            | :x:                    | 1       | 11.4K        | ImageNet Norm | 100          | MSE            | Row 1    |
-| M4       | DAVE2            | :x:                    | 1       | 11.4K        | BatchNorm     | 100          | MSE            | Row 1    |
-| M5       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | L1             | Row 1    |
-| M6       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | Row 1    |
+| M1       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | 13       |
+| M2       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | L1             | 4        |
+| M3       | DAVE2            | :x:                    | 1       | 11.4K        | ImageNet Norm | 100          | MSE            | 12       |
+| M4       | DAVE2            | :x:                    | 1       | 11.4K        | BatchNorm     | 100          | MSE            | 12       |
+| M5       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | L1             | 2        |
+| M6       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | 12       |
 | M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            | Row 1    |
 | M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            | Row 1    |
 
