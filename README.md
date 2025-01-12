@@ -5,9 +5,17 @@
   <img src="rosbotXL/docs/image/dataset.png" width="250" /> 
 </p>
 
+
+
+In the rapidly evolving field of robotics, deep neural networks (DNNs) have become integral to the navigation systems of autonomous ground robots. However, the complexity of these networks introduces potential points of failure that can lead to significant operational challenges. This  paper introduces a comprehensive repository, Defects4DeepNav, specifically designed to catalog and analyze failures caused by faulty navigation DNNs in ground robots.
+Our objective is to systematically identify, document, and summarize instances where commonly used network architectures and training strategies for navigation DNNs have failed, with an emphasis on enabling the analysis of these failures without requiring access to robots.
+By curating a diverse set of failure cases, Defects4DeepNav will serve as a critical resource for researchers and engineers seeking to improve testing methods for the reliability and robustness of autonomous navigation systems.
+The repository will facilitate the development of diagnostic tools and runtime monitoring tools for robot software, driving forward the state of the art in safe and reliable robotic navigation.
+
+
 This repository contains instructions and source code for using the ROSbot to collect a dataset by driving around using the Husarion ROSbot XL.
 It contains instructions to install, troubleshoot, and initialize the onboard data collection routine for the ROSbot.
-It also contains training scripts for a DAVE2 steering model and pytorch implmentations of other architectures.
+It also contains training scripts for pytorch implmentations of navigation neural network architectures.
 
 
 ## Quick Links
@@ -44,105 +52,19 @@ The code, documentation, and troubleshooting guide for ROSbot XL setup, data col
 ```bash
 .
 ├── install.sh # setup project environment
-├── README.md
-├── requirements.txt
+├── download.sh # download dataset, pretrained models, and failure catalog
+├── README.md 
+├── requirements.txt # python environment reqs
 ├── navigation_models
 │   ├── data_cleaning
-│   │   ├── clean_rosbot_data.py
-│   │   └── data_cleaning.md
 │   ├── data_graphing
-│   │   ├── extract_loss_values_pub.py
-│   │   ├── get_angular_speeds_pub.py
-│   │   ├── graph_loss_pub.m
-│   │   └── make_histogram_pub.m
 │   ├── model_inference
-│   │   ├── inference.sh
-│   │   ├── model_inference.py
-│   │   └── README.md
 │   ├── models
-│   │   ├── DAVE2pytorch.py
-│   │   ├── DroNet.py
-│   │   ├── MiniRecurrent.py
-│   │   ├── MiniTransformer.py
-│   │   ├── onnx_tester.py
-│   │   ├── README_DroNet.md
-│   │   ├── README.md
-│   │   ├── README_MiniRecurrent.md
-│   │   ├── README_MiniTransformer.md
-│   │   ├── README_ResNet.md
-│   │   ├── ResNet.py
-│   │   ├── utils.py
-│   │   └── vit.py
 │   └── training
-│       ├── copier.py
-│       ├── DatasetGenerator_DroNet.py
-│       ├── DatasetGenerator.py
-│       ├── DatasetGenerator_Recurrent.py
-│       ├── install.sh
-│       ├── MiniTransformer_DataLoader.py
-│       ├── MiniTransformer_Solver.py
-│       ├── Readme_DatasetGenerator.md
-│       ├── README.md
-│       ├── README_train_DAVE2.md
-│       ├── requirements.txt
-│       ├── train_DAVE2.py
-│       ├── train_DAVE2.sh
-│       ├── train_DAVE2TESTCONV.sh
-│       ├── train_DAVE2v1.sh
-│       ├── train_DAVE2v3Norm.sh
-│       ├── train_DroNet.py
-│       ├── train_DroNet.sh
-│       ├── training-output
-│           └── # training script saves directories with trained models here 
 └── rosbotXL
     ├── docs
-    │   ├── data_collection_quickstart.md
-    │   ├── image
-    │   │   └── # images in documentation
-    │   ├── ROSbot-applications.txt
-    │   ├── rosbot_basics.md
-    │   ├── rosbot_equipment_setup.md
-    │   ├── rosbot_installation.md
-    │   ├── ROSbot-pub-topics.txt
-    │   ├── rosbot_usage.md
-    │   ├── RosbotXL.md
-    │   └── usb_cam-Package.md
     ├── src
-    │   ├── final
-    │   │   ├── drive
-    │   │   │   ├── DAVE2pytorch.py
-    │   │   │   ├── DAVE2v1_steering_NN.py
-    │   │   │   ├── DAVE2v3Norm_steering_NN.py
-    │   │   │   ├── drive.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── MiniRNN_steering_NN.py
-    │   │   │   ├── onnx_steering_NN_transformer.py
-    │   │   │   ├── ros2_data_collection.py
-    │   │   │   ├── steering_NN_JAM.py
-    │   │   │   └── steering_NN.py
-    │   │   ├── launch
-    │   │   │   ├── data_collection.launch.py
-    │   │   │   ├── DAVE2v1_model_deployment_plus_data_collection.launch.py
-    │   │   │   ├── DAVE2v3Norm_model_deployment_plus_data_collection.launch.py
-    │   │   │   ├── MiniRNN_model_deployment_plus_data_collection.launch.py
-    │   │   │   ├── model_deployment.launch.py
-    │   │   │   ├── model_deployment_plus_data_collection.launch.py
-    │   │   │   ├── transformer_model_deployment.launch.py
-    │   │   │   └── transformer_model_deployment_plus_data_collection.launch.py
-    │   │   ├── models
-    │   │   │   ├── README.md
-    │   │   │   └── # put trained navigation models here for rosbot
-    │   │   ├── package.xml
-    │   │   ├── resource
-    │   │   │   └── final
-    │   │   ├── setup.cfg
-    │   │   ├── setup.py
-    │   │   └── test
-    │   │       └── # test scripts
-    │   └── sllidar_ros2
-    │       └── # install package from source, see todo.txt for instructions
-    ├── start_rosbotxl.sh
-    └── test_rosbotxl.sh
+    └── start_rosbotxl.sh
 ```
 
 
