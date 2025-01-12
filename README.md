@@ -36,8 +36,7 @@ It also contains training scripts for pytorch implmentations of navigation neura
 Failures are organized by pretrained model id (M\#, see Table 1 of [failures.pdf](./failures.pdf)). Each model has multiple failures, and each failure has a set of images and a csv file with timestamp, stereo and depth images, LiDAR reading, velocity, DNN prediction, and IMU data.
 The name of each failure corr
 
-**Supplemental video available** [via youtube](https://youtu.be/qgvO_J_3u14)\
-as part of ICSE'25 Demo Track submission
+**Supplemental Demo Video** [via youtube](https://youtu.be/qgvO_J_3u14)\
 
 **Extended failure tables:** [failures.pdf](./failures.pdf)\
 This .pdf includes a table of pretrained models for which failures have been collected, and a table for each one of unique failures with a description, small sample trace, and image of the failure circumstances.
