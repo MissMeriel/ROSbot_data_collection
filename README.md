@@ -1,4 +1,4 @@
-# ROSbot Dataset Collection
+# Defects4DeepNav Catalog
 
 <p float="middle">
   <img src="rosbotXL/docs/image/IMG_9067.jpg" width="250" />
@@ -75,8 +75,7 @@ The code, documentation, and troubleshooting guide for ROSbot XL setup, data col
 │   └── training
 └── rosbotXL
     ├── docs
-    ├── src
-    └── start_rosbotxl.sh
+    └── src
 ```
 
 
