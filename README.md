@@ -28,8 +28,15 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 | M4       | DAVE2            | :x:                    | 1       | 11.4K        | BatchNorm     | 100          | MSE            | 12       |
 | M5       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | L1             | 2        |
 | M6       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | 12       |
-| M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            | Row 1    |
-| M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            | Row 1    |
+| M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            |          |
+| M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            |          |
+| M9       | DAVE2            | :heavy_check_mark:     | 1       | 30.5K        | :x:           | 100          | MSE            | 12       |
+| M10      |             |      | 1       |         |            |           |             |        |
+| M11      |             |      | 1       |         |            |           |             |        |
+| M12      |             |      | 1       |         |            |           |             |        |
+| M13      |             |      | 1       |         |            |           |             |        |
+| M14      |             |      | 1       |         |            |           |             |        |
+| M15      |             |      | 1       |         |            |           |             |        |
 
 ## Quick Links
 
@@ -67,15 +74,20 @@ The code, documentation, and troubleshooting guide for ROSbot XL setup, data col
 ├── download.sh # download dataset, pretrained models, and failure catalog
 ├── README.md 
 ├── requirements.txt # python environment reqs
-├── navigation_models
-│   ├── data_cleaning
-│   ├── data_graphing
-│   ├── model_inference
-│   ├── models
-│   └── training
-└── rosbotXL
-    ├── docs
-    └── src
+├── analysis/ # tools to inspect failure catalog data
+│   ├── example_monitors.py
+│   ├── query.py
+│   ├── replay.py
+│   └── summarize.py
+├── navigation_models/ # DNN training and validation tools
+│   ├── data_cleaning/
+│   ├── data_graphing/
+│   ├── model_inference/
+│   ├── models/
+│   └── training/
+└── rosbotXL/ # robot data collection and deployment tools and documentation
+    ├── docs/
+    └── src/
 ```
 
 

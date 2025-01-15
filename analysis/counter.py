@@ -7,7 +7,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def main(args):
+def count_samples(args):
     directory = args.dir #"/p/rosbot/rosbotxl/data-meriel/cleaned/" "/p/rosbot/rosbotxl/data-all/data-yili-cleaned/"
     collections = [i for i in os.listdir(directory) if 'collection' in i]
     print(f"Total collections: {len(collections)}")
@@ -22,4 +22,4 @@ def main(args):
 
 if __name__ == '__main__':
     args= parse_args()
-    main(args)
+    count_samples(args)
