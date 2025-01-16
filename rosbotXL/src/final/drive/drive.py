@@ -9,8 +9,6 @@ class DriveNode(Node):
         self.subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 1)
 
-        timer_period = 0.1
-        self.timer = self.create_timer(timer_period, self.timer_callback)
         self.max_speed = 0.3
 
         self.vel = Twist()
@@ -28,20 +26,8 @@ class DriveNode(Node):
             self.vel.angular.z = 0.0
         else:
             self.vel.angular.z = msg.axes[2]
-        # if abs(msg.axes[2]) < 0.1:
-        #     self.vel.angular.z = 0.0
-        # elif abs(msg.axes[2]) < 0.75:
-        #     self.vel.angular.z = 0.3
-        # else:
-        #     self.vel.angular.z = 0.8
         # self.vel.angular.z = self.vel.angular.z if msg.axes[2] > 0 else -self.vel.angular.z
         self.publisher.publish(self.vel)
-
-
-    def timer_callback(self):
-        # print("msg", self.vel)
-        #self.publisher.publish(self.vel)
-        pass
     
 
 def main(args=None):
