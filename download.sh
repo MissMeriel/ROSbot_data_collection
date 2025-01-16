@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 . .venv-rb/bin/activate
 arg="$1"
 echo Downloading $arg
