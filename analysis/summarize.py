@@ -63,7 +63,7 @@ def statistical(df):
     for index, row  in df.iterrows():
         r = row['lidar_ranges']
         r_floats = [float(i) for i in r.split(" ")]
-        # r_floats_filtered = 
+        print(len(r_floats))
         r_floats = filter(lambda x: x != float('-inf'), r_floats)
         # print(r_floats_filtered)
         print("r_floats", r_floats)
