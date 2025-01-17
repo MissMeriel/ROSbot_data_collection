@@ -40,6 +40,40 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 | M16      | ShuffleNet       | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
 | M17      | ShuffleNet       | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
 
+## Quickstart
+
+Run the installer to set up the environment and download the catalog data:
+```bash
+cd Defects4DeepNav
+./install.sh
+```
+Output should look like the directory structure below. From here you can run the analysis tools, set up developer-defined monitors for the traces, inspect failures and training data, among other functionality.
+
+
+## Directory structure
+
+```bash
+.
+├── install.sh # setup project environment
+├── download.sh # download dataset, pretrained models, and failure catalog
+├── README.md 
+├── requirements.txt # python environment reqs
+├── analysis/ # tools to inspect failure catalog data
+│   ├── example_monitors.py
+│   ├── query.py
+│   ├── replay.py
+│   └── summarize.py
+├── navigation_models/ # DNN training and validation tools
+│   ├── data_cleaning/
+│   ├── data_graphing/
+│   ├── model_inference/
+│   ├── models/
+│   └── training/
+└── rosbotXL/ # robot data collection and deployment tools and documentation
+    ├── docs/
+    └── src/
+```
+
 
 
 ## Quick Links
@@ -68,43 +102,3 @@ The code for training these models can be found in the ``navigation_models`` dir
 
 **ROSbot XL documentation, data collection code, and deployment code:** [rosbotXL](rosbotXL)\
 The code, documentation, and troubleshooting guide for ROSbot XL setup, data collection, and deployment of pretrained models can be found in the ``rosbotXL`` directory.
-
-
-## Quickstart
-
-Run the installer to set up the environment and download the catalog data:
-```bash
-cd Defects4DeepNav
-./install.sh
-```
-Output should look like the directory structure below.
-
-
-## Directory structure
-
-```bash
-.
-├── install.sh # setup project environment
-├── download.sh # download dataset, pretrained models, and failure catalog
-├── README.md 
-├── requirements.txt # python environment reqs
-├── analysis/ # tools to inspect failure catalog data
-│   ├── example_monitors.py
-│   ├── query.py
-│   ├── replay.py
-│   └── summarize.py
-├── navigation_models/ # DNN training and validation tools
-│   ├── data_cleaning/
-│   ├── data_graphing/
-│   ├── model_inference/
-│   ├── models/
-│   └── training/
-└── rosbotXL/ # robot data collection and deployment tools and documentation
-    ├── docs/
-    └── src/
-```
-
-
-## Student offshoot projects from Fall 2023
-- [RosBot 2.0](https://github.com/Taylucky/Rosbot2.0)
-- [RosBot XL](https://github.com/ish-gupta/ml-robot)
