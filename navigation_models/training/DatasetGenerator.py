@@ -19,7 +19,6 @@ import random
 
 
 def stripleftchars(s):
-    # print(f"{s=}")
     for i in range(len(s)):
         if s[i].isnumeric():
             return s[i:]
@@ -42,7 +41,6 @@ class DataSequence(data.Dataset):
                 image_paths.append(p)
         image_paths.sort(key=lambda p: int(stripleftchars(p.stem)))
         self.image_paths = image_paths
-        # print(f"{self.image_paths=}")
         self.df = pd.read_csv(f"{self.root}/data_cleaned.csv")
         self.cache = {}
 
@@ -59,23 +57,10 @@ class DataSequence(data.Dataset):
         y_thro = self.df.loc[df_index, 'linear_speed_x'].array[0]
         y_steer = self.df.loc[df_index, 'angular_speed_z'].array[0]
         y = [y_steer, y_thro]
-        # torch.stack(y, dim=1)
         y = torch.tensor(y_steer)
-
-        # plt.title(f"steering_input={y_steer.array[0]}")
-        # plt.imshow(image)
-        # plt.show()
-        # plt.pause(0.01)
 
         if self.transform:
             image = self.transform(image).float()
-        # print(f"{img_name.name=} {y_steer=}")
-        # print(f"{image=}")
-        # print(f"{type(image)=}")
-        # print(self.df)
-        # print(y_steer.array[0])
-
-        # sample = {"image": image, "steering_input": y_steer.array[0]}
         sample = {"image name": image, "angular_speed_z": y}
 
         self.cache[idx] = sample
@@ -102,7 +87,6 @@ class MultiDirectoryDataSequence(data.Dataset):
             if p.is_dir() and marker in str(p):
                 self.dirs.append("{}/{}".format(p.parent,p.stem.replace(marker, "")))
                 image_paths = []
-                # print(f"testing testing testing!")
                 try:
                     self.dfs_hashmap[f"{p}"] = pd.read_csv(f"{p}/data_cleaned.csv")
                     # add to debug
@@ -127,7 +111,6 @@ class MultiDirectoryDataSequence(data.Dataset):
         print("Finished intaking image paths!")
         self.image_paths_hashmap = image_paths_hashmap
         self.all_image_paths = all_image_paths
-        # self.df = pd.read_csv(f"{self.root}/data_cleaned.csv")
         self.cache = {}
         self.robustification = robustification
         self.noise_level = noise_level
@@ -226,8 +209,8 @@ class MultiDirectoryDataSequence(data.Dataset):
         allocated_memory = torch.cuda.memory_allocated(0)
         free_memory = reserved_memory - allocated_memory
         # print(f"{total_memory=}\n{reserved_memory=}\n{allocated_memory=}\n{free_memory=}\n{len(self.cache.keys())=}", flush=True)
-        if (free_memory - 3 * 1e9) > 0:
-            self.cache[idx] = orig_sample
+        # if (free_memory - 3 * 1e9) > 0:
+        #     self.cache[idx] = orig_sample
         return sample
 
     def get_outputs_distribution(self):

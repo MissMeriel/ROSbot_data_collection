@@ -34,7 +34,7 @@ def parse_arguments():
     parser.add_argument("--convergence", action='store_true')
     # parser.add_argument("--normalize", action='store_true') # mobilenet is always normalized, see MobileNetHead.preprocess
     parser.add_argument("--noisevar", type=int, default=15)
-    parser.add_argument("--log_interval", type=int, default=50)
+    parser.add_argument("--log_interval", type=int, default=20)
     parser.add_argument("--slurmid", type=int, default=0)
     # parser.add_argument("--archid", type=str, default="MobileNetHead")
     parser.add_argument("--lossfxn", type=str, default="MSE")
@@ -75,12 +75,13 @@ def main():
     for d in args.dataset.split(","):
         dataset = MultiDirectoryDataSequence(d, image_size=(model.input_shape[::-1]), transform=model.preprocess,\
                                          robustification=args.robustification, noise_level=args.noisevar)
+        print(f"{dataset.get_total_samples()=}, {len(dataset)}")
         print(f"Moments of {d}  distribution:", dataset.get_outputs_distribution())
         datasets.append(dataset)
     
     dataset = torch.utils.data.ConcatDataset(datasets)
 
-    print("Total samples:", dataset.__len__(), flush=True)
+    print("Individual samples:", dataset.cumulative_sizes, "\nTotal samples:", sum(dataset.cumulative_sizes), flush=True)
     def worker_init_fn(worker_id):
         np.random.seed(np.random.get_state()[1][0] + worker_id)
 
@@ -89,7 +90,7 @@ def main():
     outdir = f"./mobilenet-training-output/{model._get_name()}-{randstr()}-{timestr()}-{args.slurmid}/"
     os.makedirs(outdir, exist_ok=True)
     shutil.copy(__file__, outdir+"/"+Path(__file__).name)
-    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-{args.epochs}epoch-{args.batch}batch-{int(dataset.__len__()/1000)}Ksamples'
+    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-{args.epochs}epoch-{args.batch}batch-{int(sum(dataset.cumulative_sizes)/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"{device=}")
@@ -98,7 +99,7 @@ def main():
     # if loss doesnt level out after 20 epochs, either inc epochs or inc learning rate
     optimizer = optim.Adam(model.head.parameters(), lr=args.lr) #, betas=(0.9, 0.999), eps=1e-08)
     lowest_loss = 1e5
-    logfreq = 20
+    logfreq = args.log_interval
     if args.lossfxn == "L1":
         criterion = nn.L1Loss()
     else:
@@ -172,16 +173,17 @@ def main():
     # save metainformation about training
     with open(f'./{outdir}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
-                f"total_samples={dataset.get_total_samples()}\n"
+                f"total_samples={sum(dataset.cumulative_sizes)}\n"
                 f"{args.epochs=}\n"
                 f"{args.lr=}\n"
                 f"{args.batch=}\n"
                 f"{optimizer=}\n"
                 f"final_loss={running_loss / logfreq}\n"
+                f"{lowest_loss=}\n"
                 f"{device=}\n"
                 f"{args.robustification=}\n"
                 f"{args.noisevar=}\n"
-                f"dataset_moments={dataset.get_outputs_distribution()}\n"
+                # f"dataset_moments={dataset.get_outputs_distribution()}\n"
                 f"{time_to_train=}\n"
                 f"dirs={dataset.get_directories()}")
 
