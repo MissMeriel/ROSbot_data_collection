@@ -17,9 +17,10 @@ Example usage:
 This will save output to the `./replay-output/` folder
 
 Sample replay output for static image using `detectExtremeValues` monitor:
-<p float="middle">
+<!-- <p float="middle">
   <img src="figures/rivian-00397.jpg" width="500" />
-</p>
+</p> -->
+![](figures/rivian-00397.jpg)
 
 
 ## Summarize
