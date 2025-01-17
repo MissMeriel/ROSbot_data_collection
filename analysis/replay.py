@@ -8,8 +8,17 @@ import example_monitors
 import cv2
 import numpy as np
 
+'''
+The replay functionality enables running a trace step by step until the failure. 
+replay takes in the model ID, failure ID, and replay speed, and replays a trace with the designated replay speed factor.
+This replay also includes a plug-in where the user can to connect monitoring code through analysis/example_monitors.py, 
+e.g. python3 replay.py --monitor example_monitors.detectLidarProximity <modelIDfailureID>.
+'''
+
 def parse_arguments():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog='replay',
+                    description='The replay functionality enables running a trace step by step until the failure.',
+                    epilog='replay also includes a plug-in where the user can to connect monitoring code through analysis/example_monitors.py, e.g. python3 replay.py --monitor example_monitors.detectLidarProximity <modelIDfailureID>.')
     parser.add_argument('-m', "--model", type=str, help='model ID')
     parser.add_argument('-f', "--failure", type=str, help='failure ID')
     parser.add_argument('-o', "--outdir", type=str, default="replay-output/", help='directory in which to save output')
@@ -24,7 +33,7 @@ def add_text(img, text):
     img2 = Image.new('RGB', (int(img.size[0]*3/2), int(img.size[1])))
     img2.paste(img, (0,0))
     d = ImageDraw.Draw(img2)
-    font = ImageFont.truetype("IBM_Plex_Mono/IBMPlexMono-Bold.ttf", 35)
+    font = ImageFont.truetype("figures/IBMPlexMono-Bold.ttf", 35)
     d.text((img.size[0]+20, 20), text, fill=(255, 255, 255), font=font)
     return img2
 
@@ -43,6 +52,8 @@ def main(args):
     monitor_output = None
     for index, row in df.iterrows():
         print(row['image_name'])
+        lidar_ranges = [float(i) for i in row["lidar_ranges"].split(" ")]
+        print(len(lidar_ranges))
         img = Image.open(d + row['image_name'])
         img = img.resize((int(img.size[0]/2), int(img.size[1]/2)), Image.Resampling.LANCZOS)
         if args.monitor:

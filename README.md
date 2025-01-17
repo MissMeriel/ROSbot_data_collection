@@ -28,15 +28,19 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 | M4       | DAVE2            | :x:                    | 1       | 11.4K        | BatchNorm     | 100          | MSE            | 12       |
 | M5       | DAVE2            | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | L1             | 2        |
 | M6       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | 100          | MSE            | 12       |
-| M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            |          |
-| M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            |          |
+| M7       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | :x:           | convergence  | MSE            | 12       |
+| M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            | 12       |
 | M9       | DAVE2            | :heavy_check_mark:     | 1       | 30.5K        | :x:           | 100          | MSE            | 12       |
-| M10      |             |      | 1       |         |            |           |             |        |
-| M11      |             |      | 1       |         |            |           |             |        |
-| M12      |             |      | 1       |         |            |           |             |        |
-| M13      |             |      | 1       |         |            |           |             |        |
-| M14      |             |      | 1       |         |            |           |             |        |
-| M15      |             |      | 1       |         |            |           |             |        |
+| M10      | DAVE2            | :heavy_check_mark:     | 1       | 65.3K        | :x:           | convergence  | MSE            | 12       |
+| M11      | DAVE2            | :x:                    | 1       | 65.3K        | :x:           | 100          | MSE            | 12       |
+| M12      | DAVE2            | :heavy_check_mark:     | 1       | 162.7K       | :x:           | 100          | MSE            | 12       |
+| M13      | DAVE2            | :x:                    | 1       | 162.7K       | :x:           | 100          | MSE            | 12       |
+| M14      | MobileNet        | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M15      | MobileNet        | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M16      | ShuffleNet       | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M17      | ShuffleNet       | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+
+
 
 ## Quick Links
 
@@ -44,7 +48,7 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 Failures are organized by pretrained model id (M\#, see Table 1 of [failures.pdf](./failures.pdf)). Each model has multiple failures, and each failure has a set of images and a csv file with timestamp, stereo and depth images, LiDAR reading, velocity, DNN prediction, and IMU data.
 The name of each failure corr
 
-**Supplemental Demo Video** [via youtube](https://youtu.be/qgvO_J_3u14)\
+**Supplemental Demo Video** [via youtube](https://youtu.be/qgvO_J_3u14)
 
 **Extended failure tables:** [failures.pdf](./failures.pdf)\
 This .pdf includes a table of pretrained models for which failures have been collected, and a table for each one of unique failures with a description, small sample trace, and image of the failure circumstances.
@@ -64,6 +68,16 @@ The code for training these models can be found in the ``navigation_models`` dir
 
 **ROSbot XL documentation, data collection code, and deployment code:** [rosbotXL](rosbotXL)\
 The code, documentation, and troubleshooting guide for ROSbot XL setup, data collection, and deployment of pretrained models can be found in the ``rosbotXL`` directory.
+
+
+## Quickstart
+
+Run the installer to set up the environment and download the catalog data:
+```bash
+cd Defects4DeepNav
+./install.sh
+```
+Output should look like the directory structure below.
 
 
 ## Directory structure
