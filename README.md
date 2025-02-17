@@ -32,13 +32,13 @@ It contains instructions to install, troubleshoot, and initialize the onboard da
 | M8       | MiniTransformer1 | :heavy_check_mark:     | 1       | 11.4K        | BatchNorm     | 100          | MSE            | 12       |
 | M9       | DAVE2            | :heavy_check_mark:     | 1       | 30.5K        | :x:           | 100          | MSE            | 12       |
 | M10      | DAVE2            | :heavy_check_mark:     | 1       | 65.3K        | :x:           | convergence  | MSE            | 12       |
-| M11      | DAVE2            | :x:                    | 1       | 65.3K        | :x:           | 100          | MSE            | 12       |
-| M12      | DAVE2            | :heavy_check_mark:     | 1       | 162.7K       | :x:           | 100          | MSE            | 12       |
-| M13      | DAVE2            | :x:                    | 1       | 162.7K       | :x:           | 100          | MSE            | 12       |
-| M14      | MobileNet        | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
-| M15      | MobileNet        | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
-| M16      | ShuffleNet       | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
-| M17      | ShuffleNet       | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M11      | DAVE2            | :x:                    | 1       | 162.7K       | :x:           | 100          | MSE            | 5 laps w/o failure   |
+| M12      | MobileNet        | :heavy_check_mark:     | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M13      | MobileNet        | :x:                    | 1       | 30.5K        | ImageNet Norm | 100          | MSE            | 12       |
+| M14      | DAVE2            | :heavy_check_mark:     | 1       | 162.7K       | BatchNorm     | 100          | MSE            | 12       |
+| M15      | DAVE2            | :heavy_check_mark:     | 1       | 162.7K       | ImageNet Norm | 100          | MSE            | 12       |
+| M16      | ShuffleNet       | :heavy_check_mark:     | 1       | 162.7K       | ImageNet Norm | 100          | MSE            | TBD      |
+| M17      | ShuffleNet       | :x:                    | 1       | 162.7K       | ImageNet Norm | 100          | MSE            | TBD      |
 
 ## Quickstart
 
@@ -80,7 +80,6 @@ Output should look like the directory structure below. From here you can run the
 
 **Failure catalog:** https://drive.google.com/drive/folders/1Lntd0lctZ05JxOc6pdGFCkYDMpMbI_cN?usp=sharing\
 Failures are organized by pretrained model id (M\#, see Table 1 of [failures.pdf](./failures.pdf)). Each model has multiple failures, and each failure has a set of images and a csv file with timestamp, stereo and depth images, LiDAR reading, velocity, DNN prediction, and IMU data.
-The name of each failure corr
 
 **Extended failure tables:** [failures.pdf](./failures.pdf)\
 This .pdf includes a table of pretrained models for which failures have been collected, and a table for each one of unique failures with a description, small sample trace, and image of the failure circumstances.
