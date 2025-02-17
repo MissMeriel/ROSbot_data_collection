@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 import os
 import matplotlib.pyplot as plt
-from DatasetGenerator import MultiDirectoryDataSequence
+from DatasetGenerator import MultiDirectoryDataSequence, CombinedDataSequence
 import time
 import sys
 sys.path.append("../models")
@@ -83,7 +83,9 @@ def main():
         transform = Compose([ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     else:
         transform = Compose([ToTensor()])
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(model.input_shape[::-1]), transform=transform,\
+    dataset_parents = args.dataset.split(",")
+    print(f"{dataset_parents=}")
+    dataset = CombinedDataSequence(dataset_parents, image_size=(model.input_shape[::-1]), transform=transform,\
                                          robustification=args.robustification, noise_level=args.noisevar)
     print("Retrieving output distribution....")
     print("Moments of distribution:", dataset.get_outputs_distribution())
@@ -93,7 +95,7 @@ def main():
 
     trainloader = DataLoader(dataset, batch_size=args.batch, shuffle=True, worker_init_fn=worker_init_fn)
     print(f"Time to load dataset: {(time.time() - start_time):.1f}s", flush=True)
-    outdir = f"./training-output/{model._get_name()}-{randstr()}-{timestr()}-{args.slurmid}/"
+    outdir = f"./training-output/{model._get_name()}-{timestr()}-{args.slurmid}-{randstr()}/"
     os.makedirs(outdir, exist_ok=True)
     shutil.copy(__file__, outdir+"/"+Path(__file__).name)
     iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.get_total_samples()/1000)}Ksamples'

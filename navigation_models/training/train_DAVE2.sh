@@ -1,18 +1,18 @@
 #!/usr/bin/bash
 
-#SBATCH --mem=32G
+#SBATCH --mem=30G
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --mail-type=end          # send email when job ends
 #SBATCH --mail-type=fail         # send email if job fails
 #SBATCH --mail-user=ms7nk@virginia.edu
 
-. .venv/bin/activate
-#. ../../.venv-rb/bin/activate
+. ../../.venv-rb/bin/activate
 export PYTHONPATH=$(pwd):$(pwd)/../models:$PYTHONPATH
 export 'PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512'
 
 # another test dataset ../datasets/rosbotxl_data
 # test dataset in /p/rosbot/datasets1/rosbotxl_data/ is 1600 samples
 # /p/rosbot/rosbotxl/data-yili/cleaned/mecanum_wheels/rosbotxl_off_4 is about 11K samples
-python3 train_DAVE2.py  /p/rosbot/rosbotxl/data-all/  --batch 32 --lossfxn MSE --archid DAVE2v3 --robustification --convergence --slurmid $SLURM_JOB_ID
+dataset_directory="../../dataset/data-meriel,../../dataset/data-zach,../../dataset/data-math-and-johann,../../dataset/data-yili"
+python3 train_DAVE2.py  $dataset_directory  --batch 32 --lossfxn L1 --archid DAVE2v3 --resize 512x144 --robustification --slurmid $SLURM_JOB_ID

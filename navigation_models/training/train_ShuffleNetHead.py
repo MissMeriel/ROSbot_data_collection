@@ -41,24 +41,6 @@ def parse_arguments():
     return args
 
 
-def characterize_steering_distribution(y_steering, generator):
-    turning, straight = [], []
-    for i in y_steering:
-        if abs(i) < 0.1:
-            straight.append(abs(i))
-        else:
-            turning.append(abs(i))
-    # turning = [i for i in y_steering if i > 0.1]
-    # straight = [i for i in y_steering if i <= 0.1]
-    try:
-        print("Moments of abs. val'd turning steering distribution:", generator.get_distribution_moments(turning))
-        print("Moments of abs. val'd straight steering distribution:", generator.get_distribution_moments(straight))
-    except Exception as e:
-        print(e)
-        print("len(turning)", len(turning))
-        print("len(straight)", len(straight))
-
-
 def main():
     args = parse_arguments()
     print(args)
@@ -76,19 +58,26 @@ def main():
         print(f"{dataset.get_total_samples()=}, {len(dataset)}")
         print(f"Moments of {d}  distribution:", dataset.get_outputs_distribution())
         datasets.append(dataset)
-    
     dataset = torch.utils.data.ConcatDataset(datasets)
+    print("Individual samples:", dataset.cumulative_sizes, "\nTotal samples:", dataset.cumulative_sizes[-1], flush=True)
+    all_outputs = np.array([])
+    for ds in dataset.datasets:
+        for key in ds.dfs_hashmap.keys():
+            df = ds.dfs_hashmap[key]
+            arr = df['angular_speed_z'].to_numpy()
+            all_outputs = np.concatenate((all_outputs, arr), axis=0)
+    dataset_moments = get_outputs_distribution(all_outputs)
+    print(f"{dataset_moments=}")
 
-    print("Individual samples:", dataset.cumulative_sizes, "\nTotal samples:", sum(dataset.cumulative_sizes), flush=True)
     def worker_init_fn(worker_id):
         np.random.seed(np.random.get_state()[1][0] + worker_id)
 
     trainloader = DataLoader(dataset, batch_size=args.batch, shuffle=True, worker_init_fn=worker_init_fn)
     print(f"Time to load dataset: {(time.time() - start_time):.1f}s", flush=True)
-    outdir = f"./mobilenet-training-output/{model._get_name()}-{randstr()}-{timestr()}-{args.slurmid}/"
+    outdir = f"./mobilenet-training-output-TESTMOMENTS/{model._get_name()}-{randstr()}-{timestr()}-{args.slurmid}/"
     os.makedirs(outdir, exist_ok=True)
     shutil.copy(__file__, outdir+"/"+Path(__file__).name)
-    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-{args.epochs}epoch-{args.batch}batch-{int(sum(dataset.cumulative_sizes)/1000)}Ksamples'
+    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-{args.epochs}epoch-{args.batch}batch-{int(dataset.cumulative_sizes[-1]/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"{device=}")
@@ -126,8 +115,7 @@ def main():
             running_loss += loss.item()
             epoch_loss += loss.item()
             if i % logfreq == logfreq-1:  # print every 2000 mini-batches
-                print('[%d, %5d] loss: %.7f' %
-                      (epoch + 1, i + 1, running_loss / logfreq))
+                print('[%d, %5d] loss: %.7f' % (epoch + 1, i + 1, running_loss / logfreq))
                 # sampled_loss = np.roll(sampled_loss, 1)
                 # sampled_loss[0] = running_loss / logfreq
                 if epoch > 9 and abs(running_loss / logfreq) < lowest_loss:
@@ -155,23 +143,32 @@ def main():
     model_name = f'{outdir}/model-{iteration}.pt'
     torch.save(model.state_dict(), model_name)
 
-    # delete models from previous epochs
-    print("Deleting models from previous epochs...")
-    for epoch in range(args.epochs):
-        try:
-            os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
-        except FileNotFoundError as ex:
-            pass
-            # print(f"No file exists {outdir}/model-{iteration}-epoch{epoch}.pt")
-            # traceback.print_exc() 
+    # # delete models from previous epochs
+    # print("Deleting models from previous epochs...")
+    # for epoch in range(args.epochs):
+    #     try:
+    #         os.remove(f"{outdir}/model-{iteration}-epoch{epoch}.pt")
+    #     except FileNotFoundError as ex:
+    #         pass
+    #         # print(f"No file exists {outdir}/model-{iteration}-epoch{epoch}.pt")
+    #         # traceback.print_exc() 
     print(f"Saving model to {model_name}")
     print("All done :)")
     time_to_train=time.time() - start_time
     print("Time to train: {}".format(time_to_train))
     # save metainformation about training
+    all_outputs = np.array([])
+    for ds in dataset.datasets:
+        for key in ds.dfs_hashmap.keys():
+            df = ds.dfs_hashmap[key]
+            arr = df['angular_speed_z'].to_numpy()
+            # print("len(arr)=", len(arr))
+            all_outputs = np.concatenate((all_outputs, arr), axis=0)
+            # print(f"Retrieved dataframe {key=}")
+    dataset_moments = get_outputs_distribution(all_outputs)
     with open(f'./{outdir}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
-                f"total_samples={sum(dataset.cumulative_sizes)}\n"
+                f"total_samples={dataset.cumulative_sizes[-1]}\n"
                 f"{args.epochs=}\n"
                 f"{args.lr=}\n"
                 f"{args.batch=}\n"
@@ -181,7 +178,7 @@ def main():
                 f"{device=}\n"
                 f"{args.robustification=}\n"
                 f"{args.noisevar=}\n"
-                # f"dataset_moments={dataset.get_outputs_distribution()}\n"
+                f"dataset_moments={dataset_moments}\n"
                 f"{time_to_train=}\n"
                 f"dirs={dataset.get_directories()}")
 

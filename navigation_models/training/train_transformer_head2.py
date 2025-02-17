@@ -71,17 +71,31 @@ def train():
         transform = Compose([ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     else:
         transform = Compose([ToTensor()])
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=transform,\
-                                         robustification=args.robustification, noise_level=args.noisevar) #, Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]))
-    print("Moments of distribution:", dataset.get_outputs_distribution())
-    print("Total samples:", dataset.get_total_samples())
+    datasets = []
+    for d in args.dataset.split(","):
+        dataset = MultiDirectoryDataSequence(d, image_size=input_shape, transform=transform,\
+                                         robustification=args.robustification, noise_level=args.noisevar)
+        print(f"{dataset.get_total_samples()=}, {len(dataset)}")
+        print(f"Moments of {d}  distribution:", dataset.get_outputs_distribution())
+        datasets.append(dataset)
+    dataset = torch.utils.data.ConcatDataset(datasets)
+    print("Individual samples:", dataset.cumulative_sizes, "\nTotal samples:", dataset.cumulative_sizes[-1], flush=True)
+    all_outputs = np.array([])
+    for ds in dataset.datasets:
+        for key in ds.dfs_hashmap.keys():
+            df = ds.dfs_hashmap[key]
+            arr = df['angular_speed_z'].to_numpy()
+            all_outputs = np.concatenate((all_outputs, arr), axis=0)
+    dataset_moments = get_outputs_distribution(all_outputs)
+    print(f"{dataset_moments=}")
+
     def worker_init_fn(worker_id):
         np.random.seed(np.random.get_state()[1][0] + worker_id)
 
     trainloader = DataLoader(dataset, batch_size=args.batch, shuffle=True, worker_init_fn=worker_init_fn)
     print("time to load dataset: {}".format(time.time() - start_time))
 
-    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.get_total_samples()/1000)}Ksamples'
+    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-loss{args.lossfxn}-aug{args.robustification}-converge{args.convergence}-norm{args.normalize}-{args.epochs}epoch-{args.batch}batch-{int(dataset.cumulative_sizes[-1]/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"Training on {device=}", flush=True)
@@ -101,7 +115,7 @@ def train():
         for i, hashmap in enumerate(trainloader, 0):
             # zero the parameter gradients
             optimizer.zero_grad()
-            x = hashmap['image name'].float().to(device)
+            x = hashmap['image_name'].float().to(device)
             y = hashmap['angular_speed_z'].float().to(device)
             x = Variable(x, requires_grad=True)
             y = Variable(y, requires_grad=False)
@@ -154,7 +168,7 @@ def train():
     # save metainformation about training
     with open(f'./{newpath}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
-                f"total_samples={dataset.get_total_samples()}\n"
+                f"total_samples={dataset.cumulative_sizes[-1]}\n"
                 f"{args.epochs=}\n"
                 f"{args.lr=}\n"
                 f"{args.batch=}\n"
@@ -163,7 +177,7 @@ def train():
                 f"{device=}\n"
                 f"{args.robustification=}\n"
                 f"{args.noisevar=}\n"
-                f"dataset_moments={dataset.get_outputs_distribution()}\n"
+                f"dataset_moments={dataset_moments}\n"
                 f"{time_to_train=}\n"
                 f"dirs={dataset.get_directories()}")
 

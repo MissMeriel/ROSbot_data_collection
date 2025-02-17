@@ -2,20 +2,17 @@ import sys
 sys.path.append("../models")
 import numpy as np
 import os
-import numpy as np
 import argparse
 import pandas as pd
 import matplotlib.image as mpimg
 from torch.autograd import Variable
 import shutil
 from pathlib import Path
-import os
 import matplotlib.pyplot as plt
-from DatasetGenerator import MultiDirectoryDataSequence
+# from DatasetGenerator import MultiDirectoryDataSequence
 import time
-import sys
 sys.path.append("../models")
-from DAVE2pytorch import *
+# from DAVE2pytorch import *
 import traceback
 import torch
 import torch.nn as nn
@@ -25,13 +22,9 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from torchvision.transforms import Compose, ToPILImage, ToTensor, Resize, Lambda, Normalize
 from utils import *
-
-
+from DatasetGenerator_DroNet import MultiDirectoryDataSequence
 from DroNet import DronetTorch
 # from dronet_datasets import DronetDataset # https://github.com/peasant98/Dronet-Pytorch/blob/master/dronet_datasets.py
-
-import torch
-from DatasetGenerator_DroNet import MultiDirectoryDataSequence
 
 
 

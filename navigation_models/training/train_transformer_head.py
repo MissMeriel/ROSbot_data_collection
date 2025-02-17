@@ -55,18 +55,28 @@ def train():
     if not os.path.exists(newpath):
         os.makedirs(newpath)
         shutil.copy(__file__, newpath+"/"+Path(__file__).name)
-    dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=Compose([ToTensor()]),\
+    # dataset = MultiDirectoryDataSequence(args.dataset, image_size=(input_shape[::-1]), transform=Compose([ToTensor()]),\
+    #                                      robustification=args.robustification, noise_level=args.noisevar)
+    datasets = []
+    for d in args.dataset.split(","):
+        dataset = MultiDirectoryDataSequence(d, image_size=(model.input_shape[::-1]), transform=model.preprocess,\
                                          robustification=args.robustification, noise_level=args.noisevar)
-    print("Retrieving output distribution....")
-    print("Moments of distribution:", dataset.get_outputs_distribution())
-    print("Total samples:", dataset.get_total_samples(), flush=True)
+        print(f"{dataset.get_total_samples()=}, {len(dataset)}")
+        print(f"Moments of {d}  distribution:", dataset.get_outputs_distribution())
+        datasets.append(dataset)
+    dataset = torch.utils.data.ConcatDataset(datasets)
+    # print("Retrieving output distribution....")
+    # print("Moments of distribution:", dataset.get_outputs_distribution())
+    # print("Total samples:", dataset.get_total_samples(), flush=True)
+    print("Individual samples:", dataset.cumulative_sizes, "\nTotal samples:", sum(dataset.cumulative_sizes), flush=True)
+
     def worker_init_fn(worker_id):
         np.random.seed(np.random.get_state()[1][0] + worker_id)
 
     trainloader = DataLoader(dataset, batch_size=args.batch, shuffle=True, worker_init_fn=worker_init_fn)
     print("time to load dataset: {}".format(time.time() - start_time))
 
-    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-{args.epochs}epoch-{int(dataset.get_total_samples()/1000)}Ksamples'
+    iteration = f'{model._get_name()}-{input_shape[0]}x{input_shape[1]}-{args.epochs}epoch-{int(sum(dataset.cumulative_sizes)/1000)}Ksamples'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"{iteration=}")
     print(f"Running on {device=}", flush=True)
@@ -137,7 +147,7 @@ def train():
     # save metainformation about training
     with open(f'./{newpath}/model-{iteration}-metainfo.txt', "w") as f:
         f.write(f"{model_name=}\n"
-                f"total_samples={dataset.get_total_samples()}\n"
+                f"total_samples={int(sum(dataset.cumulative_sizes))}\n"
                 f"{args.epochs=}\n"
                 f"{args.lr=}\n"
                 f"{args.batch=}\n"
@@ -146,7 +156,7 @@ def train():
                 f"{device=}\n"
                 f"{args.robustification=}\n"
                 f"{args.noisevar=}\n"
-                f"dataset_moments={dataset.get_outputs_distribution()}\n"
+                # f"dataset_moments={dataset.get_outputs_distribution()}\n"
                 f"{time_to_train=}\n"
                 f"dirs={dataset.get_directories()}")
 

@@ -1,6 +1,8 @@
 import time
 import string
 import random
+import numpy as np
+from scipy import stats
 
 def randstr():
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
@@ -38,3 +40,16 @@ def characterize_steering_distribution(y_steering, generator):
         print(e)
         print("len(turning)", len(turning))
         print("len(straight)", len(straight))
+
+def get_outputs_distribution(arr: np.array):
+    # all_outputs = np.array(all_outputs)
+    moments = {}
+    moments['shape'] = np.asarray(arr).shape
+    moments['mean'] = np.mean(arr)
+    moments['median'] = np.median(arr)
+    moments['var'] = np.var(arr)
+    moments['skew'] = stats.skew(arr)
+    moments['kurtosis'] = stats.kurtosis(arr)
+    moments['max'] = np.max(arr)
+    moments['min'] = np.min(arr)
+    return moments

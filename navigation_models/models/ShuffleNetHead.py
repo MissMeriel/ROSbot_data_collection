@@ -26,7 +26,7 @@ class ShuffleNetSteer(nn.Module):
             # ()))))))
         self.featuresize = np.prod(self.featuresize.shape)
         print(self.featuresize)
-        self.model.fc = nn.Sequential(nn.Linear(in_features=self.featuresize, out_features=1, bias=True))
+        self.head = nn.Sequential(nn.Linear(in_features=self.featuresize, out_features=1, bias=True))
         self.dropout = nn.Dropout()
 
     def forward(self, x):
@@ -41,7 +41,8 @@ class ShuffleNetSteer(nn.Module):
         x = self.dropout(x)
         x = torch.flatten(x, start_dim=1) #x.flatten()
         print(f"{x.shape=} {self.featuresize=}")
-        x = self.model.fc(x)
+        # x = self.model.fc(x)
+        x = self.head(x)
         x = torch.tanh(x)
         return x
 
