@@ -6,7 +6,7 @@
   <img src="rosbotXL/docs/image/rosbot-heroimage-new.jpg" width="250" /> 
 </p>
 
-
+**Demonstration video** available [via YouTube](https://youtu.be/nwCCu53PBFQ)
 
 In the rapidly evolving field of robotics, deep neural networks (DNNs) have become integral to the navigation systems of autonomous ground robots. However, the complexity of these networks introduces potential points of failure that can lead to significant operational challenges. This  paper introduces a comprehensive repository, Defects4DeepNav, specifically designed to catalog and analyze failures caused by faulty navigation DNNs in ground robots.
 Our objective is to systematically identify, document, and summarize instances where commonly used network architectures and training strategies for navigation DNNs have failed, with an emphasis on enabling the analysis of these failures without requiring access to robots.
